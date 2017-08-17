@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+    # -*- coding: utf-8 -*-
 """
 Created on Wed Jun 21 15:25:23 2017
 main file. 
@@ -197,8 +197,11 @@ for patient in patient_unique:
 #%% write to Excel
 '''
 - convert list_angles to DataFrame type
+- convert columns to numeric type to allow Excel operations over columns
 - write the DataFrame to the Excel file
 ''' 
+# drop columns that are not needed anymore in visualization mode
+df5.drop({'entryNeedle', 'entryRef', 'targetNeedle', 'targetRef'},axis=1, inplace=True)
 list_angles_df = pd.DataFrame(list_angles)
 #create columns names string vector
 angles_columns_names = [('Angle' + str(i+1)) for i in range(0,max_Needles)]
@@ -206,8 +209,11 @@ angles_columns_names.append('AngleReference')
 list_angles_df.columns = angles_columns_names
 df_final = pd.concat([df5, list_angles_df], axis=1)
 
-##precision = lambda x: str(round(float(x), 2))
-##df2['LateralError'] = df2['LateralError'].apply(precision)
+df_final.apply(pd.to_numeric, errors='ignore')
+df_final[['LateralError','LongitudinalError', 'AngularError', 'ResidualError']] = \
+df_final[['LateralError','LongitudinalError', 'AngularError', 'ResidualError']].apply(pd.to_numeric)
+
+#convert to datetime
 #%%
 # Write to Excel File
 timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -226,20 +232,14 @@ worksheet.set_default_row(26)
 worksheet.set_row(0, 30)
 
 # Add a format. Light red fill with dark red text.
-format1 = workbook.add_format({'bg_color': '#008000',
-                               'font_color': '#FFFFFF'})
                                 
-format2 = workbook.add_format({'bg_color': '#000000',
-                               'font_color': '#FFFFFF'})
-#
-#worksheet.conditional_format('A1:V1', {'type': 'cell',
-#                                       'format': format1})
-                                
+format2 = workbook.add_format({'bg_color': '#D3D3D3',
+                               'font_color': '	#000000'})                               
+                                               
 # might need to update the range for angles if new columns are added to the DataFrame
-worksheet.conditional_format('Q2:V100', {'type': '2_color_scale'})
-
-worksheet.conditional_format('Q2:V100', {'type':  'text',
+worksheet.conditional_format('A2:W200', {'type':  'text',
                                         'criteria': 'begins with',
                                         'value':    'N',
                                         'format':   format2})
 
+writer.save()
