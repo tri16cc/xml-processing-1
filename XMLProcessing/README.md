@@ -1,7 +1,7 @@
 
-#extract the IRE needle information 
-#calculate the angle in-between the needles
-#extract the Target Positioning Errors
+# extract the IRE needle information 
+# calculate the angle in-between the needles
+# extract the Target Positioning Errors
 
 General tasks:
 - iterate through all folders and subfolders

@@ -19,7 +19,7 @@ import  AngleNeedles
 
 # iterate through all folders and subfolders
 # generally the log files are in the folder "XML Recording"
-# create zip dump if necessary (probably it is)
+# create zip dump if necessary (probably it is) !!!!
 # iterate through all files that contain IRE measurement
 # 
 
@@ -214,6 +214,11 @@ df_final[['LateralError','LongitudinalError', 'AngularError', 'ResidualError']] 
 df_final[['LateralError','LongitudinalError', 'AngularError', 'ResidualError']].apply(pd.to_numeric)
 
 #convert to datetime
+
+# rename columns - add [mm]  in the title columns
+df_final.rename(columns={'LateralError': 'LateralError[mm]', 'LongitudinalError': 'LongitudinalError[mm]',
+                         'AngularError':'AngularError[mm]','ResidualError':'ResidualError[mm]',
+                         'LesionCount':'LesionNr', 'NeedleCount':'NeedleNr'}, inplace=True)
 #%%
 # Write to Excel File
 timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -227,7 +232,7 @@ workbook = writer.book
 worksheet = writer.sheets['IRE_Angles']
 worksheet.set_zoom(90)
 # set row/columns width
-worksheet.set_column('A:W', 14)
+worksheet.set_column('A:W', 20)
 worksheet.set_default_row(26)
 worksheet.set_row(0, 30)
 
