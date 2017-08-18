@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import untangle as ut
 import  AngleNeedles
-
+from datetime import datetime
 #%%
 
 # iterate through all folders and subfolders
@@ -214,7 +214,13 @@ df_final[['LateralError','LongitudinalError', 'AngularError', 'ResidualError']] 
 df_final[['LateralError','LongitudinalError', 'AngularError', 'ResidualError']].apply(pd.to_numeric)
 
 #convert to datetime
-
+s2 = df_final['time']
+d = s2.str.split('_').str.get(0)
+t = s2.str.split('_').str.get(1)
+t1 = t.str.split().str.get(0)
+t2 = t.str.split().str.get(1)
+df_final['period'] = d.astype(str) + ' ' + t2
+datetime_object = datetime.strptime(df_final['period'].astype(str), '%Y-%m-%d %H:%M:%S')
 # rename columns - add [mm]  in the title columns
 df_final.rename(columns={'LateralError': 'LateralError[mm]', 'LongitudinalError': 'LongitudinalError[mm]',
                          'AngularError':'AngularError[mm]','ResidualError':'ResidualError[mm]',
