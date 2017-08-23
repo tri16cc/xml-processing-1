@@ -1,0 +1,947 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<HEPAVISION-INFO>
+  <HEPAVISION-VERSION>2.1.2</HEPAVISION-VERSION>
+  <PATIENT>BP
+    <NAME>BP</NAME>
+    <DOB>19380101</DOB>
+    <PID>0010922318</PID>
+  </PATIENT>
+  <STUDY>20150826
+    <INSTITUTION>IMPORT</INSTITUTION>
+    <STUDY_DATE>20150826</STUDY_DATE>
+    <COMMENT>ARTERIELLE PORTALE</COMMENT>
+  </STUDY>
+  <IMAGEDATA>venous
+    <OBJ_ID>0</OBJ_ID>
+    <TITLE>venous</TITLE>
+    <DESCRIPTION/>
+    <FILENAME>./BP_0010922318_0001.dcm</FILENAME>
+    <LAST_CHANGED>2015-10-01T15:41:10</LAST_CHANGED>
+    <VOXEL_SIZE>0.820312023162842,0.820312023162842,1</VOXEL_SIZE>
+    <ROI>venous
+      <OBJ_ID>1</OBJ_ID>
+      <LAST_CHANGED>2015-10-01T15:36:41</LAST_CHANGED>
+      <BASED_ON>0</BASED_ON>
+      <TITLE>venous</TITLE>
+      <DESCRIPTION/>
+      <FILENAME>./BP_0010922318_0001.dcm</FILENAME>
+      <START_VOXEL>0,0,0</START_VOXEL>
+      <SIZE_VOXEL>511,511,197</SIZE_VOXEL>
+      <START_WORLD>-223.7100067138672,-188.1100006103516,-386.25</START_WORLD>
+      <END_WORLD>196.2899932861328,231.8899993896484,-188.25</END_WORLD>
+      <SIZE_C>1</SIZE_C>
+      <SIZE_T>1</SIZE_T>
+      <SIZE_U>1</SIZE_U>
+      <ROI_NR>0</ROI_NR>
+    </ROI>
+    <QUALITY_CONTROL structure="LIVER" mean="116" standardDeviation="17.8" area="281.3"/>
+    <QUALITY_CONTROL structure="PV" mean="201" standardDeviation="20.4" area="25.6"/>
+    <ROI>venous, ROI
+      <OBJ_ID>4</OBJ_ID>
+      <LAST_CHANGED>2015-10-05T11:07:15</LAST_CHANGED>
+      <BASED_ON>0</BASED_ON>
+      <TITLE>venous, ROI</TITLE>
+      <DESCRIPTION/>
+      <FILENAME>./BP_0010922318_00010.dcm</FILENAME>
+      <START_VOXEL>58,72,9</START_VOXEL>
+      <SIZE_VOXEL>397,301,179</SIZE_VOXEL>
+      <START_WORLD>-175.496994,-128.4759979,-376.3500061</START_WORLD>
+      <END_WORLD>149.7740021,118.0230026,-198.1499939</END_WORLD>
+      <SIZE_C>1</SIZE_C>
+      <SIZE_T>1</SIZE_T>
+      <SIZE_U>1</SIZE_U>
+      <ROI_NR>1</ROI_NR>
+      <REGISTRATION objID="5" matrix="1.000000 0.000000 0.000000 1.997333
+0.000000 1.000000 0.000000 -1.497027
+0.000000 0.000000 1.000000 -3.995697
+0.000000 0.000000 0.000000 1.000000"/>
+      <RESULT>Liver
+        <OBJ_ID>6</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T12:30:19</LAST_CHANGED>
+        <BASED_ON>4</BASED_ON>
+        <TITLE>Liver</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_0001000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SEGMENTED</RESULT_TYPE>
+        <STRUCTURE>LIVER</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT>Volume    1328 ml</TEXT_RESULT>
+        <TEXTFILE>./Liver0.cnt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <AUTO_COMPUTE value="FALSE"/>
+          <SMOOTHING value="Gauss"/>
+          <DRAW_CLOCKWISE value="FALSE"/>
+          <FILL_ADDITIVE value="FALSE"/>
+          <CONTOUR_MODE value="Modify Contour"/>
+          <WEIGHT0 value="0"/>
+          <WEIGHT1 value="1"/>
+          <WEIGHT6 value="0.8000000119"/>
+          <MEAN0 value="2300"/>
+          <MEAN1 value="1650"/>
+          <MEAN6 value="750"/>
+          <DEVIATION0 value="450"/>
+          <DEVIATION1 value="800"/>
+          <DEVIATION6 value="350"/>
+          <SECOND_DISPLAY value="0"/>
+          <SEGMENTATION_MODE value="TRUE"/>
+          <STANDARD_LUT value="TRUE"/>
+          <STANDARD_LUT_CENTER value="1100"/>
+          <STANDARD_LUT_WIDTH value="300"/>
+          <VOLUME unit="ml" value="1328"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>IVC
+        <OBJ_ID>7</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T12:32:57</LAST_CHANGED>
+        <BASED_ON>4</BASED_ON>
+        <TITLE>IVC</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_0001001.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SEGMENTED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS/>
+      </RESULT>
+      <RESULT>venous,VasPrep
+        <OBJ_ID>8</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T12:33:28</LAST_CHANGED>
+        <BASED_ON>4</BASED_ON>
+        <TITLE>venous,VasPrep</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_0001002.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>PREPROCESSED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <GaussX value="3"/>
+          <GaussY value="3"/>
+          <GaussZ value="3"/>
+          <MedianX value="2"/>
+          <MedianY value="2"/>
+          <MedianZ value="2"/>
+          <AnisoX value="0"/>
+          <AnisoY value="0"/>
+          <AnisoZ value="0"/>
+          <AnisoWidth value="25"/>
+          <Mode value="BackgroundCompensation"/>
+          <WindowMin value="100"/>
+          <WindowMax value="160"/>
+          <BCKernelX value="15"/>
+          <BCKernelY value="15"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>venous,VasSeg
+        <OBJ_ID>13</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T13:53:16</LAST_CHANGED>
+        <BASED_ON>8</BASED_ON>
+        <TITLE>venous,VasSeg</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000100200.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SEGMENTED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE>./ManVasSeg2.dcm</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <LIVERMASK activated="false"/>
+          <MARKER_MODE value="Marker"/>
+          <THRESHOLD value="39"/>
+          <MAX_VOXEL value="5000000"/>
+          <UP_DOWN value="downwards"/>
+          <CUT_PLANE_RADIUS value="20"/>
+          <BALANCE value="0.5"/>
+          <CLIP_GROWING activated="false"/>
+          <MARKER_0 position="-85.487678527832 -39.223991394043 -271.75"/>
+          <MARKER_1 position="-72.36268615722661 -32.6614952087402 -271.75"/>
+          <MARKER_2 position="-88.768928527832 -11.333381652832 -271.75"/>
+          <MARKER_3 position="-28.8861484527588 -52.3489837646484 -271.75"/>
+          <MARKER_4 position="-19.8627166748047 -63.8333511352539 -254.75"/>
+          <MARKER_5 position="-13.3002195358276 -31.8411827087402 -254.75"/>
+          <MARKER_6 position="13.770076751709 -39.223991394043 -254.75"/>
+          <MARKER_7 position="15.4107007980347 -58.9114799499512 -254.75"/>
+          <MARKER_8 position="-68.26112365722661 -58.9114799499512 -254.75"/>
+          <MARKER_9 position="-62.5189399719238 -58.9114799499512 -254.75"/>
+          <MARKER_10 position="-42.8314514160156 -51.5286712646484 -254.75"/>
+          <MARKER_11 position="-32.1673965454102 -64.65366363525391 -254.75"/>
+          <MARKER_12 position="-76.46424865722661 -0.669325113296509 -254.75"/>
+          <MARKER_13 position="-115.839225769043 -9.692757606506349 -254.75"/>
+          <MARKER_14 position="-101.893920898438 -24.4583740234375 -254.75"/>
+          <MARKER_15 position="-64.15956878662109 -20.3568134307861 -235.75"/>
+          <MARKER_16 position="-27.2455234527588 -25.2786865234375 -235.75"/>
+          <VECTOR_0 position="0 0 0" vector="0 0 0"/>
+          <MANUAL_SEGMENTATION filename="./ManVasSeg2.dcm" drawSize="4" drawMode="Draw"/>
+          <MANUAL_SEGMENTATION_ERASE filename="./ManVasSeg_erase2.dcm" drawSize="4" drawMode="Draw"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>venous,VasSeg, auto skel
+        <OBJ_ID>14</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T13:53:22</LAST_CHANGED>
+        <BASED_ON>13</BASED_ON>
+        <TITLE>venous,VasSeg, auto skel</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_00010020000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SKELETIZED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS/>
+      </RESULT>
+      <RESULT>venous,VasSeg1
+        <OBJ_ID>15</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T15:19:04</LAST_CHANGED>
+        <BASED_ON>13,15</BASED_ON>
+        <TITLE>venous,VasSeg1</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000100201.dcm</FILENAME>
+        <IS_VALID>false</IS_VALID>
+        <RESULT_TYPE>SEGMENTED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE>./ManVasSeg2.dcm</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS/>
+      </RESULT>
+      <RESULT>venous,VasSeg1, auto skel
+        <OBJ_ID>16</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T15:19:04</LAST_CHANGED>
+        <BASED_ON>15</BASED_ON>
+        <TITLE>venous,VasSeg1, auto skel</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_00010020100.dcm</FILENAME>
+        <IS_VALID>false</IS_VALID>
+        <RESULT_TYPE>SKELETIZED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS/>
+      </RESULT>
+      <RESULT>venous,VasSeg2
+        <OBJ_ID>17</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T15:19:15</LAST_CHANGED>
+        <BASED_ON>13,15</BASED_ON>
+        <TITLE>venous,VasSeg2</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_0001002000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SEGMENTED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE>./ManVasSeg2.dcm</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS/>
+      </RESULT>
+      <RESULT>venous,comb.skel.
+        <OBJ_ID>19</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T15:19:15</LAST_CHANGED>
+        <BASED_ON>17</BASED_ON>
+        <TITLE>venous,comb.skel.</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000100.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SKELETIZED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS/>
+      </RESULT>
+      <RESULT>venous,VasSeg3
+        <OBJ_ID>20</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T15:19:37</LAST_CHANGED>
+        <BASED_ON>17,7</BASED_ON>
+        <TITLE>venous,VasSeg3</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_00010020001.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SEGMENTED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE>./ManVasSeg2.dcm</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS/>
+      </RESULT>
+      <RESULT>venous,comb.skel.IVC
+        <OBJ_ID>22</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T15:19:37</LAST_CHANGED>
+        <BASED_ON>20</BASED_ON>
+        <TITLE>venous,comb.skel.IVC</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000101.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SKELETIZED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS/>
+      </RESULT>
+      <RESULT>PV,HV
+        <OBJ_ID>23</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:20:16</LAST_CHANGED>
+        <BASED_ON>22</BASED_ON>
+        <TITLE>PV,HV</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_00010100.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>CODEDSEGMENTATION</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE>HV,PV</SUBSTRUCTURE>
+        <TEXT_RESULT>| | | | | | | | | | | | | |</TEXT_RESULT>
+        <TEXTFILE>./Treedata_HV,PV3.txt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <SENSITIVITY value="0.2000000179"/>
+          <TREEDATA filename="./Treedata_HV,PV3.txt" xml_filename="./Treedata_HV,PV3.xml"/>
+          <SNAP_TO_NODE value="TRUE"/>
+          <SNAP_TO_ROOT value="TRUE"/>
+          <MAX_TREE value="2"/>
+          <VIEW_MODE value="Edit"/>
+          <SKELETON_ONLY value="FALSE"/>
+          <SHOW_MARKER value="FALSE"/>
+          <VASCULAR_STRUCTURES HA="FALSE" HV="TRUE" PV="TRUE" BD="FALSE" OTHER="FALSE" OTHER_DESC=""/>
+          <COLOR_INFO_0 description=""/>
+          <COLOR_INFO_1 description=""/>
+          <COLOR_INFO_2 description=""/>
+          <COLOR_INFO_3 description=""/>
+          <COLOR_INFO_4 description=""/>
+          <COLOR_INFO_5 description=""/>
+          <COLOR_INFO_6 description=""/>
+          <COLOR_INFO_7 description=""/>
+          <COLOR_INFO_8 description=""/>
+          <COLOR_INFO_9 description=""/>
+          <COLOR_INFO_10 description=""/>
+          <COLOR_INFO_11 description=""/>
+          <COLOR_INFO_12 description=""/>
+          <COLOR_INFO_13 description=""/>
+          <COLOR_INFO_14 description=""/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>HV sep
+        <OBJ_ID>24</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:20:49</LAST_CHANGED>
+        <BASED_ON>22</BASED_ON>
+        <TITLE>HV sep</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000101000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SKELETIZED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE>HV</SUBSTRUCTURE>
+        <TEXT_RESULT>| | | | | | | | | | | | | |</TEXT_RESULT>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <VASCULAR_STRUCTURES HA="FALSE" HV="TRUE" PV="FALSE" BD="FALSE" OTHER="FALSE" OTHER_DESC=""/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>PV sep
+        <OBJ_ID>25</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:21:15</LAST_CHANGED>
+        <BASED_ON>22</BASED_ON>
+        <TITLE>PV sep</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000101001.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SKELETIZED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE>PV</SUBSTRUCTURE>
+        <TEXT_RESULT>| | | | | | | | | | | | | |</TEXT_RESULT>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <VASCULAR_STRUCTURES HA="FALSE" HV="FALSE" PV="TRUE" BD="FALSE" OTHER="FALSE" OTHER_DESC=""/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>HV Analysis
+        <OBJ_ID>26</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:24:57</LAST_CHANGED>
+        <BASED_ON>24</BASED_ON>
+        <TITLE>HV Analysis</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_00010100000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>CODEDSEGMENTATION</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE>HV</SUBSTRUCTURE>
+        <TEXT_RESULT>HV|LHV||||||||MHV|||||</TEXT_RESULT>
+        <TEXTFILE>./Treedata_HV3.txt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <SENSITIVITY value="0.400000006"/>
+          <TREEDATA filename="./Treedata_HV3.txt" xml_filename="./Treedata_HV3.xml"/>
+          <SNAP_TO_NODE value="TRUE"/>
+          <SNAP_TO_ROOT value="TRUE"/>
+          <MAX_TREE value="2"/>
+          <VIEW_MODE value="Edit"/>
+          <SKELETON_ONLY value="FALSE"/>
+          <SHOW_MARKER value="FALSE"/>
+          <VASCULAR_STRUCTURES HA="FALSE" HV="TRUE" PV="FALSE" BD="FALSE" OTHER="FALSE" OTHER_DESC=""/>
+          <COLOR_INFO_0 description="HV"/>
+          <COLOR_INFO_1 description=""/>
+          <COLOR_INFO_2 description="LHV"/>
+          <COLOR_INFO_3 description=""/>
+          <COLOR_INFO_4 description=""/>
+          <COLOR_INFO_5 description=""/>
+          <COLOR_INFO_6 description=""/>
+          <COLOR_INFO_7 description=""/>
+          <COLOR_INFO_8 description=""/>
+          <COLOR_INFO_9 description=""/>
+          <COLOR_INFO_10 description=""/>
+          <COLOR_INFO_11 description=""/>
+          <COLOR_INFO_12 description="MHV"/>
+          <COLOR_INFO_13 description=""/>
+          <COLOR_INFO_14 description=""/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>PV Analysis
+        <OBJ_ID>27</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:42:09</LAST_CHANGED>
+        <BASED_ON>25</BASED_ON>
+        <TITLE>PV Analysis</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_00010100100.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>CODEDSEGMENTATION</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE>PV</SUBSTRUCTURE>
+        <TEXT_RESULT>PV|P2|||P4b|||P4a|P3||||||</TEXT_RESULT>
+        <TEXTFILE>./Treedata_PV2.txt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <SENSITIVITY value="0.400000006"/>
+          <TREEDATA filename="./Treedata_PV2.txt" xml_filename="./Treedata_PV2.xml"/>
+          <SNAP_TO_NODE value="TRUE"/>
+          <SNAP_TO_ROOT value="TRUE"/>
+          <MAX_TREE value="2"/>
+          <VIEW_MODE value="Edit"/>
+          <SKELETON_ONLY value="FALSE"/>
+          <SHOW_MARKER value="FALSE"/>
+          <VASCULAR_STRUCTURES HA="FALSE" HV="FALSE" PV="TRUE" BD="FALSE" OTHER="FALSE" OTHER_DESC=""/>
+          <COLOR_INFO_0 description="PV"/>
+          <COLOR_INFO_1 description=""/>
+          <COLOR_INFO_2 description="P2"/>
+          <COLOR_INFO_3 description=""/>
+          <COLOR_INFO_4 description=""/>
+          <COLOR_INFO_5 description="P4b"/>
+          <COLOR_INFO_6 description=""/>
+          <COLOR_INFO_7 description="P4a"/>
+          <COLOR_INFO_8 description=""/>
+          <COLOR_INFO_9 description=""/>
+          <COLOR_INFO_10 description=""/>
+          <COLOR_INFO_11 description=""/>
+          <COLOR_INFO_12 description=""/>
+          <COLOR_INFO_13 description="P3"/>
+          <COLOR_INFO_14 description=""/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>Ablation Area
+        <OBJ_ID>28</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T10:54:28</LAST_CHANGED>
+        <BASED_ON>4</BASED_ON>
+        <TITLE>Ablation Area</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_0001020.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SEGMENTED</RESULT_TYPE>
+        <STRUCTURE>TUMOR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT>Volume:     7.6 ml</TEXT_RESULT>
+        <TEXTFILE>./Tumor0.cnt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <SMOOTHING value="Gauss"/>
+          <SEGMENTATION_MODE value="Contour"/>
+          <AUTO_COMPUTE value="FALSE"/>
+          <DRAW_CLOCKWISE value="FALSE"/>
+          <FILL_ADDITIVE value="FALSE"/>
+          <ACTION_MODE value="New Contour"/>
+          <WEIGHT0 value="0"/>
+          <WEIGHT1 value="1"/>
+          <WEIGHT6 value="0.8000000119"/>
+          <MEAN0 value="2300"/>
+          <MEAN1 value="1650"/>
+          <MEAN6 value="750"/>
+          <DEVIATION0 value="450"/>
+          <DEVIATION1 value="800"/>
+          <DEVIATION6 value="350"/>
+          <SECOND_DISPLAY value="COST_FUNCTION"/>
+          <CONTOUR_MODE value="FREEHAND"/>
+          <VOLUME unit="ml" value="7.6"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>Tumor
+        <OBJ_ID>29</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:00:56</LAST_CHANGED>
+        <BASED_ON>4</BASED_ON>
+        <TITLE>Tumor</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_0001021.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SEGMENTED</RESULT_TYPE>
+        <STRUCTURE>TUMOR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT>Volume:    24.5 ml</TEXT_RESULT>
+        <TEXTFILE>./Tumor1.cnt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <SMOOTHING value="Gauss"/>
+          <SEGMENTATION_MODE value="Contour"/>
+          <AUTO_COMPUTE value="FALSE"/>
+          <DRAW_CLOCKWISE value="FALSE"/>
+          <FILL_ADDITIVE value="FALSE"/>
+          <ACTION_MODE value="Modify Contour"/>
+          <WEIGHT0 value="0"/>
+          <WEIGHT1 value="1"/>
+          <WEIGHT6 value="0.8000000119"/>
+          <MEAN0 value="2300"/>
+          <MEAN1 value="1650"/>
+          <MEAN6 value="750"/>
+          <DEVIATION0 value="450"/>
+          <DEVIATION1 value="800"/>
+          <DEVIATION6 value="350"/>
+          <SECOND_DISPLAY value="COST_FUNCTION"/>
+          <CONTOUR_MODE value="FREEHAND"/>
+          <VOLUME unit="ml" value="24.5"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>HA Territories
+        <OBJ_ID>30</OBJ_ID>
+        <LAST_CHANGED>2015-10-06T08:58:02</LAST_CHANGED>
+        <BASED_ON>6,12</BASED_ON>
+        <TITLE>HA Territories</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000100000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>CODEDSEGMENTATION</RESULT_TYPE>
+        <STRUCTURE>LIVER</STRUCTURE>
+        <SUBSTRUCTURE>HA</SUBSTRUCTURE>
+        <TEXT_RESULT>Volumes of Vascular Territories
+===============================
+
+Territory        Volume       (relative)
+                (in ml)     (% of total)
+----------------------------------------
+A2                  191         ( 14.4%)
+----------------------------------------
+A3                  553         ( 41.6%)
+----------------------------------------
+A4a                 212         ( 16.0%)
+----------------------------------------
+A4b                 372         ( 28.0%)
+========================================
+Total              1328         (100.0%)
+</TEXT_RESULT>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <MIN_BOUNDARY value="12050"/>
+          <MAX_BOUNDARY value="12700"/>
+          <ANALYSIS title="HA Analysis"/>
+          <COLOR_INFO_0 description="HA" volume="0 ml"/>
+          <COLOR_INFO_1 description="" volume="0 ml"/>
+          <COLOR_INFO_2 description="A2" volume="191 ml"/>
+          <COLOR_INFO_3 description="" volume="0 ml"/>
+          <COLOR_INFO_4 description="" volume="0 ml"/>
+          <COLOR_INFO_5 description="A4b" volume="372 ml"/>
+          <COLOR_INFO_6 description="" volume="0 ml"/>
+          <COLOR_INFO_7 description="A4a" volume="212 ml"/>
+          <COLOR_INFO_8 description="" volume="0 ml"/>
+          <COLOR_INFO_9 description="" volume="0 ml"/>
+          <COLOR_INFO_10 description="" volume="0 ml"/>
+          <COLOR_INFO_11 description="" volume="0 ml"/>
+          <COLOR_INFO_12 description="" volume="0 ml"/>
+          <COLOR_INFO_13 description="A3" volume="553 ml"/>
+          <COLOR_INFO_14 description="" volume="0 ml"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>PV Territories
+        <OBJ_ID>31</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:42:46</LAST_CHANGED>
+        <BASED_ON>6,27</BASED_ON>
+        <TITLE>PV Territories</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000100001.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>CODEDSEGMENTATION</RESULT_TYPE>
+        <STRUCTURE>LIVER</STRUCTURE>
+        <SUBSTRUCTURE>PV</SUBSTRUCTURE>
+        <TEXT_RESULT>Volumes of Vascular Territories
+===============================
+
+Territory        Volume       (relative)
+                (in ml)     (% of total)
+----------------------------------------
+P2                  185         ( 13.9%)
+----------------------------------------
+P3                  542         ( 40.8%)
+----------------------------------------
+P4a                 354         ( 26.7%)
+----------------------------------------
+P4b                 247         ( 18.6%)
+========================================
+Total              1328         (100.0%)</TEXT_RESULT>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <MIN_BOUNDARY value="12050"/>
+          <MAX_BOUNDARY value="12700"/>
+          <ANALYSIS title="PV Analysis"/>
+          <COLOR_INFO_0 description="PV" volume="0 ml"/>
+          <COLOR_INFO_1 description="" volume="0 ml"/>
+          <COLOR_INFO_2 description="P2" volume="185 ml"/>
+          <COLOR_INFO_3 description="" volume="0 ml"/>
+          <COLOR_INFO_4 description="" volume="0 ml"/>
+          <COLOR_INFO_5 description="P4b" volume="247 ml"/>
+          <COLOR_INFO_6 description="" volume="0 ml"/>
+          <COLOR_INFO_7 description="P4a" volume="354 ml"/>
+          <COLOR_INFO_8 description="" volume="0 ml"/>
+          <COLOR_INFO_9 description="" volume="0 ml"/>
+          <COLOR_INFO_10 description="" volume="0 ml"/>
+          <COLOR_INFO_11 description="" volume="0 ml"/>
+          <COLOR_INFO_12 description="" volume="0 ml"/>
+          <COLOR_INFO_13 description="P3" volume="542 ml"/>
+          <COLOR_INFO_14 description="" volume="0 ml"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>HV Territories
+        <OBJ_ID>32</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:43:03</LAST_CHANGED>
+        <BASED_ON>6,26</BASED_ON>
+        <TITLE>HV Territories</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_0001000010.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>CODEDSEGMENTATION</RESULT_TYPE>
+        <STRUCTURE>LIVER</STRUCTURE>
+        <SUBSTRUCTURE>HV</SUBSTRUCTURE>
+        <TEXT_RESULT>Volumes of Vascular Territories
+===============================
+
+Territory        Volume       (relative)
+                (in ml)     (% of total)
+----------------------------------------
+LHV                 774         ( 58.3%)
+----------------------------------------
+MHV                 554         ( 41.7%)
+========================================
+Total              1328         (100.0%)</TEXT_RESULT>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <MIN_BOUNDARY value="12050"/>
+          <MAX_BOUNDARY value="12700"/>
+          <ANALYSIS title="HV Analysis"/>
+          <COLOR_INFO_0 description="HV" volume="0 ml"/>
+          <COLOR_INFO_1 description="" volume="0 ml"/>
+          <COLOR_INFO_2 description="LHV" volume="774 ml"/>
+          <COLOR_INFO_3 description="" volume="0 ml"/>
+          <COLOR_INFO_4 description="" volume="0 ml"/>
+          <COLOR_INFO_5 description="" volume="0 ml"/>
+          <COLOR_INFO_6 description="" volume="0 ml"/>
+          <COLOR_INFO_7 description="" volume="0 ml"/>
+          <COLOR_INFO_8 description="" volume="0 ml"/>
+          <COLOR_INFO_9 description="" volume="0 ml"/>
+          <COLOR_INFO_10 description="" volume="0 ml"/>
+          <COLOR_INFO_11 description="" volume="0 ml"/>
+          <COLOR_INFO_12 description="MHV" volume="554 ml"/>
+          <COLOR_INFO_13 description="" volume="0 ml"/>
+          <COLOR_INFO_14 description="" volume="0 ml"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>HV Risk Analysis 2,5,10mm independent
+        <OBJ_ID>33</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:43:57</LAST_CHANGED>
+        <BASED_ON>24</BASED_ON>
+        <TITLE>HV Risk Analysis 2,5,10mm independent</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000101000000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>RISK_ANALYSIS</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE>HV</SUBSTRUCTURE>
+        <TEXT_RESULT>safe| 2mm||10mm||||| 5mm||||||</TEXT_RESULT>
+        <TEXTFILE>./Treedata_HV4.txt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <TUMOR_DISTANCE_TRANSFORMATION filename="./TumDistTrans3.dcm"/>
+          <SENSITIVITY value="0.400000006"/>
+          <TREEDATA filename="./Treedata_HV4.txt" xml_filename="./Treedata_HV4.xml"/>
+          <SNAP_TO_NODE value="TRUE"/>
+          <SNAP_TO_ROOT value="TRUE"/>
+          <SKELETON_ONLY value="FALSE"/>
+          <SHOW_MARKER value="TRUE"/>
+          <VASCULAR_STRUCTURES HA="FALSE" HV="TRUE" PV="FALSE" BD="FALSE" OTHER="FALSE" OTHER_DESC=""/>
+          <TUMORMASK title="Tumor"/>
+          <RISK_MODE value="undependent"/>
+          <RISK_RESULT_0 margin="-1" description="safe" colorNumber="0"/>
+          <RISK_RESULT_1 margin="10" description="10mm" colorNumber="4"/>
+          <RISK_RESULT_2 margin="5" description="5mm" colorNumber="13"/>
+          <RISK_RESULT_3 margin="2" description="2mm" colorNumber="2"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>PV Risk Analysis 2,5,10mm independent
+        <OBJ_ID>34</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:44:29</LAST_CHANGED>
+        <BASED_ON>25</BASED_ON>
+        <TITLE>PV Risk Analysis 2,5,10mm independent</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000101001000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>RISK_ANALYSIS</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE>PV</SUBSTRUCTURE>
+        <TEXT_RESULT>safe| 2mm||10mm||||| 5mm||||||</TEXT_RESULT>
+        <TEXTFILE>./Treedata_PV3.txt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <TUMOR_DISTANCE_TRANSFORMATION filename="./TumDistTrans4.dcm"/>
+          <SENSITIVITY value="0.400000006"/>
+          <TREEDATA filename="./Treedata_PV3.txt" xml_filename="./Treedata_PV3.xml"/>
+          <SNAP_TO_NODE value="TRUE"/>
+          <SNAP_TO_ROOT value="TRUE"/>
+          <SKELETON_ONLY value="FALSE"/>
+          <SHOW_MARKER value="TRUE"/>
+          <VASCULAR_STRUCTURES HA="FALSE" HV="FALSE" PV="TRUE" BD="FALSE" OTHER="FALSE" OTHER_DESC=""/>
+          <TUMORMASK title="Tumor"/>
+          <RISK_MODE value="undependent"/>
+          <RISK_RESULT_0 margin="-1" description="safe" colorNumber="0"/>
+          <RISK_RESULT_1 margin="10" description="10mm" colorNumber="4"/>
+          <RISK_RESULT_2 margin="5" description="5mm" colorNumber="13"/>
+          <RISK_RESULT_3 margin="2" description="2mm" colorNumber="2"/>
+        </PARAMETERS>
+      </RESULT>
+    </ROI>
+  </IMAGEDATA>
+  <IMAGEDATA>arterial
+    <OBJ_ID>2</OBJ_ID>
+    <TITLE>arterial</TITLE>
+    <DESCRIPTION/>
+    <FILENAME>./BP_0010922318_0000.dcm</FILENAME>
+    <LAST_CHANGED>2015-10-01T15:41:09</LAST_CHANGED>
+    <VOXEL_SIZE>0.820312023162842,0.820312023162842,1</VOXEL_SIZE>
+    <ROI>arterial
+      <OBJ_ID>3</OBJ_ID>
+      <LAST_CHANGED>2015-10-01T15:37:02</LAST_CHANGED>
+      <BASED_ON>2</BASED_ON>
+      <TITLE>arterial</TITLE>
+      <DESCRIPTION/>
+      <FILENAME>./BP_0010922318_0000.dcm</FILENAME>
+      <START_VOXEL>0,0,0</START_VOXEL>
+      <SIZE_VOXEL>511,511,645</SIZE_VOXEL>
+      <START_WORLD>-223.7100067138672,-188.1100006103516,-609.75</START_WORLD>
+      <END_WORLD>196.2899932861328,231.8899993896484,36.25</END_WORLD>
+      <SIZE_C>1</SIZE_C>
+      <SIZE_T>1</SIZE_T>
+      <SIZE_U>1</SIZE_U>
+      <ROI_NR>0</ROI_NR>
+    </ROI>
+    <QUALITY_CONTROL structure="PV" mean="82" standardDeviation="13.2" area="119.1"/>
+    <QUALITY_CONTROL structure="HA" mean="260" standardDeviation="43.5" area="45.1"/>
+    <ROI>arterial, ROI
+      <OBJ_ID>5</OBJ_ID>
+      <LAST_CHANGED>2015-10-05T11:08:06</LAST_CHANGED>
+      <BASED_ON>2</BASED_ON>
+      <TITLE>arterial, ROI</TITLE>
+      <DESCRIPTION/>
+      <FILENAME>./BP_0010922318_00000.dcm</FILENAME>
+      <START_VOXEL>58,72,207</START_VOXEL>
+      <SIZE_VOXEL>395,301,226</SIZE_VOXEL>
+      <START_WORLD>-175.496994,-128.4759979,-401.9379883</START_WORLD>
+      <END_WORLD>148.2830048,118.0230026,-176.6000061</END_WORLD>
+      <SIZE_C>1</SIZE_C>
+      <SIZE_T>1</SIZE_T>
+      <SIZE_U>1</SIZE_U>
+      <ROI_NR>1</ROI_NR>
+      <REGISTRATION objID="4" matrix="1.000000 0.000000 0.000000 -1.997333
+0.000000 1.000000 0.000000 1.497027
+0.000000 0.000000 1.000000 3.995697
+0.000000 0.000000 0.000000 1.000000"/>
+      <RESULT>arterial,VasPrep
+        <OBJ_ID>9</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T12:41:05</LAST_CHANGED>
+        <BASED_ON>5</BASED_ON>
+        <TITLE>arterial,VasPrep</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_0000000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>PREPROCESSED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <GaussX value="3"/>
+          <GaussY value="3"/>
+          <GaussZ value="3"/>
+          <MedianX value="1"/>
+          <MedianY value="1"/>
+          <MedianZ value="1"/>
+          <AnisoX value="0"/>
+          <AnisoY value="0"/>
+          <AnisoZ value="0"/>
+          <AnisoWidth value="25"/>
+          <Mode value="SmoothedOnly"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>arterial,VasSeg
+        <OBJ_ID>10</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T13:00:54</LAST_CHANGED>
+        <BASED_ON>9</BASED_ON>
+        <TITLE>arterial,VasSeg</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_000000000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SEGMENTED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE>./ManVasSeg1.dcm</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <LIVERMASK activated="false"/>
+          <MARKER_MODE value="Marker"/>
+          <THRESHOLD value="1238"/>
+          <MAX_VOXEL value="5000000"/>
+          <UP_DOWN value="downwards"/>
+          <CUT_PLANE_RADIUS value="20"/>
+          <BALANCE value="0.5"/>
+          <CLIP_GROWING activated="false"/>
+          <MARKER_0 position="-0.995539426803589 -19.5365009307861 -285.25"/>
+          <MARKER_1 position="-23.9642753601074 -21.1771259307861 -285.25"/>
+          <MARKER_2 position="-52.6751976013184 -21.9974384307861 -295.25"/>
+          <VECTOR_0 position="-14.1205320358276 16.5572280883789 -263.25" vector="5.74218463897705 -16.4062411785126 0"/>
+          <MANUAL_SEGMENTATION filename="./ManVasSeg1.dcm" drawSize="2" drawMode="Draw"/>
+          <MANUAL_SEGMENTATION_ERASE filename="./ManVasSeg_erase1.dcm" drawSize="2" drawMode="Draw"/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>arterial,VasSeg, auto skel
+        <OBJ_ID>11</OBJ_ID>
+        <LAST_CHANGED>2015-10-02T13:01:02</LAST_CHANGED>
+        <BASED_ON>10</BASED_ON>
+        <TITLE>arterial,VasSeg, auto skel</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_00000000000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>SKELETIZED</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE/>
+        <TEXT_RESULT/>
+        <TEXTFILE/>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS/>
+      </RESULT>
+      <RESULT>HA Analysis
+        <OBJ_ID>12</OBJ_ID>
+        <LAST_CHANGED>2015-10-06T08:57:33</LAST_CHANGED>
+        <BASED_ON>11</BASED_ON>
+        <TITLE>HA Analysis</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_0000000000000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>CODEDSEGMENTATION</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE>HA</SUBSTRUCTURE>
+        <TEXT_RESULT>HA|A2| | |A4b| | |A4a|A3| | | | | | </TEXT_RESULT>
+        <TEXTFILE>./Treedata_HA4.txt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <SENSITIVITY value="0.400000006"/>
+          <TREEDATA filename="./Treedata_HA4.txt" xml_filename="./Treedata_HA4.xml"/>
+          <SNAP_TO_NODE value="TRUE"/>
+          <SNAP_TO_ROOT value="TRUE"/>
+          <MAX_TREE value="2"/>
+          <VIEW_MODE value="Edit"/>
+          <SKELETON_ONLY value="FALSE"/>
+          <SHOW_MARKER value="FALSE"/>
+          <VASCULAR_STRUCTURES HA="TRUE" HV="FALSE" PV="FALSE" BD="FALSE" OTHER="FALSE" OTHER_DESC=""/>
+          <COLOR_INFO_0 description="HA"/>
+          <COLOR_INFO_1 description=""/>
+          <COLOR_INFO_2 description="A2"/>
+          <COLOR_INFO_3 description=""/>
+          <COLOR_INFO_4 description=""/>
+          <COLOR_INFO_5 description="A4b"/>
+          <COLOR_INFO_6 description=""/>
+          <COLOR_INFO_7 description="A4a"/>
+          <COLOR_INFO_8 description=""/>
+          <COLOR_INFO_9 description=""/>
+          <COLOR_INFO_10 description=""/>
+          <COLOR_INFO_11 description=""/>
+          <COLOR_INFO_12 description=""/>
+          <COLOR_INFO_13 description="A3"/>
+          <COLOR_INFO_14 description=""/>
+        </PARAMETERS>
+      </RESULT>
+      <RESULT>HA Risk Analysis 2,5,10mm independent
+        <OBJ_ID>35</OBJ_ID>
+        <LAST_CHANGED>2015-10-05T11:45:04</LAST_CHANGED>
+        <BASED_ON>11</BASED_ON>
+        <TITLE>HA Risk Analysis 2,5,10mm independent</TITLE>
+        <DESCRIPTION/>
+        <FILENAME>./BP_0010922318_00000000000000.dcm</FILENAME>
+        <IS_VALID>true</IS_VALID>
+        <RESULT_TYPE>RISK_ANALYSIS</RESULT_TYPE>
+        <STRUCTURE>VASCULAR</STRUCTURE>
+        <SUBSTRUCTURE>HA</SUBSTRUCTURE>
+        <TEXT_RESULT>safe| 2mm||10mm||||| 5mm||||||</TEXT_RESULT>
+        <TEXTFILE>./Treedata_HA3.txt</TEXTFILE>
+        <IS_RESECTION_PROPOSAL>FALSE</IS_RESECTION_PROPOSAL>
+        <PARAMETERS>
+          <TUMOR_DISTANCE_TRANSFORMATION filename="./TumDistTrans5.dcm"/>
+          <SENSITIVITY value="0.400000006"/>
+          <TREEDATA filename="./Treedata_HA3.txt" xml_filename="./Treedata_HA3.xml"/>
+          <SNAP_TO_NODE value="FALSE"/>
+          <SNAP_TO_ROOT value="TRUE"/>
+          <SKELETON_ONLY value="FALSE"/>
+          <SHOW_MARKER value="TRUE"/>
+          <VASCULAR_STRUCTURES HA="TRUE" HV="FALSE" PV="FALSE" BD="FALSE" OTHER="FALSE" OTHER_DESC=""/>
+          <TUMORMASK title="Tumor"/>
+          <RISK_MODE value="undependent"/>
+          <RISK_RESULT_0 margin="-1" description="safe" colorNumber="0"/>
+          <RISK_RESULT_1 margin="10" description="10mm" colorNumber="4"/>
+          <RISK_RESULT_2 margin="5" description="5mm" colorNumber="13"/>
+          <RISK_RESULT_3 margin="2" description="2mm" colorNumber="2"/>
+        </PARAMETERS>
+      </RESULT>
+    </ROI>
+  </IMAGEDATA>
+  <STATUS>
+    <LAST_PROCESSING_STEP>8</LAST_PROCESSING_STEP>
+    <LAST_OPENED_IMAGE>Welcome|F:/Pat_Bapst__Paul_08_05_1938/datasets/BP.xml|</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Load Image|./BP_0010922318_0000.dcm|</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>ROI Select|./BP_0010922318_0000.dcm|</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Liver Segmentation|D:/Cases_Susi/Pat_BP_0010922318/datasets/BP_0010922318_00010.dcm|</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Tumor Segmentation|E:/Patienten/Pat_BP_0010922318/datasets/BP_0010922318_00010.dcm|</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Vascular Preprocessing|D:/Cases_Susi/Pat_BP_0010922318/datasets/BP_0010922318_00000.dcm|</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Vascular Segmentation|D:/Cases_Susi/Pat_BP_0010922318/datasets/BP_0010922318_0001002.dcm|</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Vascular Analysis|M:/Bern_Inselspital/20151001/Pat_BP_0010922318/datasets/BP_0010922318_00000000000.dcm|</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Vascular Territories|M:/Bern_Inselspital/20151001/Pat_BP_0010922318/datasets/BP_0010922318_0001000.dcm|./BP_0010922318_0000000000000.dcm</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Risk Analysis|E:/Patienten/Pat_BP_0010922318/datasets/BP_0010922318_00000000000.dcm|</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Combine Results|./BP_0010922318_0001002000.dcm|./BP_0010922318_0001001.dcm</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Registration||</LAST_OPENED_IMAGE>
+    <LAST_OPENED_IMAGE>Manual Resection||</LAST_OPENED_IMAGE>
+  </STATUS>
+  <SCREENSHOTS/>
+</HEPAVISION-INFO>
