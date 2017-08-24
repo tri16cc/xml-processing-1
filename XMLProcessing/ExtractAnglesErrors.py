@@ -229,7 +229,7 @@ df_final.rename(columns={'LateralError': 'LateralError[mm]', 'LongitudinalError'
 #%%
 # Write to Excel File
 timestr = time.strftime("%Y%m%d-%H%M%S")
-filename = 'MAVERRIC_IRE_NeedleInformation_' + timestr + '.xlsx' 
+filename = 'IRE_NeedleInformation_' + timestr + '.xlsx' 
 writer = pd.ExcelWriter(filename)
 df_final.to_excel(writer,sheet_name='IRE_Angles', index=False, na_rep='NaN')
 df3.to_excel(writer,'Sheet2', index=False) 
