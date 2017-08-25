@@ -12,7 +12,6 @@ The segmented tumor can be found in the MeVis DICOM file “BP_0010922318_000102
 
 import os
 import time
-import argparse
 import pandas as pd
 import untangle as ut
 
@@ -44,6 +43,7 @@ for dirname, dirnames, filenames in os.walk(srvPath):
                 obj = ut.parse(xmlFilePathName_norm)
                 data = obj.HEPAVISION_INFO.IMAGEDATA
                 k = 0
+                tumorData = []
                 for imagedata in data:
                     rois = imagedata.ROI
                     for roi in rois:
@@ -55,36 +55,44 @@ for dirname, dirnames, filenames in os.walk(srvPath):
                                     'FilePathSourceImg' : roi.FILENAME.cdata[2:],
                                     'ImageType' : roi.cdata
                             })
-                            for re in result:
-                                if 'Tumor' in re.cdata:
-                                    k+=1
-                                   
-                                    # remove the "./" in front of the filename
-                                    filenameTumor = re.FILENAME.cdata[2:]
-                                    # the DICOM contains only the metadata
-                                    filepathTumorDICOM = os.path.join(dirname,filenameTumor)
+                            for res in result:
+                                # add all the tumor data to a new list
+                                if 'tumor'.casefold() in res.cdata.casefold() or \
+                                'Metastas'.casefold() in res.cdata.casefold() or \
+                                'cyst'.casefold() in res.cdata.casefold():
+                                   # remove the "./" in front of the filename
+                                    filenameTumor = res.FILENAME.cdata[2:]
                                     # the TIFF contains the binary image mask
-                                    filepathTumorTiff = os.path.join(dirname, filenameTumor[:-4]+'.tif')
-                                    # save the obj id
-                                    basedon_ROI_OBJID = re.BASED_ON.cdata
+                                    # the DICOM contains only the metadata
+                                    tumorData.append({
+                                            'TumorTitle': res.TITLE.cdata,
+                                            'PathDicomTumor': os.path.join(dirname,filenameTumor),
+                                            'PathTiffTumor':  os.path.join(dirname, filenameTumor[:-4]+'.tif'),
+                                            'basedon_ROI_OBJID': res.BASED_ON.cdata
+                                            })
 
                         except Exception:
                             print('')
+                            
                     if k>1:  print('Tumors found:',str(k))
-                    # iterate through the list of dict ROIs to find segmentation source based on OBJ_ID
-                    filepathSourceImg, ImageType = next((item["FilePathSourceImg"], item["ImageType"])for item in roiData if item["objID"] == basedon_ROI_OBJID)
-                    
-                    foundData.append({
-                                    'PatientID' : obj.HEPAVISION_INFO.PATIENT.PID.cdata,
-                                    'PatientIn': patientInitials,
-                                    'Clinic' : clinic,
-                                    'PathXML' : xmlFilePathName,
-                                    'PathDicomTumor': filepathTumorDICOM,
-                                    'PathTiffTumor': filepathTumorTiff,
-                                    'PathDicomSource':  os.path.join(dirname, filepathSourceImg),
-                                    'ImageType' : ImageType
-                                    
-                                })
+
+                    for i, d in enumerate(tumorData):
+                        # iterate through the list of dict ROIs to find segmentation source based on OBJ_ID
+                        filepathSourceImg, ImageType = next((item["FilePathSourceImg"], 
+                                                         item["ImageType"])for item in roiData if item["objID"] == d['basedon_ROI_OBJID'])
+                        # add new entry to the tumorData dictionary --> 
+                        # the image path on which the segmentation was based
+                        foundData.append({
+                                        'PatientID' : obj.HEPAVISION_INFO.PATIENT.PID.cdata,
+                                        'PatientInitials': patientInitials,
+                                        'Clinic' : clinic,
+                                        'PathXML' : xmlFilePathName,
+                                        'PathDicomTumor': d['PathDicomTumor'],
+                                        'PathTiffTumor': d['PathTiffTumor'],
+                                        'PathDicomSource':  os.path.join(dirname, filepathSourceImg),
+                                        'ImageType' : ImageType,
+                                        'TumorTitle': d['TumorTitle']
+                                    })
             except Exception:
                 print('XML file structure problem:',xmlFilePathName)
 
