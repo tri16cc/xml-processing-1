@@ -16,9 +16,7 @@ import pandas as pd
 import untangle as ut
 
 
-
-srvPath = '\\\\cochlea.artorg.unibe.ch\IGT\Projects\LIVER\_Clinical_Data\Laparoscopic_Liver_Surgery'
-print('searching in ', srvPath)
+srvPath = '\\\\cochlea.artorg.unibe.ch\IGT\Projects\LIVER\_Clinical_Data\Interventions'
 foundData = []
 
 for dirname, dirnames, filenames in os.walk(srvPath):
@@ -59,7 +57,7 @@ for dirname, dirnames, filenames in os.walk(srvPath):
                                 # add all the tumor data to a new list
                                 if 'tumor'.casefold() in res.cdata.casefold() or \
                                 'Metastas'.casefold() in res.cdata.casefold() or \
-                                'cyst'.casefold() in res.cdata.casefold():
+                                'Cyst'.casefold() in res.cdata.casefold():
                                    # remove the "./" in front of the filename
                                     filenameTumor = res.FILENAME.cdata[2:]
                                     # the TIFF contains the binary image mask
@@ -70,36 +68,40 @@ for dirname, dirnames, filenames in os.walk(srvPath):
                                             'PathTiffTumor':  os.path.join(dirname, filenameTumor[:-4]+'.tif'),
                                             'basedon_ROI_OBJID': res.BASED_ON.cdata
                                             })
-
+    
                         except Exception:
-                            print('')
+                            print('result data not found in roi:',xmlFilePathName)
                             
                     if k>1:  print('Tumors found:',str(k))
-
-                    for i, d in enumerate(tumorData):
-                        # iterate through the list of dict ROIs to find segmentation source based on OBJ_ID
-                        filepathSourceImg, ImageType = next((item["FilePathSourceImg"], 
-                                                         item["ImageType"])for item in roiData if item["objID"] == d['basedon_ROI_OBJID'])
-                        # add new entry to the tumorData dictionary --> 
-                        # the image path on which the segmentation was based
-                        foundData.append({
-                                        'PatientID' : obj.HEPAVISION_INFO.PATIENT.PID.cdata,
-                                        'PatientInitials': patientInitials,
-                                        'Clinic' : clinic,
-                                        'PathXML' : xmlFilePathName,
-                                        'PathDicomTumor': d['PathDicomTumor'],
-                                        'PathTiffTumor': d['PathTiffTumor'],
-                                        'PathDicomSource':  os.path.join(dirname, filepathSourceImg),
-                                        'ImageType' : ImageType,
-                                        'TumorTitle': d['TumorTitle']
-                                    })
+    
+                for i, d in enumerate(tumorData):
+                    # iterate through the list of dict ROIs to find segmentation source based on OBJ_ID
+                    filepathSourceImg, ImageType = next((item["FilePathSourceImg"], 
+                                                     item["ImageType"])for item in roiData if item["objID"] == d['basedon_ROI_OBJID'])
+                    # add new entry to the tumorData dictionary --> 
+                    # the image path on which the segmentation was based
+                    foundData.append({
+                                    'PatientID' : obj.HEPAVISION_INFO.PATIENT.PID.cdata,
+                                    'PatientInitials': patientInitials,
+                                    'Clinic' : clinic,
+                                    'PathXML' : xmlFilePathName,
+                                    'PathDicomTumor': d['PathDicomTumor'],
+                                    'PathTiffTumor': d['PathTiffTumor'],
+                                    'PathDicomSource':  os.path.join(dirname, filepathSourceImg),
+                                    'ImageType' : ImageType,
+                                    'TumorTitle': d['TumorTitle']
+                                })
             except Exception:
                 print('XML file structure problem:',xmlFilePathName)
 
 #%%
-
 df = pd.DataFrame(foundData)  # convert list of dicts to pandas dataframe
 timestr = time.strftime("%Y%m%d-%H%M%S")
-filename = '3DMevisSegmentationMasks_' + timestr + '.xlsx'
-writer = pd.ExcelWriter(filename)
-df.to_excel(writer,sheet_name='MevisFilepaths', index=False)
+filenameExcel = '3DMevisSegmentationMasks.csv'
+#writer = pd.ExcelWriter(filenameExcel)
+#df.to_excel(writer,sheet_name='MevisFilepaths', index=False)
+# might need to change to param "constant memory" for perfomance matters
+# workbook = xlsxwriter.Workbook(filename, {'constant_memory': True})
+
+with open(filenameExcel, 'a') as f:
+    df.to_csv(f, header=False)
