@@ -9,6 +9,8 @@
 
 import SimpleITK as sitk
 import numpy as np
+from medpy import metric
+from surface import Surface
 #import dicom
 #import scipy
 #import scipy.misc
@@ -106,7 +108,28 @@ overlap_results[0,OverlapMeasures.volume_similarity.value] = overlap_measures_fi
 overlap_results[0,OverlapMeasures.false_negative.value] = overlap_measures_filter.GetFalseNegativeError()
 overlap_results[0,OverlapMeasures.false_positive.value] = overlap_measures_filter.GetFalsePositiveError()
 
+#%% 
+''' More Overlap Metrics'''
+'''Relative Volume Difference'''
+volscores = {}
+ref = sitk.GetArrayFromImage(image)
+seg = sitk.GetArrayFromImage(segmentation)
+volscores['rvd'] = metric.ravd(seg, ref)
+volscores['dice'] = metric.dc(seg,ref)
+volscores['jaccard'] = metric.binary.jc(seg,ref)
+volscores['voe'] = 1. - volscores['jaccard']
 
+vxlspacing = np.asarray(segmentation.GetSpacing()) # assuming both segmentation and image have the same spacing
+#[1.0,0.845703125,0.845703125]
+
+if np.count_nonzero(seg) ==0 or np.count_nonzero(ref)==0:
+		volscores['assd'] = 0
+		volscores['msd'] = 0
+else:
+    
+		evalsurf = Surface(seg,ref, physical_voxel_spacing = vxlspacing , mask_offset = [0.,0.,0.], reference_offset = [0.,0.,0.])
+		volscores['assd'] = evalsurf.get_average_symmetric_surface_distance()
+		volscores['msd'] = metric.hd(ref,seg,voxelspacing=vxlspacing)
 # In[168]:
 
 # Hausdorff distance
@@ -142,11 +165,15 @@ overlap_results_df = pd.DataFrame(data=overlap_results, index = list(range(1)),
 surface_distance_results_df = pd.DataFrame(data=surface_distance_results, index = list(range(1)), 
                                   columns=[name for name, _ in SurfaceDistanceMeasures.__members__.items()]) 
 
+seg_quality_results_df = pd.DataFrame(data=volscores, index = list(range(1)), 
+                                  columns=[name for name, _ in volscores.items()]) 
+
 # Display the data as HTML tables and graphs
 display(HTML(overlap_results_df.to_html(float_format=lambda x: '%.3f' % x)))
 display(HTML(surface_distance_results_df.to_html(float_format=lambda x: '%.3f' % x)))
+display(HTML(seg_quality_results_df.to_html(float_format=lambda x: '%.3f' % x)))
 overlap_results_df.plot(kind='bar').legend(bbox_to_anchor=(1.6,0.9))
 surface_distance_results_df.plot(kind='bar').legend(bbox_to_anchor=(1.6,0.9))
-
+seg_quality_results_df.plot(kind='bar').legend(bbox_to_anchor=(1.6,0.9))
 
 #%%
