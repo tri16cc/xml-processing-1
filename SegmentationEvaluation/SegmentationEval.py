@@ -166,7 +166,7 @@ for idx, seg in enumerate(segmentations):
     
     # In[169]:
     
-    #np.set_printoptions(precision=3)
+#    np.set_printoptions(precision=3)
     #print(overlap_results)
     #print(surface_distance_results)
     
@@ -182,6 +182,8 @@ for idx, seg in enumerate(segmentations):
     
     metrics_all = pd.concat([overlap_results_df, surface_distance_results_df], axis=1)
     df_metrics = df_metrics.append(metrics_all)
+    df_metrics.index = list(range(len(df_metrics)))
+
     #
     #seg_quality_results_df = pd.DataFrame(data=volscores, index = list(range(1)), 
     #                                  columns=[name for name, _ in volscores.items()]) 
@@ -196,10 +198,12 @@ for idx, seg in enumerate(segmentations):
     #%% 
     '''edit axis limits & labels '''
     ''' save plots'''
+    # TO DO
 #%%
 ''' save to excel '''
-
 df_final = pd.concat([df_patientdata, df_metrics], axis=1)
 filename = 'SegmentationMetrics_4Subjects'  + '.xlsx' 
 writer = pd.ExcelWriter(filename)
-df_final.to_excel(writer, index=False)
+df_final.to_excel(writer, index=False, float_format='%.2f')
+
+angle_value = float("{0:.2f}".format(angle_degrees))
