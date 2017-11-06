@@ -1,37 +1,26 @@
 
 # coding: utf-8
 
-# # Segmentation Evaluation In Python
+# # Segmentation Evaluation In Python - metrics for volume overlap
 
 # Raluca Sandu November 2017
 
-# In[157]:
-
-import SimpleITK as sitk
-import numpy as np
-from medpy import metric
-from surface import Surface
-from enum import Enum
-import pandas as pd
-from IPython.display import display, HTML 
+#%% Libraries Import
 import os
-#import dicom
-#import scipy
-#import scipy.misc
-
+import numpy as np
+import pandas as pd
+from enum import Enum
+from medpy import metric
+import SimpleITK as sitk
+from surface import Surface
 import matplotlib.pyplot as plt
-#get_ipython().magic('matplotlib inline')
-#from ipywidgets import interact, fixed
-
-# Utility Display for Segmentation Visualization
-
-# In[158]:
-
+from IPython.display import display, HTML 
+# %%
 def display_with_overlay(slice_number, image, segs, window_min, window_max):
     
     """
     Display a CT slice with segmented contours overlaid onto it. The contours are the edges of 
-    the labeled regions.
+    the labeled regions. Only works in Jupyter Notebook
     """
     img = image[:,:,slice_number]
     msk = segs[:,:,slice_number]
@@ -47,26 +36,43 @@ def display_with_overlay(slice_number, image, segs, window_min, window_max):
     plt.axis('off')
     plt.show()
 #%%
-''' Volume Overlap measures'''
-''' Surface Distance Measures'''
+''' Volume Overlap measures:
+    - Dice (itk)
+    - Jaccard (itk)
+    - Volumetric Similarity (itk)
+    - Volumetric Overlap Error (voe) - @package medpy.metric.surface by Oskar Maier. calls function "surface.py"
+    - Relative Volume Difference (rvd) - Volumetric Overlap Error (voe) - @package medpy.metric.surface by Oskar Maier. calls function "surface.py"
 
+'''
+''' Surface Distance Measures:
+     - Maximum Surface Distance (which might be hausdorff need to check) - itk
+     - Hausdorff Distance - itk
+     - Mean Surface Distance - itk
+     - Median Surface Distance - itk
+     - rmsd : root mean square symmetric surface distance [mm] -  @package medpy.metric.surface by Oskar Maier. calls function "surface.py"
+     - assd:  average symmetric surface distance [mm] - -  @package medpy.metric.surface by Oskar Maier. calls function "surface.py"
+'''
 # Use enumerations to represent the various evaluation measures
+# very stupid way to do it atm, change it later
 class OverlapMeasures(Enum):
      dice, jaccard, volume_similarity, volumetric_overlap_error, relative_vol_difference = range(5)
 
 class SurfaceDistanceMeasures(Enum):
     max_surface_distance, hausdorff_distance, rmsd, assd,  mean_surface_distance, median_surface_distance = range(6)
 
-
 #%% 
-'''Read Segmentations and their Respective Ablation Zone'''
+'''Read Segmentations and their Respective Ablation Zone
+    Assumes both maks are isotropic (have the same number of slices).
+    Foreground value label = 255 [white] and is considered to be the object of interest.
+    Background object = 0
+    
+    --- This function requieres a root directory filepath that contains segmnations of ablations and tumors.
+        it assumes the parent directory is named after the patient name/id
+        Input : rootdirectory filepath
+        Output: dataframe containing filepaths of segmentations and ablations for a specific patient.    
+'''
 
-segmentation_data = []
-df_metrics = pd.DataFrame()
-
-#image = sitk.ReadImage("tumor", sitk.sitkUInt8)
-#
-#segmentation =  sitk.ReadImage("ablation",sitk.sitkUInt8)
+segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 
 rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/segm2/"
 
@@ -92,66 +98,66 @@ for subdir, dirs, files in os.walk(rootdir):
                 }
         segmentation_data.append(data)  
 
+# convert to data frame 
 df_patientdata = pd.DataFrame(segmentation_data)
+df_metrics = pd.DataFrame() # emtpy dataframe to append the segmentation metrics calculated
 
-#%%
 ablations = df_patientdata['AblationFile'].tolist()
 segmentations = df_patientdata['TumorFile'].tolist()
+
+#%%
 
 for idx, seg in enumerate(segmentations):
     image = sitk.ReadImage(seg, sitk.sitkUInt8)
     segmentation =  sitk.ReadImage(ablations[idx],sitk.sitkUInt8)
 
-    #%%
-    
-    # Empty numpy arrays to hold the results 
+    '''init vectors (size) that will contain the volume and distance metrics'''
+    '''init the OverlapMeasures Image Filter and the HausdorffDistance Image Filter from Simple ITK'''
+
     overlap_results = np.zeros((1,len(OverlapMeasures.__members__.items())))  
     surface_distance_results = np.zeros((1,len(SurfaceDistanceMeasures.__members__.items())))  
     
     overlap_measures_filter = sitk.LabelOverlapMeasuresImageFilter()
-    
     hausdorff_distance_filter = sitk.HausdorffDistanceImageFilter()
     
-    
-    # In[166]:
-    reference_segmentation = image
+    reference_segmentation = image # the refenrence image in this case is the tumor mask
+    label = 255
+    # init signed mauerer distance as reference metrics
     reference_distance_map = sitk.Abs(sitk.SignedMaurerDistanceMap(reference_segmentation, squaredDistance=False))
     label_intensity_statistics_filter = sitk.LabelIntensityStatisticsImageFilter()
-    label = 255
-    
-    
-    
-    #%% 
-    ''' More Overlap Metrics'''
-    '''Relative Volume Difference'''
+ 
+    ''' Calculate Overlap Metrics'''
     volscores = {}
-    ref = sitk.GetArrayFromImage(image)
+    ref = sitk.GetArrayFromImage(image) # convert the sitk image to numpy array 
     seg = sitk.GetArrayFromImage(segmentation)
     volscores['rvd'] = metric.ravd(seg, ref)
     volscores['dice'] = metric.dc(seg,ref)
     volscores['jaccard'] = metric.binary.jc(seg,ref)
     volscores['voe'] = 1. - volscores['jaccard']
+   
+    ''' Calculate Surface Distance Metrics'''
+    if segmentation.GetSpacing() != image.GetSpacing():
+        print('The Spacing between slices is different between the segmentation and reference image')
+    else:
+        vxlspacing = np.asarray(segmentation.GetSpacing()) # assuming both segmentation and image have the same spacing
     
-    vxlspacing = np.asarray(segmentation.GetSpacing()) # assuming both segmentation and image have the same spacing
-    #[1.0,0.845703125,0.845703125]
-    
-    if np.count_nonzero(seg) ==0 or np.count_nonzero(ref)==0:
+    if np.count_nonzero(seg)==0 or np.count_nonzero(ref)==0:
     		volscores['assd'] = 0
     		volscores['msd'] = 0 ; volscores['rmsd'] = 0
     else:
-        
     		evalsurf = Surface(seg,ref, physical_voxel_spacing = vxlspacing , mask_offset = [0.,0.,0.], reference_offset = [0.,0.,0.])
     		volscores['assd'] = evalsurf.get_average_symmetric_surface_distance(); volscores['rmsd'] = evalsurf.get_root_mean_square_symmetric_surface_distance()
     		volscores['msd'] = metric.hd(ref,seg,voxelspacing=vxlspacing)
         
-    #%%
-    # Volume Overlap Metrics
+
+    ''' Add the Volume Overlap Metrics in the Enum vector '''
     overlap_measures_filter.Execute(reference_segmentation, segmentation)
     overlap_results[0,OverlapMeasures.jaccard.value] = overlap_measures_filter.GetJaccardCoefficient()
     overlap_results[0,OverlapMeasures.dice.value] = overlap_measures_filter.GetDiceCoefficient()
     overlap_results[0,OverlapMeasures.volume_similarity.value] = overlap_measures_filter.GetVolumeSimilarity()
     overlap_results[0,OverlapMeasures.volumetric_overlap_error.value] = volscores['voe']
     overlap_results[0,OverlapMeasures.relative_vol_difference.value] = volscores['rvd'] 
+    ''' Add the Surface Distance Metrics in the Enum vector '''
     # Hausdorff distance
     hausdorff_distance_filter.Execute(reference_segmentation, segmentation)
     surface_distance_results[0,SurfaceDistanceMeasures.hausdorff_distance.value] = hausdorff_distance_filter.GetHausdorffDistance()
@@ -163,17 +169,8 @@ for idx, seg in enumerate(segmentations):
     surface_distance_results[0,SurfaceDistanceMeasures.rmsd.value] = volscores['rmsd']
     surface_distance_results[0,SurfaceDistanceMeasures.assd.value] = volscores['assd']
     surface_distance_results[0,SurfaceDistanceMeasures.max_surface_distance.value] = label_intensity_statistics_filter.GetMaximum(label)
-    
-    # In[169]:
-    
-#    np.set_printoptions(precision=3)
-    #print(overlap_results)
-    #print(surface_distance_results)
-    
-    # In[170]:
-    
-    
-    # Graft our results matrix into pandas data frames 
+
+    ''' Graft our results matrix into pandas data frames '''
     overlap_results_df = pd.DataFrame(data=overlap_results, index = list(range(1)), 
                                       columns=[name for name, _ in OverlapMeasures.__members__.items()])
      
@@ -184,11 +181,7 @@ for idx, seg in enumerate(segmentations):
     df_metrics = df_metrics.append(metrics_all)
     df_metrics.index = list(range(len(df_metrics)))
 
-    #
-    #seg_quality_results_df = pd.DataFrame(data=volscores, index = list(range(1)), 
-    #                                  columns=[name for name, _ in volscores.items()]) 
-    
-    # Display the data as HTML tables and graphs
+    # Display the data as HTML tables and graphs - why?? probably not necessary 
     display(HTML(overlap_results_df.to_html(float_format=lambda x: '%.3f' % x)))
     display(HTML(surface_distance_results_df.to_html(float_format=lambda x: '%.3f' % x)))
     overlap_results_df.plot(kind='bar').legend(bbox_to_anchor=(1.6,0.9))
@@ -198,6 +191,7 @@ for idx, seg in enumerate(segmentations):
     #%% 
     '''edit axis limits & labels '''
     ''' save plots'''
+    
     # TO DO
 #%%
 ''' save to excel '''
@@ -206,4 +200,3 @@ filename = 'SegmentationMetrics_4Subjects'  + '.xlsx'
 writer = pd.ExcelWriter(filename)
 df_final.to_excel(writer, index=False, float_format='%.2f')
 
-angle_value = float("{0:.2f}".format(angle_degrees))
