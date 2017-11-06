@@ -13,6 +13,7 @@ from enum import Enum
 from medpy import metric
 import SimpleITK as sitk
 from surface import Surface
+import graphing as gh
 import matplotlib.pyplot as plt
 from IPython.display import display, HTML 
 # %%
@@ -36,6 +37,30 @@ def display_with_overlay(slice_number, image, segs, window_min, window_max):
     plt.axis('off')
     plt.show()
 #%%
+def plot_v1(data):
+    # Create the figure and axis objects I'll be plotting on
+    fig, ax = plt.subplots()
+
+    # Plot the bars
+    ax.bar(np.arange(len(data)), data, align='center')
+    
+    # Show the 50% mark, which would indicate an equal
+    # number of tasks being completed by the robot and the
+    # human. There are 39 tasks total, so 50% is 19.5
+    ax.hlines(19.5, -0.5, 5.5, linestyle='--', linewidth=1)
+    
+    # Set a reasonable y-axis limit
+    ax.set_ylim(0, 40)
+    
+    # Apply labels to the bars so you know which is which
+    ax.set_xticks(np.arange(len(data)))
+    ax.set_xticklabels(["\n".join(x) for x in data.index])
+    
+    return fig, ax
+
+
+
+#%%
 ''' Volume Overlap measures:
     - Dice (itk)
     - Jaccard (itk)
@@ -58,7 +83,7 @@ class OverlapMeasures(Enum):
      dice, jaccard, volume_similarity, volumetric_overlap_error, relative_vol_difference = range(5)
 
 class SurfaceDistanceMeasures(Enum):
-    max_surface_distance, hausdorff_distance, rmsd, assd,  mean_surface_distance, median_surface_distance = range(6)
+    max_surface_distance, hausdorff_distance, rmsd, assd, median_surface_distance = range(5)
 
 #%% 
 '''Read Segmentations and their Respective Ablation Zone
@@ -104,7 +129,7 @@ df_metrics = pd.DataFrame() # emtpy dataframe to append the segmentation metrics
 
 ablations = df_patientdata['AblationFile'].tolist()
 segmentations = df_patientdata['TumorFile'].tolist()
-
+pats = df_patientdata['PatientName']
 #%%
 
 for idx, seg in enumerate(segmentations):
@@ -164,7 +189,7 @@ for idx, seg in enumerate(segmentations):
     # Surface distance measures
     segmented_surface = sitk.LabelContour(segmentation)
     label_intensity_statistics_filter.Execute(segmented_surface, reference_distance_map)
-    surface_distance_results[0,SurfaceDistanceMeasures.mean_surface_distance.value] = label_intensity_statistics_filter.GetMean(label)
+#    surface_distance_results[0,SurfaceDistanceMeasures.mean_surface_distance.value] = label_intensity_statistics_filter.GetMean(label)
     surface_distance_results[0,SurfaceDistanceMeasures.median_surface_distance.value] = label_intensity_statistics_filter.GetMedian(label)
     surface_distance_results[0,SurfaceDistanceMeasures.rmsd.value] = volscores['rmsd']
     surface_distance_results[0,SurfaceDistanceMeasures.assd.value] = volscores['assd']
@@ -182,17 +207,32 @@ for idx, seg in enumerate(segmentations):
     df_metrics.index = list(range(len(df_metrics)))
 
     # Display the data as HTML tables and graphs - why?? probably not necessary 
-    display(HTML(overlap_results_df.to_html(float_format=lambda x: '%.3f' % x)))
-    display(HTML(surface_distance_results_df.to_html(float_format=lambda x: '%.3f' % x)))
-    overlap_results_df.plot(kind='bar').legend(bbox_to_anchor=(1.6,0.9))
-    surface_distance_results_df.plot(kind='bar').legend(bbox_to_anchor=(1.6,0.9))
-    
-    
+#    display(HTML(overlap_results_df.to_html(float_format=lambda x: '%.3f' % x)))
+#    display(HTML(surface_distance_results_df.to_html(float_format=lambda x: '%.3f' % x)))
+
+    overlap_results_df.columns = ['Dice', 'Jaccard', 'Volume Similarity', 'Volumetric Overlap Error', 'Relative Volume Difference']
+    overlap_results_df.plot(kind='bar')
+    plt.axhline(0, color='k')
+    plt.ylim((-1.0,1.0))
     #%% 
     '''edit axis limits & labels '''
     ''' save plots'''
+ 
+    figName_vol = pats[idx] + 'volumeMetrics'
+    figpath1 = os.path.join(rootdir, figName_vol)
+    plt.title('Volumetric Overlap Metrics Tumor vs. Ablation. Patient ' + str(idx+1))
+    gh.save(figpath1,width=12, height=10)
     
-    # TO DO
+    
+    figName_distance = pats[idx] + 'distanceMetrics'
+    figpath2 = os.path.join(rootdir, figName_distance)
+    surface_distance_results_df.columns = ['Maximum Surface Distance', 'Hausdorff Distance', 'Root Mean Square Symmetric Distance ', 'Average Symmetric Distance', 'Median Surface Distance']
+    surface_distance_results_df.plot(kind='bar')
+    plt.ylabel('[mm]')
+    plt.axhline(0, color='k')
+    plt.ylim((0,40))
+    plt.title('Surface Distance Metrics Tumor vs. Ablation. Patient ' + str(idx+1))
+    gh.save(figpath2,width=12, height=10)
 #%%
 ''' save to excel '''
 df_final = pd.concat([df_patientdata, df_metrics], axis=1)
