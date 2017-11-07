@@ -15,6 +15,9 @@ import SimpleITK as sitk
 from surface import Surface
 import graphing as gh
 import matplotlib.pyplot as plt
+#plt.style.use('ggplot')
+#plt.style.use('seaborn')
+#print(plt.style.available)
 from IPython.display import display, HTML 
 # %%
 def display_with_overlay(slice_number, image, segs, window_min, window_max):
@@ -201,42 +204,52 @@ for idx, seg in enumerate(segmentations):
      
     surface_distance_results_df = pd.DataFrame(data=surface_distance_results, index = list(range(1)), 
                                       columns=[name for name, _ in SurfaceDistanceMeasures.__members__.items()]) 
-    
+    #change col names 
+    overlap_results_df.columns = ['Dice', 'Jaccard', 'Volume Similarity', 'Volume Overlap Error', 'Relative Volume Difference']
+    surface_distance_results_df.columns = ['Maximum Surface Distance', 'Hausdorff Distance', 'Root Mean Square Distance ', 'Average Distance', 'Median Distance']
     metrics_all = pd.concat([overlap_results_df, surface_distance_results_df], axis=1)
     df_metrics = df_metrics.append(metrics_all)
     df_metrics.index = list(range(len(df_metrics)))
 
-    # Display the data as HTML tables and graphs - why?? probably not necessary 
-#    display(HTML(overlap_results_df.to_html(float_format=lambda x: '%.3f' % x)))
-#    display(HTML(surface_distance_results_df.to_html(float_format=lambda x: '%.3f' % x)))
 
-    overlap_results_df.columns = ['Dice', 'Jaccard', 'Volume Similarity', 'Volumetric Overlap Error', 'Relative Volume Difference']
-    overlap_results_df.plot(kind='bar')
-    plt.axhline(0, color='k')
-    plt.ylim((-1.0,1.0))
+  
     #%% 
     '''edit axis limits & labels '''
     ''' save plots'''
- 
     figName_vol = pats[idx] + 'volumeMetrics'
     figpath1 = os.path.join(rootdir, figName_vol)
+    fig, ax = plt.subplots()
+    dfVolT = overlap_results_df.T
+    color = plt.cm.Dark2(np.arange(len(dfVolT))) # create colormap
+    dfVolT.plot(kind='bar', rot=15, legend=False, ax=ax, color=color)
+    plt.axhline(0, color='k')
+    plt.ylim((-1.0,1.0))
+    plt.tick_params(labelsize=12)
     plt.title('Volumetric Overlap Metrics Tumor vs. Ablation. Patient ' + str(idx+1))
+    plt.rc('figure', titlesize=25) 
     gh.save(figpath1,width=12, height=10)
     
     
     figName_distance = pats[idx] + 'distanceMetrics'
     figpath2 = os.path.join(rootdir, figName_distance)
-    surface_distance_results_df.columns = ['Maximum Surface Distance', 'Hausdorff Distance', 'Root Mean Square Symmetric Distance ', 'Average Symmetric Distance', 'Median Surface Distance']
-    surface_distance_results_df.plot(kind='bar')
+    # transpose DataFrame to set column names as index for easy plotting into columns
+    dfDistT = surface_distance_results_df.T
+    color = plt.cm.Dark2(np.arange(len( dfDistT))) # create colormap
+    fig, ax = plt.subplots()
+    dfDistT.plot(kind='bar',rot=15, legend=False, ax=ax, color=color)
     plt.ylabel('[mm]')
     plt.axhline(0, color='k')
-    plt.ylim((0,40))
+    plt.ylim((0,35))
     plt.title('Surface Distance Metrics Tumor vs. Ablation. Patient ' + str(idx+1))
+    plt.tick_params(labelsize=12)
+    plt.rc('figure', titlesize=25) 
+    # plot legend outside: bbox_to_anchor=(1, 0.5)
     gh.save(figpath2,width=12, height=10)
+    
 #%%
 ''' save to excel '''
-df_final = pd.concat([df_patientdata, df_metrics], axis=1)
-filename = 'SegmentationMetrics_4Subjects'  + '.xlsx' 
-writer = pd.ExcelWriter(filename)
-df_final.to_excel(writer, index=False, float_format='%.2f')
+#df_final = pd.concat([df_patientdata, df_metrics], axis=1)
+#filename = 'SegmentationMetrics_4Subjects'  + '.xlsx' 
+#writer = pd.ExcelWriter(filename)
+#df_final.to_excel(writer, index=False, float_format='%.2f')
 
