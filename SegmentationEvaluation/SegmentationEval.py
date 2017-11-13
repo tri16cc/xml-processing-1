@@ -12,6 +12,7 @@ import pandas as pd
 from enum import Enum
 from medpy import metric
 import SimpleITK as sitk
+from scipy import ndimage
 from surface import Surface
 import graphing as gh
 import matplotlib.pyplot as plt
@@ -39,29 +40,6 @@ def display_with_overlay(slice_number, image, segs, window_min, window_max):
     plt.imshow(sitk.GetArrayViewFromImage(overlay_img))
     plt.axis('off')
     plt.show()
-#%%
-def plot_v1(data):
-    # Create the figure and axis objects I'll be plotting on
-    fig, ax = plt.subplots()
-
-    # Plot the bars
-    ax.bar(np.arange(len(data)), data, align='center')
-    
-    # Show the 50% mark, which would indicate an equal
-    # number of tasks being completed by the robot and the
-    # human. There are 39 tasks total, so 50% is 19.5
-    ax.hlines(19.5, -0.5, 5.5, linestyle='--', linewidth=1)
-    
-    # Set a reasonable y-axis limit
-    ax.set_ylim(0, 40)
-    
-    # Apply labels to the bars so you know which is which
-    ax.set_xticks(np.arange(len(data)))
-    ax.set_xticklabels(["\n".join(x) for x in data.index])
-    
-    return fig, ax
-
-
 
 #%%
 ''' Volume Overlap measures:
@@ -86,7 +64,7 @@ class OverlapMeasures(Enum):
      dice, jaccard, volume_similarity, volumetric_overlap_error, relative_vol_difference = range(5)
 
 class SurfaceDistanceMeasures(Enum):
-    max_surface_distance, hausdorff_distance, rmsd, assd, median_surface_distance = range(5)
+    max_surface_distance, hausdorff_distance, mean_symmetric_surface_distance, median_symmetric_surface_distance, std_deviation = range(5)
 
 #%% 
 '''Read Segmentations and their Respective Ablation Zone
@@ -102,16 +80,16 @@ class SurfaceDistanceMeasures(Enum):
 
 segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 
-rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/segm2/"
+rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/StudyPatientsMasks/"
 
 for subdir, dirs, files in os.walk(rootdir):
     tumorFilePath  = ''
     ablationSegm = ''
     for file in files:
-        if file == "tumorSegm":
+        if file == "ablationSegm_aligned":
             FilePathName = os.path.join(subdir, file)
             tumorFilePath = os.path.normpath(FilePathName)
-        elif file == "ablationSegm":
+        elif file == "predictedSegm_aligned":
             FilePathName = os.path.join(subdir, file)
             ablationFilePath = os.path.normpath(FilePathName)
         else:
@@ -137,7 +115,7 @@ pats = df_patientdata['PatientName']
 
 for idx, seg in enumerate(segmentations):
     image = sitk.ReadImage(seg, sitk.sitkUInt8)
-    segmentation =  sitk.ReadImage(ablations[idx],sitk.sitkUInt8)
+    segmentation = sitk.ReadImage(ablations[idx],sitk.sitkUInt8)
 
     '''init vectors (size) that will contain the volume and distance metrics'''
     '''init the OverlapMeasures Image Filter and the HausdorffDistance Image Filter from Simple ITK'''
@@ -151,7 +129,7 @@ for idx, seg in enumerate(segmentations):
     reference_segmentation = image # the refenrence image in this case is the tumor mask
     label = 255
     # init signed mauerer distance as reference metrics
-    reference_distance_map = sitk.Abs(sitk.SignedMaurerDistanceMap(reference_segmentation, squaredDistance=False))
+    reference_distance_map = sitk.SignedMaurerDistanceMap(reference_segmentation, squaredDistance=False, useImageSpacing=True)
     label_intensity_statistics_filter = sitk.LabelIntensityStatisticsImageFilter()
  
     ''' Calculate Overlap Metrics'''
@@ -175,8 +153,7 @@ for idx, seg in enumerate(segmentations):
     else:
     		evalsurf = Surface(seg,ref, physical_voxel_spacing = vxlspacing , mask_offset = [0.,0.,0.], reference_offset = [0.,0.,0.])
     		volscores['assd'] = evalsurf.get_average_symmetric_surface_distance(); volscores['rmsd'] = evalsurf.get_root_mean_square_symmetric_surface_distance()
-    		volscores['msd'] = metric.hd(ref,seg,voxelspacing=vxlspacing)
-        
+    		volscores['msd'] = metric.hd(ref,seg,voxelspacing=vxlspacing)    
 
     ''' Add the Volume Overlap Metrics in the Enum vector '''
     overlap_measures_filter.Execute(reference_segmentation, segmentation)
@@ -186,16 +163,20 @@ for idx, seg in enumerate(segmentations):
     overlap_results[0,OverlapMeasures.volumetric_overlap_error.value] = volscores['voe']
     overlap_results[0,OverlapMeasures.relative_vol_difference.value] = volscores['rvd'] 
     ''' Add the Surface Distance Metrics in the Enum vector '''
-    # Hausdorff distance
-    hausdorff_distance_filter.Execute(reference_segmentation, segmentation)
-    surface_distance_results[0,SurfaceDistanceMeasures.hausdorff_distance.value] = hausdorff_distance_filter.GetHausdorffDistance()
+ 
     # Surface distance measures
     segmented_surface = sitk.LabelContour(segmentation)
     label_intensity_statistics_filter.Execute(segmented_surface, reference_distance_map)
-#    surface_distance_results[0,SurfaceDistanceMeasures.mean_surface_distance.value] = label_intensity_statistics_filter.GetMean(label)
-    surface_distance_results[0,SurfaceDistanceMeasures.median_surface_distance.value] = label_intensity_statistics_filter.GetMedian(label)
-    surface_distance_results[0,SurfaceDistanceMeasures.rmsd.value] = volscores['rmsd']
-    surface_distance_results[0,SurfaceDistanceMeasures.assd.value] = volscores['assd']
+    # currently surface library is acting weird
+#    surface_distance_results[0,SurfaceDistanceMeasures.rmsd.value] = volscores['rmsd']
+#    surface_distance_results[0,SurfaceDistanceMeasures.assd.value] = volscores['assd']
+
+      # Hausdorff distance
+    hausdorff_distance_filter.Execute(reference_segmentation, segmentation)
+    surface_distance_results[0,SurfaceDistanceMeasures.hausdorff_distance.value] = hausdorff_distance_filter.GetHausdorffDistance()
+    surface_distance_results[0,SurfaceDistanceMeasures.mean_symmetric_surface_distance.value] = label_intensity_statistics_filter.GetMean(label)
+    surface_distance_results[0,SurfaceDistanceMeasures.median_symmetric_surface_distance.value] = label_intensity_statistics_filter.GetMedian(label)
+    surface_distance_results[0,SurfaceDistanceMeasures.std_deviation.value] = label_intensity_statistics_filter.GetStandardDeviation(label)
     surface_distance_results[0,SurfaceDistanceMeasures.max_surface_distance.value] = label_intensity_statistics_filter.GetMaximum(label)
 
     ''' Graft our results matrix into pandas data frames '''
@@ -204,15 +185,15 @@ for idx, seg in enumerate(segmentations):
      
     surface_distance_results_df = pd.DataFrame(data=surface_distance_results, index = list(range(1)), 
                                       columns=[name for name, _ in SurfaceDistanceMeasures.__members__.items()]) 
+    
+   
     #change col names 
     overlap_results_df.columns = ['Dice', 'Jaccard', 'Volume Similarity', 'Volume Overlap Error', 'Relative Volume Difference']
-    surface_distance_results_df.columns = ['Maximum Surface Distance', 'Hausdorff Distance', 'Root Mean Square Distance ', 'Average Distance', 'Median Distance']
+    surface_distance_results_df.columns = ['Maximum Surface Distance', 'Hausdorff Distance', 'Average Symmetric Distance ', 'Median Distance', 'Standard Deviation']
     metrics_all = pd.concat([overlap_results_df, surface_distance_results_df], axis=1)
     df_metrics = df_metrics.append(metrics_all)
     df_metrics.index = list(range(len(df_metrics)))
 
-
-  
     #%% 
     '''edit axis limits & labels '''
     ''' save plots'''
@@ -220,36 +201,40 @@ for idx, seg in enumerate(segmentations):
     figpath1 = os.path.join(rootdir, figName_vol)
     fig, ax = plt.subplots()
     dfVolT = overlap_results_df.T
+    plt.style.use('ggplot')
     color = plt.cm.Dark2(np.arange(len(dfVolT))) # create colormap
-    dfVolT.plot(kind='bar', rot=15, legend=False, ax=ax, color=color)
+#    color=color
+    dfVolT.plot(kind='bar', rot=15, legend=False, ax=ax, grid=True)
     plt.axhline(0, color='k')
-    plt.ylim((-1.0,1.0))
+    plt.ylim((-1.5,1.5))
     plt.tick_params(labelsize=12)
-    plt.title('Volumetric Overlap Metrics Tumor vs. Ablation. Patient ' + str(idx+1))
+    plt.title('Volumetric Overlap Metrics. Ablation GT vs. Ablation Estimated ' + str(idx+1))
     plt.rc('figure', titlesize=25) 
     gh.save(figpath1,width=12, height=10)
     
     
     figName_distance = pats[idx] + 'distanceMetrics'
     figpath2 = os.path.join(rootdir, figName_distance)
-    # transpose DataFrame to set column names as index for easy plotting into columns
+    plt.style.use('seaborn')
     dfDistT = surface_distance_results_df.T
     color = plt.cm.Dark2(np.arange(len( dfDistT))) # create colormap
-    fig, ax = plt.subplots()
-    dfDistT.plot(kind='bar',rot=15, legend=False, ax=ax, color=color)
+#    color=color
+    fig1, ax1 = plt.subplots()
+    dfDistT.plot(kind='bar',rot=15, legend=False, ax=ax1, grid=True)
     plt.ylabel('[mm]')
     plt.axhline(0, color='k')
-    plt.ylim((0,35))
-    plt.title('Surface Distance Metrics Tumor vs. Ablation. Patient ' + str(idx+1))
-    plt.tick_params(labelsize=12)
+    plt.ylim((0,25))
+    plt.title('Surface Distance Metrics. Ablation GT vs. Ablation Estimated ' + str(idx+1))
     plt.rc('figure', titlesize=25) 
+    plt.tick_params(labelsize=12)
+#    sns.set_context("talk")
     # plot legend outside: bbox_to_anchor=(1, 0.5)
     gh.save(figpath2,width=12, height=10)
     
 #%%
 ''' save to excel '''
-#df_final = pd.concat([df_patientdata, df_metrics], axis=1)
-#filename = 'SegmentationMetrics_4Subjects'  + '.xlsx' 
-#writer = pd.ExcelWriter(filename)
-#df_final.to_excel(writer, index=False, float_format='%.2f')
+df_final = pd.concat([df_patientdata, df_metrics], axis=1)
+filename = 'SegmentationMetrics_4Subjects'  + '.xlsx' 
+writer = pd.ExcelWriter(filename)
+df_final.to_excel(writer, index=False, float_format='%.2f')
 
