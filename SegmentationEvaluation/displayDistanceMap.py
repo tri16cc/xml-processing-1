@@ -15,7 +15,7 @@ from surface import Surface
 from enum import Enum
 import matplotlib.pyplot as plt
 #plt.style.use('ggplot')
-plt.style.use('seaborn')
+#plt.style.use('classic')
 #print(plt.style.available)
 from IPython.display import display, HTML
 from ipywidgets import interact, fixed
@@ -72,7 +72,7 @@ surface_dists_Medpy = np.zeros((1,len(MedpyMetricDists.__members__.items())))
 segmented_surface = sitk.LabelContour(segmentation)
 
 # init signed mauerer distance as reference metrics
-reference_distance_map = sitk.Abs(sitk.SignedMaurerDistanceMap(reference_segmentation, squaredDistance=False, useImageSpacing=True))
+reference_distance_map = sitk.SignedMaurerDistanceMap(reference_segmentation, squaredDistance=False, useImageSpacing=True)
 
 # init label intensity statistics filter
 label_intensity_statistics_filter = sitk.LabelIntensityStatisticsImageFilter()
@@ -96,6 +96,20 @@ fig, ax= plt.subplots()
 plt.hist(reference_distance_map)
 plt.title('Mauerer Distance Map')
 
+# plt mauerer distance map multiplied with the contour
+segmented_surface_float = sitk.GetArrayFromImage(segmented_surface)
+reference_distance_map_float = sitk.GetArrayFromImage(reference_distance_map)
+dists_to_plot = segmented_surface_float * reference_distance_map_float
+fig1, ax1= plt.subplots()
+z = int(np.floor(np.shape(dists_to_plot)[0]/2))
+plt.imshow(dists_to_plot[z,:,:])
+plt.title(' Distance Map. 1 Slice Visualization')
+
+ix = dists_to_plot.nonzero()
+dists_nonzero = dists_to_plot[ix]
+fig3, ax3 = plt.subplots()
+plt.hist(dists_nonzero/255)
+plt.title('Histogram Mauerer Distances')
 #%%
 # img read as img[z,y,x]
 img_array = sitk.GetArrayFromImage(reference_segmentation)
@@ -122,9 +136,13 @@ surface_distance_SurfacePY_df = pd.DataFrame(data=surface_distance_SurfacePy, in
 
 # compute the hausdorff distances histogram
 dists_refImgtoMask = evalsurf.get_reference_mask_nn()
+dist_maskImgtoRef = evalsurf.get_mask_reference_nn()
 fig1, ax= plt.subplots()
 plt.hist(dists_refImgtoMask)
-plt.title('18-Neighbourhood NN Euclidean Distances')
+plt.title('18-Neighbourhood NN Euclidean Distances. Reference to Mask Distances')
+fig2, ax2 = plt.subplots()
+plt.hist(dist_maskImgtoRef )
+plt.title('18-Neighbourhood NN Euclidean Distances. Mask to References Distances')
 #%% use the MedPy metric library
 
 #msd = metric.hd(ref,seg,voxelspacing=vxlspacing)
@@ -145,9 +163,12 @@ np.set_printoptions(precision=3)
 display(HTML(surface_distance_results_df.to_html(float_format=lambda x: '%.3f' % x)))
 display(HTML(surface_distance_SurfacePY_df.to_html(float_format=lambda x: '%.3f' % x)))
 display(HTML(surface_dists_Medpy_df.to_html(float_format=lambda x: '%.3f' % x)))
-surface_distance_results_df.plot(kind='bar').legend(bbox_to_anchor=(1.6,0.9))
-surface_distance_SurfacePY_df.plot(kind='bar').legend(bbox_to_anchor=(1.6,0.9))
-surface_dists_Medpy_df.plot(kind='bar').legend(bbox_to_anchor=(1.6,0.9))
+surface_distance_results_df.plot(kind='bar').legend(loc='best')
+plt.title('Metrics Computed with Simple ITK')
+surface_distance_SurfacePY_df.plot(kind='bar').legend(loc='best')
+plt.title("Metrics Computed with Surface Py . LITS Challenge")
+surface_dists_Medpy_df.plot(kind='bar').legend(loc='best')
+plt.title("Metrics Computed with MedPy Library")
 #%%
 #interact(display_with_overlay,
 #         slice_number = (0, reference_segmentation .GetSize()[1]-1), image = fixed(reference_segmentation),
