@@ -211,6 +211,7 @@ for PatientIdx, patient in enumerate(patient_unique):
         needleA.append(needleA_lesion)
         needleB.append(needleB_lesion)
         AngleDegrees.append(AngleDegrees_lesion)
+        
 
 # flatten list of lists using nested list comprehension
 
@@ -229,7 +230,8 @@ df_angles = pd.DataFrame(np.column_stack([PatientIdx_all, PatientID_all, LesionN
                                columns=['PatientNr', 'PatientID', 'LesionNr',
                                         'NeedleA', 'NeedleB', 'AngleDegrees'])
         
-        
+df_angles[['AngleDegrees']] = df_angles[['AngleDegrees']].apply(pd.to_numeric)
+
 #%% write to Excel
 '''
 #- convert list_angles to DataFrame type
@@ -238,7 +240,7 @@ df_angles = pd.DataFrame(np.column_stack([PatientIdx_all, PatientID_all, LesionN
 
 ## Write to Excel File
 timestr = time.strftime("%Y%m%d-%H%M%S")
-filename = 'IRE_NeedleInformation_' + timestr + '.xlsx' 
+filename = 'IRE_NeedleInformationv2_' + timestr + '.xlsx' 
 writer = pd.ExcelWriter(filename)
 df_angles.to_excel(writer,sheet_name='IRE_Angles', index=False, na_rep='NaN')
 

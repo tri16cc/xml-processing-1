@@ -86,10 +86,10 @@ for subdir, dirs, files in os.walk(rootdir):
     tumorFilePath  = ''
     ablationSegm = ''
     for file in files:
-        if file == "ablationSegm_aligned":
+        if file == "tumorSegm":
             FilePathName = os.path.join(subdir, file)
             tumorFilePath = os.path.normpath(FilePathName)
-        elif file == "predictedSegm_aligned":
+        elif file == "ablationSegm":
             FilePathName = os.path.join(subdir, file)
             ablationFilePath = os.path.normpath(FilePathName)
         else:
@@ -114,8 +114,8 @@ pats = df_patientdata['PatientName']
 #%%
 
 for idx, seg in enumerate(segmentations):
-    image = sitk.ReadImage(seg, sitk.sitkUInt8)
-    segmentation = sitk.ReadImage(ablations[idx],sitk.sitkUInt8)
+    image = sitk.ReadImage(seg, sitk.sitkUInt8) # reference images
+    segmentation = sitk.ReadImage(ablations[idx],sitk.sitkUInt8) # segmentations to compare to the GT segmentations
 
     '''init vectors (size) that will contain the volume and distance metrics'''
     '''init the OverlapMeasures Image Filter and the HausdorffDistance Image Filter from Simple ITK'''
@@ -141,19 +141,6 @@ for idx, seg in enumerate(segmentations):
     volscores['jaccard'] = metric.binary.jc(seg,ref)
     volscores['voe'] = 1. - volscores['jaccard']
    
-    ''' Calculate Surface Distance Metrics'''
-    if segmentation.GetSpacing() != image.GetSpacing():
-        print('The Spacing between slices is different between the segmentation and reference image')
-    else:
-        vxlspacing = np.asarray(segmentation.GetSpacing()) # assuming both segmentation and image have the same spacing
-    
-    if np.count_nonzero(seg)==0 or np.count_nonzero(ref)==0:
-    		volscores['assd'] = 0
-    		volscores['msd'] = 0 ; volscores['rmsd'] = 0
-    else:
-    		evalsurf = Surface(seg,ref, physical_voxel_spacing = vxlspacing , mask_offset = [0.,0.,0.], reference_offset = [0.,0.,0.])
-    		volscores['assd'] = evalsurf.get_average_symmetric_surface_distance(); volscores['rmsd'] = evalsurf.get_root_mean_square_symmetric_surface_distance()
-    		volscores['msd'] = metric.hd(ref,seg,voxelspacing=vxlspacing)    
 
     ''' Add the Volume Overlap Metrics in the Enum vector '''
     overlap_measures_filter.Execute(reference_segmentation, segmentation)
@@ -167,9 +154,6 @@ for idx, seg in enumerate(segmentations):
     # Surface distance measures
     segmented_surface = sitk.LabelContour(segmentation)
     label_intensity_statistics_filter.Execute(segmented_surface, reference_distance_map)
-    # currently surface library is acting weird
-#    surface_distance_results[0,SurfaceDistanceMeasures.rmsd.value] = volscores['rmsd']
-#    surface_distance_results[0,SurfaceDistanceMeasures.assd.value] = volscores['assd']
 
       # Hausdorff distance
     hausdorff_distance_filter.Execute(reference_segmentation, segmentation)
@@ -187,7 +171,8 @@ for idx, seg in enumerate(segmentations):
                                       columns=[name for name, _ in SurfaceDistanceMeasures.__members__.items()]) 
     
    
-    #change col names 
+  
+    #change DataFrame column names 
     overlap_results_df.columns = ['Dice', 'Jaccard', 'Volume Similarity', 'Volume Overlap Error', 'Relative Volume Difference']
     surface_distance_results_df.columns = ['Maximum Surface Distance', 'Hausdorff Distance', 'Average Symmetric Distance ', 'Median Distance', 'Standard Deviation']
     metrics_all = pd.concat([overlap_results_df, surface_distance_results_df], axis=1)
@@ -208,7 +193,7 @@ for idx, seg in enumerate(segmentations):
     plt.axhline(0, color='k')
     plt.ylim((-1.5,1.5))
     plt.tick_params(labelsize=12)
-    plt.title('Volumetric Overlap Metrics. Ablation GT vs. Ablation Estimated ' + str(idx+1))
+    plt.title('Volumetric Overlap Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(idx+1))
     plt.rc('figure', titlesize=25) 
     gh.save(figpath1,width=12, height=10)
     
@@ -224,7 +209,7 @@ for idx, seg in enumerate(segmentations):
     plt.ylabel('[mm]')
     plt.axhline(0, color='k')
     plt.ylim((0,25))
-    plt.title('Surface Distance Metrics. Ablation GT vs. Ablation Estimated ' + str(idx+1))
+    plt.title('Surface Distance Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(idx+1))
     plt.rc('figure', titlesize=25) 
     plt.tick_params(labelsize=12)
 #    sns.set_context("talk")
@@ -234,7 +219,7 @@ for idx, seg in enumerate(segmentations):
 #%%
 ''' save to excel '''
 df_final = pd.concat([df_patientdata, df_metrics], axis=1)
-filename = 'SegmentationMetrics_4Subjects'  + '.xlsx' 
-writer = pd.ExcelWriter(filename)
+filepathExcel = os.path.join(rootdir, 'SegmentationMetrics_4Subjects.xlsx')
+writer = pd.ExcelWriter(filepathExcel)
 df_final.to_excel(writer, index=False, float_format='%.2f')
 

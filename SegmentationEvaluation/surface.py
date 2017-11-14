@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 
@@ -86,7 +87,7 @@ class Surface(object):
         reference_pts = reference_edge_image.nonzero()
         reference_edge_points = list(zip(reference_pts[0], reference_pts[1], reference_pts[2]))
         
-        # get lenght of the mask_edge_points with iterator for Python 3
+
         len_mask_edge_points = len(mask_edge_points) #sum(1 for _ in mask_edge_points)
         len_reference_edge_points = len( reference_edge_points)
 
@@ -179,6 +180,7 @@ class Surface(object):
         A_B_distances = self.get_mask_reference_nn()
         B_A_distances = self.get_reference_mask_nn()
 
+
         # square the distances
         A_B_distances_sqrt = A_B_distances * A_B_distances
         B_A_distances_sqrt = B_A_distances * B_A_distances
@@ -219,7 +221,7 @@ class Surface(object):
         """
         # get object sizes
         mask_surface_size = len(self.get_mask_edge_points())
-        reference_surface_sice = len(self.get_reference_edge_points())
+        reference_surface_size = len(self.get_reference_edge_points())
 
         # get minimal nearest neighbours distances
         A_B_distances = self.get_mask_reference_nn()
@@ -230,7 +232,7 @@ class Surface(object):
         B_A_distances = B_A_distances.sum()
 
         # compute result and return
-        return 1. / (mask_surface_size + reference_surface_sice) * (A_B_distances + B_A_distances)
+        return 1. / (mask_surface_size + reference_surface_size) * (A_B_distances + B_A_distances)
 
     def get_mask_reference_nn(self):
         """
