@@ -6,21 +6,19 @@ Created on Thu Nov  9 13:43:49 2017
 """
 # libraries import
 
+import math
 import numpy as np
-from medpy import metric
 import pandas as pd
+from medpy import metric
 import SimpleITK as sitk
-#from scipy import ndimage
 from surface import Surface
 from enum import Enum
-import matplotlib.pyplot as plt
 #plt.style.use('ggplot')
 #plt.style.use('classic')
 #print(plt.style.available)
 
 #%%
 class DistanceMetrics(object):
-    
 
     
     def __init__(self,mask, reference):
@@ -28,13 +26,10 @@ class DistanceMetrics(object):
         # image read as img[x,y,z]
         reference_segmentation = sitk.ReadImage(reference, sitk.sitkUInt8)
         segmentation = sitk.ReadImage(mask,sitk.sitkUInt8)
-        print(reference_segmentation.GetSpacing())
-        print(reference_segmentation.GetOrigin())
-        print(reference_segmentation.GetSize())
-        label = 255
+        label_1 = 255
          
         class SurfaceDistanceMeasuresITK(Enum):
-            hausdorff_distance, max_surface_distance, avg_surface_distance, median_surface_distance, std_surfance_distance = range(5)
+            hausdorff_distance, max_surface_distance, avg_surface_distance, symmetric_avg, median_surface_distance, std_surfance_distance = range(6)
         
         # Computes the maximum symmetric surface distance = Hausdorff distance between the two objects surfaces.
         class SurfaceDistanceMeasuresSurfacePy(Enum):
@@ -48,47 +43,44 @@ class DistanceMetrics(object):
         surface_dists_Medpy = np.zeros((1,len(MedpyMetricDists.__members__.items())))
         
         #%%
-        segmented_surface = sitk.LabelContour(segmentation)
+        segmented_surface_mask = sitk.LabelContour(segmentation)
+        segmented_surface_ref = sitk.LabelContour(reference_segmentation)
         
         # init signed mauerer distance as reference metrics
-        reference_distance_map = sitk.Abs(sitk.SignedMaurerDistanceMap(reference_segmentation, squaredDistance=False, useImageSpacing=True))
+        self.reference_distance_map = sitk.Abs(sitk.SignedMaurerDistanceMap(reference_segmentation, squaredDistance=False, useImageSpacing=True))
+        self.mask_distance_map = sitk.Abs(sitk.SignedMaurerDistanceMap(segmentation, squaredDistance=False, useImageSpacing=True))
         
-        # init label intensity statistics filter
+        # init label_1 intensity statistics filter
         label_intensity_statistics_filter = sitk.LabelIntensityStatisticsImageFilter()
-        label_intensity_statistics_filter.Execute(segmented_surface, reference_distance_map)
+        label_intensity_statistics_filter.Execute(segmented_surface_mask, self.reference_distance_map)
         
         hausdorff_distance_filter = sitk.HausdorffDistanceImageFilter()
         hausdorff_distance_filter.Execute(reference_segmentation, segmentation)
 
         surface_distance_results[0,SurfaceDistanceMeasuresITK.hausdorff_distance.value] = hausdorff_distance_filter.GetHausdorffDistance()
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.max_surface_distance.value] = label_intensity_statistics_filter.GetMaximum(label)
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.avg_surface_distance.value] = label_intensity_statistics_filter.GetMean(label)
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.median_surface_distance.value] = label_intensity_statistics_filter.GetMedian(label)
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.std_surfance_distance.value] = label_intensity_statistics_filter.GetStandardDeviation(label)
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.max_surface_distance.value] = label_intensity_statistics_filter.GetMaximum(label_1)
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.avg_surface_distance.value] = label_intensity_statistics_filter.GetMean(label_1)
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.median_surface_distance.value] = label_intensity_statistics_filter.GetMedian(label_1)
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.std_surfance_distance.value] = label_intensity_statistics_filter.GetStandardDeviation(label_1)
         
+        # Compute the average symmetric distance
+        self.n1 = label_intensity_statistics_filter.GetNumberOfPixels(label_1)
+        self.avg_ref = label_intensity_statistics_filter.GetMean(label_1)
+        self.max_ref = label_intensity_statistics_filter.GetMaximum(label_1)
+        # execute the filter from the segmented reference mask to the Mauerer distances map calculated for the mask
+        label_intensity_statistics_filter.Execute(segmented_surface_ref, self.mask_distance_map)
+        self.avg_seg =  label_intensity_statistics_filter.GetMean(label_1)
+        self.max_seg = label_intensity_statistics_filter.GetMaximum(label_1)
+        self.n2 = label_intensity_statistics_filter.GetNumberOfPixels(label_1)
+
+        symmetric_avg = (self.n1*self.avg_ref + self.n2*self.avg_seg)/(self.n1+self.n2)
+        
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.symmetric_avg.value] = symmetric_avg
+
         self.surface_distance_results_df = pd.DataFrame(data=surface_distance_results, index = list(range(1)),
                                       columns=[name for name, _ in SurfaceDistanceMeasuresITK.__members__.items()])
         
-        
-        # mauerer distances from simple itk
-        #fig, ax= plt.subplots()
-        #plt.hist(reference_distance_map)
-        #plt.title('Mauerer Distance Map')
-        
-        # plt mauerer distance map multiplied with the contour
-        segmented_surface_float = sitk.GetArrayFromImage(segmented_surface)
-        reference_distance_map_float = sitk.GetArrayFromImage(reference_distance_map)
-        dists_to_plot = segmented_surface_float * reference_distance_map_float
-        fig1, ax1= plt.subplots()
-        z = int(np.floor(np.shape(dists_to_plot)[0]/2))
-        plt.imshow(dists_to_plot[z,:,:]/255)
-        plt.title(' Distance Map. 1 Slice Visualization')
-        
-        ix = dists_to_plot.nonzero()
-        dists_nonzero = dists_to_plot[ix]
-        fig3, ax3 = plt.subplots()
-        plt.hist(dists_nonzero/255)
-        plt.title('Histogram Mauerer Distances')
+        self.surface_distance_results_df.columns = [ 'Hausdorff Distance', 'Maximum Surface Distance', 'Average Distance ', 'Average Symmetric Distance',  'Median Distance', 'Standard Deviation']
         #%%
         # img read as img[z,y,x]
         img_array = sitk.GetArrayFromImage(reference_segmentation)
@@ -109,7 +101,7 @@ class DistanceMetrics(object):
             surface_distance_SurfacePy[0,SurfaceDistanceMeasuresSurfacePy.avg_symmetric_surface_distance.value] = evalsurf.get_average_symmetric_surface_distance()
             surface_distance_SurfacePy[0,SurfaceDistanceMeasuresSurfacePy.rms_symmetric_surface_distance.value]= evalsurf.get_root_mean_square_symmetric_surface_distance()
         
-        surface_distance_SurfacePY_df = pd.DataFrame(data=surface_distance_SurfacePy, index = list(range(1)),
+        self.surface_distance_SurfacePY_df = pd.DataFrame(data=surface_distance_SurfacePy, index = list(range(1)),
                                       columns=[name for name, _ in SurfaceDistanceMeasuresSurfacePy.__members__.items()])
         
         #%% use the MedPy metric library
@@ -120,17 +112,8 @@ class DistanceMetrics(object):
         surface_dists_Medpy[0,MedpyMetricDists.avg_symmetric_surface_distanceMedPy.value] = metric.binary.assd(seg_array_rev,img_array_rev, voxelspacing=vxlspacing)
         self.surface_dists_Medpy_df = pd.DataFrame(data=surface_dists_Medpy, index = list(range(1)),
                                       columns=[name for name, _ in MedpyMetricDists.__members__.items()])
-        
-        
 
     #%%
-           # Plot the data as bar plots
-        self.surface_distance_results_df.plot(kind='bar').legend(loc='best')
-        plt.title('Metrics Computed with Simple ITK')
-        surface_distance_SurfacePY_df.plot(kind='bar').legend(loc='best')
-        plt.title("Metrics Computed with Surface Py . LITS Challenge")
-        self.surface_dists_Medpy_df.plot(kind='bar').legend(loc='best')
-        plt.title("Metrics Computed with MedPy Library")
         
     def get_Distances(self):
         # convert to DataFrame
@@ -139,3 +122,28 @@ class DistanceMetrics(object):
     
     def get_SitkDistances(self):
         return self.surface_distance_results_df
+    
+    def get_MedPyDistances(self):
+        return self.surface_dists_Medpy_df
+    
+    def get_avg_symmetric_dist(self):
+        return (self.n1*self.avg_ref + self.n2*self.avg_seg)/(self.n1+self.n2)
+    
+    # to check the accuracy
+    def get_rms_symmetric_dist(self):      
+        '''compute the root mean square distance'''
+        
+        # square the Mauerer distances distances
+        mask_distance_map_float = sitk.GetArrayFromImage(self.mask_distance_map)
+        mask_distance_map_float = np.flip(mask_distance_map_float ,2)
+        mask_distance_map_squared =  mask_distance_map_float ** 2
+        
+        reference_distance_map_float = sitk.GetArrayFromImage(self.reference_distance_map)
+        reference_distance_map_float = np.flip(reference_distance_map_float,2)
+        reference_distance_map_squared = reference_distance_map_float ** 2
+        
+        # sum the distances
+        mask_distance_map_sum = mask_distance_map_squared.sum()
+        reference_distance_map_sum = reference_distance_map_squared.sum()
+        
+        return np.sqrt(1. / (self.n1 + self.n2)) * np.sqrt(mask_distance_map_sum  + reference_distance_map_sum)

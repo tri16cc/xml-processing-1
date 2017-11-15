@@ -19,27 +19,7 @@ import matplotlib.pyplot as plt
 #plt.style.use('ggplot')
 #plt.style.use('seaborn')
 #print(plt.style.available)
-from IPython.display import display, HTML 
-# %%
-def display_with_overlay(slice_number, image, segs, window_min, window_max):
-    
-    """
-    Display a CT slice with segmented contours overlaid onto it. The contours are the edges of 
-    the labeled regions. Only works in Jupyter Notebook
-    """
-    img = image[:,:,slice_number]
-    msk = segs[:,:,slice_number]
-    overlay_img = sitk.LabelMapContourOverlay(sitk.Cast(msk, sitk.sitkLabelUInt8), 
-                                              sitk.Cast(sitk.IntensityWindowing(img,
-                                                                                windowMinimum=window_min, 
-                                                                                windowMaximum=window_max), 
-                                                        sitk.sitkUInt8), 
-                                             opacity = 1, 
-                                             contourThickness=[2,2])
-    #We assume the original slice is isotropic, otherwise the display would be distorted 
-    plt.imshow(sitk.GetArrayViewFromImage(overlay_img))
-    plt.axis('off')
-    plt.show()
+
 
 #%%
 ''' Volume Overlap measures:
