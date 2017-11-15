@@ -60,7 +60,7 @@ class SurfaceDistanceMeasures(Enum):
 
 segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 
-rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/StudyPatientsMasks/"
+rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/perfect_spheres_drawn_amira/"
 
 for subdir, dirs, files in os.walk(rootdir):
     tumorFilePath  = ''
@@ -133,6 +133,8 @@ for idx, seg in enumerate(segmentations):
  
     # Surface distance measures
     segmented_surface = sitk.LabelContour(segmentation)
+
+    
     label_intensity_statistics_filter.Execute(segmented_surface, reference_distance_map)
 
       # Hausdorff distance
@@ -161,44 +163,51 @@ for idx, seg in enumerate(segmentations):
     #%% 
     '''edit axis limits & labels '''
     ''' save plots'''
-    figName_vol = pats[idx] + 'volumeMetrics'
-    figpath1 = os.path.join(rootdir, figName_vol)
-    fig, ax = plt.subplots()
-    dfVolT = overlap_results_df.T
-#    plt.style.use('ggplot')
-    color = plt.cm.Dark2(np.arange(len(dfVolT))) # create colormap
-#    color=color
-    dfVolT.plot(kind='bar', rot=15, legend=False, ax=ax, grid=True, color='coral')
-    plt.axhline(0, color='k')
-    plt.ylim((-1.5,1.5))
-    plt.tick_params(labelsize=12)
-    plt.title('Volumetric Overlap Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(idx+1))
-    plt.rc('figure', titlesize=25) 
-    gh.save(figpath1,width=12, height=10)
-    
-    # PLOT SURFACE DISTANCE METRICS
-    figName_distance = pats[idx] + 'distanceMetrics'
-    figpath2 = os.path.join(rootdir, figName_distance)
-#    plt.style.use('seaborn-colorblind')
-    dfDistT = surface_distance_results_df.T
-    color = plt.cm.Dark2(np.arange(len( dfDistT))) # create colormap
-#    color=color
-    fig1, ax1 = plt.subplots()
-    dfDistT.plot(kind='bar',rot=15, legend=False, ax=ax1, grid=True)
-    plt.ylabel('[mm]')
-    plt.axhline(0, color='k')
-    plt.ylim((0,30))
-    plt.title('Surface Distance Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(idx+1))
-    plt.rc('figure', titlesize=25) 
-    plt.tick_params(labelsize=12)
-    gh.save(figpath2,width=12, height=10)
+#    figName_vol = pats[idx] + 'volumeMetrics'
+#    figpath1 = os.path.join(rootdir, figName_vol)
+#    fig, ax = plt.subplots()
+#    dfVolT = overlap_results_df.T
+##    plt.style.use('ggplot')
+#    color = plt.cm.Dark2(np.arange(len(dfVolT))) # create colormap
+##    color=color
+#    dfVolT.plot(kind='bar', rot=15, legend=False, ax=ax, grid=True, color='coral')
+#    plt.axhline(0, color='k')
+#    plt.ylim((-1.5,1.5))
+#    plt.tick_params(labelsize=12)
+#    plt.title('Volumetric Overlap Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(idx+1))
+#    plt.rc('figure', titlesize=25) 
+#    gh.save(figpath1,width=12, height=10)
+#    
+#    # PLOT SURFACE DISTANCE METRICS
+#    figName_distance = pats[idx] + 'distanceMetrics'
+#    figpath2 = os.path.join(rootdir, figName_distance)
+##    plt.style.use('seaborn-colorblind')
+#    dfDistT = surface_distance_results_df.T
+#    color = plt.cm.Dark2(np.arange(len( dfDistT))) # create colormap
+##    color=color
+#    fig1, ax1 = plt.subplots()
+#    dfDistT.plot(kind='bar',rot=15, legend=False, ax=ax1, grid=True)
+#    plt.ylabel('[mm]')
+#    plt.axhline(0, color='k')
+#    plt.ylim((0,30))
+#    plt.title('Surface Distance Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(idx+1))
+#    plt.rc('figure', titlesize=25) 
+#    plt.tick_params(labelsize=12)
+#    gh.save(figpath2,width=12, height=10)
     
     # PLOT THE HISTOGRAM FOR THE MAUERER DISTANCES
     figName_slice = pats[idx] + 'Slice'
     figpathSlice = os.path.join(rootdir, figName_slice)
     segmented_surface_float = sitk.GetArrayFromImage(segmented_surface)
     reference_distance_map_float = sitk.GetArrayFromImage(reference_distance_map)
-    dists_to_plot = segmented_surface_float * reference_distance_map_float
+    dists_fromAblation = segmented_surface_float * reference_distance_map_float
+    
+    segmented_surface_ref = sitk.LabelContour(reference_segmentation)
+    mask_distance_map = sitk.SignedMaurerDistanceMap(segmentation, squaredDistance=False, useImageSpacing=True)
+    
+    segmented_surface_ref_float = sitk.GetArrayFromImage(segmented_surface_ref)
+    mask_distance_map_float = sitk.GetArrayFromImage(mask_distance_map)
+    dists_fromTumor = segmented_surface_ref_float * mask_distance_map_float
 #    fig2, ax2= plt.subplots()
 #    z = int(np.floor(np.shape(dists_to_plot)[0]/2))
 #    plt.imshow(dists_to_plot[z,:,:]/255)
@@ -206,15 +215,31 @@ for idx, seg in enumerate(segmentations):
 #    plt.rc('figure', titlesize=25) 
 #    gh.save(figpathSlice, width=12, height=10)
 #    
-    figName_hist = pats[idx] + 'histogramDistances'
+    figName_hist = pats[idx] + 'histogramDistancesfromAblationtoTumor'
     figpathHist = os.path.join(rootdir, figName_hist)
-    ix = dists_to_plot.nonzero()
-    dists_nonzero = dists_to_plot[ix]
+    ix = dists_fromAblation.nonzero()
+    dists_nonzero = dists_fromAblation[ix]
     fig3, ax3 = plt.subplots()
     plt.hist(dists_nonzero/255, ec='darkgrey')
-    plt.title('Histogram Mauerer Distances. Patient ' + str(idx+1))
+    plt.title('Histogram Euclidean Distances. Tumor to Ablation. Patient ' + str(idx))
     plt.rc('figure', titlesize=25) 
+    plt.xlabel('[mm]')
+    plt.tick_params(labelsize=12)
     gh.save(figpathHist, width=12, height=10)
+    
+    
+    figName_hist = pats[idx] + 'histogramDistancesfromTumortoAblation'
+    figpathHist2 = os.path.join(rootdir, figName_hist)
+    ix = dists_fromTumor.nonzero()
+    dists_nonzero = dists_fromTumor[ix]
+    fig4, ax4 = plt.subplots()
+    plt.hist(dists_nonzero/255, ec='darkgrey')
+    plt.title('Histogram Euclidean Distances. Ablation to Tumor. Patient ' + str(idx))
+    plt.rc('figure', titlesize=25) 
+    plt.xlabel('[mm]')
+    plt.tick_params(labelsize=12)
+    gh.save(figpathHist2, width=12, height=10)
+
 
 #%%
 ''' save to excel '''
