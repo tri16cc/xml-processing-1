@@ -66,6 +66,7 @@ def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , titl
     
     n, bins, patches = plt.hist(distanceMap, ec='darkgrey', bins=range(min_val,max_val))
     
+    
     for c, p in zip(bins, patches):
         if c < 0:
             plt.setp(p, 'facecolor', 'red', label='Non-ablated surface')
@@ -76,13 +77,16 @@ def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , titl
 
     handles, labels = plt.gca().get_legend_handles_labels()
     by_label = OrderedDict(zip(labels, handles))
-    plt.show()
-    plt.legend(by_label.values(), by_label.keys(), fontsize=18)
+    plt.legend(by_label.values(), by_label.keys(), fontsize=16)
     
-    plt.ylabel('Number of voxels', fontsize=18)
-    plt.xlabel('[mm]', fontsize=18)
-    plt.tick_params(labelsize=18)
-    
+    plt.xlabel('[mm]', fontsize=16)
+    yticks, locs = plt.yticks()
+    percent = yticks/num_voxels * 100
+    percent_format = np.asarray(percent, dtype=int)
+    plt.yticks(yticks,percent_format)
+    plt.ylabel('Percetange of surface voxels [%]', fontsize=16)
+    plt.tick_params(labelsize=16)
     plt.title('Surface to Surface - Euclidean Distances. Patient ' + str(pat_idx+1), fontsize=18)
     
+#    plt.show()
     gh.save(figpathHist, width=12, height=10)
