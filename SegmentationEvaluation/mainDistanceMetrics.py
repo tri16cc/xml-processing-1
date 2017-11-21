@@ -52,15 +52,16 @@ pats = df_patientdata['PatientName']
 df_metrics_all = pd.DataFrame()
 
 for idx, seg in enumerate(reference):
-    evalmetrics = DistanceMetrics(ablations[idx],seg)
-    evaloverlap = VolumeMetrics(ablations[idx],seg)
+    evalmetrics = DistanceMetrics(ablations[idx],reference[idx])
+    evaloverlap = VolumeMetrics(ablations[idx],reference[idx])
     df_distances_1set = evalmetrics.get_Distances()
     df_volumes_1set = evaloverlap.get_VolumeMetrics()
     df_metrics = pd.concat([df_volumes_1set, df_distances_1set], axis=1)
     df_metrics_all = df_metrics_all.append(df_metrics)
     df_toplot = df_distances_1set[['Minimum Symmetric Surface Distance', 'Maximum Symmetric Distance', 'Average Symmetric Distance', 'Standard Deviation']]
     # ploot
-    pm.plotBarMetrics(pats[idx], idx ,rootdir, df_volumes_1set,  df_toplot )
+#    pm.plotBarMetrics(pats[idx], idx ,rootdir, df_volumes_1set,  df_toplot )
+# should plot distances here as well
     distanceMap_ref2seg = evalmetrics.get_ref2seg_distances()
     n1 = evalmetrics.num_reference_surface_pixels
     # calculate the percentage of contour surface covered by a specific distance
@@ -73,11 +74,11 @@ for idx, seg in enumerate(reference):
     pm.plotHistDistances(pats[idx], idx, rootdir,  distanceMap_seg2ref, n2, title)
 #%% Write to excel
 
-''' save to excel '''
+#''' save to excel '''
 df_metrics_all.index = list(range(len(df_metrics_all)))
 df_final = pd.concat([df_patientdata, df_metrics_all], axis=1)
-timestr = time.strftime("%Y%m%d-%H%M%S")
-filename = 'DistanceVolumeMetrics_Pooled' + timestr +'.xlsx'
+timestr = time.strftime("%H%M%S-%Y%m%d")
+filename = 'DistanceVolumeMetrics_Pooled_' + timestr +'.xlsx'
 filepathExcel = os.path.join(rootdir, filename )
 writer = pd.ExcelWriter(filepathExcel)
 df_final.to_excel(writer, index=False, float_format='%.2f')
