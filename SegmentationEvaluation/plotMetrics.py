@@ -6,67 +6,83 @@ Created on Wed Nov 15 16:15:51 2017
 """
 import os
 import numpy as np
-import pandas as pd
 import graphing as gh
 import matplotlib.pyplot as plt
+from collections import OrderedDict
 
-
-    #%% 
-class PlotSegmentationMetrics(object):
+#%%    
     
-    def __init__(self, pat_name, pat_idx, overlap_results_df, surface_distance_results_df, rootdir):
-        
-        '''edit axis limits & labels '''
-        ''' save plots'''
-        figName_vol = pat_name + 'volumeMetrics'
-        figpath1 = os.path.join(rootdir, figName_vol)
-        fig, ax = plt.subplots()
-        dfVolT = overlap_results_df.T
+def plotBarMetrics(pat_name, pat_idx, rootdir, overlap_results_df, surface_distance_results_df):
+    
+    # PLOT VOLUME OVERLAP METRICS BAR PLOTS
+    '''edit axis limits & labels '''
+    ''' save plots'''
+    figName_vol = pat_name + 'volumeMetrics'
+    figpath1 = os.path.join(rootdir, figName_vol)
+    fig, ax = plt.subplots()
+    dfVolT = overlap_results_df.T
 
-        dfVolT.plot(kind='bar', rot=15, legend=False, ax=ax, grid=True, color='coral')
-        plt.axhline(0, color='k')
-        plt.ylim((-2.5,2.5))
-        plt.tick_params(labelsize=12)
-        plt.title('Volumetric Overlap Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(pat_idx))
-        plt.rc('figure', titlesize=25) 
-        gh.save(figpath1,width=12, height=10)
-        
-        # PLOT SURFACE DISTANCE METRICS
-        figName_distance = pat_name + 'distanceMetrics'
-        figpath2 = os.path.join(rootdir, figName_distance)
-        dfDistT = surface_distance_results_df.T
+    dfVolT.plot(kind='bar', rot=15, legend=False, ax=ax, grid=True, color='coral')
+    plt.axhline(0, color='k')
+    plt.ylim((-2.5,2.5))
+    plt.tick_params(labelsize=12)
+    plt.title('Volumetric Overlap Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(pat_idx))
+    plt.rc('figure', titlesize=25) 
+    gh.save(figpath1,width=12, height=10)
+    
+    # PLOT SURFACE DISTANCE METRICS BAR PLOTS
+    figName_distance = pat_name + 'distanceMetrics'
+    figpath2 = os.path.join(rootdir, figName_distance)
+    dfDistT = surface_distance_results_df.T
 
-        fig1, ax1 = plt.subplots()
-        dfDistT.plot(kind='bar',rot=15, legend=False, ax=ax1, grid=True)
-        plt.ylabel('[mm]')
-        plt.axhline(0, color='k')
-        plt.ylim((0,30))
-        plt.title('Surface Distance Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(pat_idx))
-        plt.rc('figure', titlesize=25) 
-        plt.tick_params(labelsize=12)
-        gh.save(figpath2,width=12, height=10)
-        
-        #%%
-        # PLOT THE HISTOGRAM FOR THE MAUERER DISTANCES
-#
-#        segmented_surface_float = sitk.GetArrayFromImage(segmented_surface)
-#        reference_distance_map_float = sitk.GetArrayFromImage(reference_distance_map)
-#        dists_to_plot = segmented_surface_float * reference_distance_map_float
-        #        figName_slice = pat_name + 'Slice'
-#        figpathSlice = os.path.join(rootdir, figName_slice)
-    #    fig2, ax2= plt.subplots()
-    #    z = int(np.floor(np.shape(dists_to_plot)[0]/2))
-    #    plt.imshow(dists_to_plot[z,:,:]/255)
-    #    plt.title(' Distance Map. 1 Slice Visualization. Patient ' + str(idx+1))
-    #    plt.rc('figure', titlesize=25) 
-    #    gh.save(figpathSlice, width=12, height=10)
-    #    
-#        figName_hist = pat_name + 'histogramDistances'
-#        figpathHist = os.path.join(rootdir, figName_hist)
-#        ix = dists_to_plot.nonzero()
-#        dists_nonzero = dists_to_plot[ix]
-#        fig3, ax3 = plt.subplots()
-#        plt.hist(dists_nonzero/255, ec='darkgrey')
-#        plt.title('Histogram Mauerer Distances. Patient ' + str(idx+1))
-#        plt.rc('figure', titlesize=25) 
-#        gh.save(figpathHist, width=12, height=10)
+    fig1, ax1 = plt.subplots()
+    dfDistT.plot(kind='bar',rot=15, legend=False, ax=ax1, grid=True)
+    plt.ylabel('[mm]')
+    plt.axhline(0, color='k')
+    plt.ylim((0,30))
+    plt.title('Surface Distance Metrics. Ablation GT vs. Ablation Estimated. Patient ' + str(pat_idx))
+    plt.rc('figure', titlesize=25) 
+    plt.tick_params(labelsize=12)
+    gh.save(figpath2,width=12, height=10)
+    
+def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , title):
+
+    ''' PLOT THE HISTOGRAM FOR THE MAUERER DISTANCES'''
+#        
+    figName_hist = pat_name + 'histogramDistances' + title
+    figpathHist = os.path.join(rootdir, figName_hist)
+    
+    # This is  the colormap I'd like to use.
+#    cm = plt.cm.get_cmap('RdYlGn')
+#    bin_centers = 0.5 * (bins[:-1] + bins[1:])
+
+    # scale values to interval [0,1]
+#    col = bin_centers - min(bin_centers)
+#    col /= max(col)
+#        plt.setp(p, 'facecolor', cm(c))
+
+    min_val = int(np.floor(min(distanceMap)))
+    max_val = int(np.ceil(max(distanceMap)))
+    
+    n, bins, patches = plt.hist(distanceMap, ec='darkgrey', bins=range(min_val,max_val))
+    
+    for c, p in zip(bins, patches):
+        if c < 0:
+            plt.setp(p, 'facecolor', 'red', label='Non-ablated surface')
+        elif c >=0 and c < 5 :
+            plt.setp(p, 'facecolor', 'orange', label='Insufficient Margin')
+        elif c>=5:
+            plt.setp(p, 'facecolor', 'green', label='Sufficient Margin')
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = OrderedDict(zip(labels, handles))
+    plt.show()
+    plt.legend(by_label.values(), by_label.keys(), fontsize=18)
+    
+    plt.ylabel('Number of voxels', fontsize=18)
+    plt.xlabel('[mm]', fontsize=18)
+    plt.tick_params(labelsize=18)
+    
+    plt.title('Surface to Surface - Euclidean Distances. Patient ' + str(pat_idx+1), fontsize=18)
+    
+    gh.save(figpathHist, width=12, height=10)

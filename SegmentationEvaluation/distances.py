@@ -53,9 +53,9 @@ class DistanceMetrics(object):
         hausdorff_distance_filter.Execute(reference_segmentation, segmentation)
 
         surface_distance_results[0,SurfaceDistanceMeasuresITK.hausdorff_distance.value] = hausdorff_distance_filter.GetHausdorffDistance()
+            
         
-        
-        # Compute the average symmetric distance
+        #%% Compute the average symmetric distance
         self.n1 = label_intensity_statistics_filter.GetNumberOfPixels(label_1)
         self.avg_ref = label_intensity_statistics_filter.GetMean(label_1)
         self.max_ref = label_intensity_statistics_filter.GetMaximum(label_1)
