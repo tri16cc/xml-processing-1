@@ -49,14 +49,7 @@ class DistanceMetrics(object):
         reference_surface_array =sitk.GetArrayFromImage(reference_surface)
         rf_pts = reference_surface_array.nonzero()
         self.num_reference_surface_pixels = len(list(zip(rf_pts[0], rf_pts[1], rf_pts[2])))
-        
-        statistics_image_filter = sitk.StatisticsImageFilter()
-        
-        # Get the number of pixels in the reference surface by counting all pixels that are 1.
-        statistics_image_filter.Execute(reference_surface)
-        sitk.LabelVoting(reference_surface, 1)
-        
-        
+                        
         # init signed mauerer distance as reference metrics
         self.reference_distance_map = sitk.SignedMaurerDistanceMap(reference_segmentation, squaredDistance=False, useImageSpacing=True)
         
@@ -66,11 +59,14 @@ class DistanceMetrics(object):
         surface_distance_results[0,SurfaceDistanceMeasuresITK.hausdorff_distance.value] = hausdorff_distance_filter.GetHausdorffDistance()
         
         #%%
+        # get the Contour
         segmented_surface_mask = sitk.LabelContour(segmentation)
         segmented_surface_mask_array =sitk.GetArrayFromImage(segmented_surface_mask)
         rf_pts = segmented_surface_mask_array.nonzero()
+        # Get the number of pixels in the mask surface by counting all pixels that are non-zero
         self.self.num_segmented_surface_pixels = len(list(zip(rf_pts[0], rf_pts[1], rf_pts[2])))
         
+        # Compute Mauerer Distance
         self.mask_distance_map = sitk.SignedMaurerDistanceMap(segmentation, squaredDistance=False, useImageSpacing=True)
         
         # Multiply the binary surface segmentations with the distance maps. The resulting distance
@@ -78,9 +74,6 @@ class DistanceMetrics(object):
         self.seg2ref_distance_map = self.reference_distance_map*sitk.Cast(segmented_surface_mask, sitk.sitkFloat32)
         self.ref2seg_distance_map = self.mask_distance_map*sitk.Cast(reference_surface, sitk.sitkFloat32)
             
-          # Get the number of pixels in the mask surface by counting all pixels that are 1.
-        statistics_image_filter.Execute(segmented_surface_mask)
-        #self.num_segmented_surface_pixels = int(statistics_image_filter.GetSum())
         
         # Get all non-zero distances and then add zero distances if required.
         seg2ref_distance_map_arr = sitk.GetArrayFromImage(self.seg2ref_distance_map)
@@ -89,26 +82,27 @@ class DistanceMetrics(object):
         ref2seg_distance_map_arr = sitk.GetArrayFromImage(self.ref2seg_distance_map)
         self.ref2seg_distances = list(ref2seg_distance_map_arr[ref2seg_distance_map_arr!=0]/255) 
 
-                            
-        #%% Compute the average symmetric distance
-        self.all_surface_distances = self.seg2ref_distances + self.ref2seg_distances
+        self.all_surface_distances = self.seg2ref_distances + self.ref2seg_distances        
+        #%% Compute the symmetric surface distances min, mean, median, std
+    
         surface_distance_results[0,SurfaceDistanceMeasuresITK.min_surface_distance.value] = np.min(self.all_surface_distances)
         surface_distance_results[0,SurfaceDistanceMeasuresITK.mean_surface_distance.value] = np.mean(self.all_surface_distances)
         surface_distance_results[0,SurfaceDistanceMeasuresITK.median_surface_distance.value] = np.median(self.all_surface_distances)
         surface_distance_results[0,SurfaceDistanceMeasuresITK.std_surface_distance.value] = np.std(self.all_surface_distances)
         
+        # Compute the root mean square distance
         ref2seg_distances_squared = np.asarray(self.ref2seg_distances) ** 2
         seg2ref_distances_squared = np.asarray(self.seg2ref_distances) ** 2
-        
         
         rms = np.sqrt(1. / (self.num_reference_surface_pixels + self.num_segmented_surface_pixels)) * np.sqrt(seg2ref_distances_squared.sum()  + ref2seg_distances_squared.sum())
         surface_distance_results[0,SurfaceDistanceMeasuresITK.rms_surface_distance.value] = rms
 
-
+        
+        # Save to DataFrame
         self.surface_distance_results_df = pd.DataFrame(data=surface_distance_results, index = list(range(1)),
                                       columns=[name for name, _ in SurfaceDistanceMeasuresITK.__members__.items()])
         
-        
+        # change the name of the columns
         self.surface_distance_results_df.columns = ['Maximum Symmetric Distance', 'Minimum Symmetric Surface Distance','Average Symmetric Distance', 'Median Symmetric Distance', 'Standard Deviation', 'RMS Symmetric Distance']
         #%%
         # img read as img[z,y,x]
@@ -144,9 +138,6 @@ class DistanceMetrics(object):
     
     def get_std_symmetric_dist(self):
         return self.symmetric_std
-    
-    def get_max_symmetric_dist(self):
-        return max(self.max_ref,self.max_seg)
     
     def get_mask_dist_map(self):
         return self.seg2ref_distance_map
