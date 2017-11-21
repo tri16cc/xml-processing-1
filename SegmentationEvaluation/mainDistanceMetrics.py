@@ -17,7 +17,7 @@ import plotMetrics as pm
 
 segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 
-rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/translated_spheres/"
+rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/studyPatientsMasks/"
 
 for subdir, dirs, files in os.walk(rootdir):
     tumorFilePath  = ''
@@ -60,7 +60,7 @@ for idx, seg in enumerate(reference):
     df_metrics_all = df_metrics_all.append(df_metrics)
     df_toplot = df_distances_1set[['Minimum Symmetric Surface Distance', 'Maximum Symmetric Distance', 'Average Symmetric Distance', 'Standard Deviation']]
     # ploot
-#    pm.PlotBarPlotsMetrics(pats[idx], idx ,rootdir, df_volumes_1set,  df_toplot )
+    pm.plotBarMetrics(pats[idx], idx ,rootdir, df_volumes_1set,  df_toplot )
     distanceMap_ref2seg = evalmetrics.get_ref2seg_distances()
     n1 = evalmetrics.num_reference_surface_pixels
     # calculate the percentage of contour surface covered by a specific distance
