@@ -64,7 +64,7 @@ class DistanceMetrics(object):
         segmented_surface_mask_array =sitk.GetArrayFromImage(segmented_surface_mask)
         rf_pts = segmented_surface_mask_array.nonzero()
         # Get the number of pixels in the mask surface by counting all pixels that are non-zero
-        self.self.num_segmented_surface_pixels = len(list(zip(rf_pts[0], rf_pts[1], rf_pts[2])))
+        self.num_segmented_surface_pixels = len(list(zip(rf_pts[0], rf_pts[1], rf_pts[2])))
         
         # Compute Mauerer Distance
         self.mask_distance_map = sitk.SignedMaurerDistanceMap(segmentation, squaredDistance=False, useImageSpacing=True)
