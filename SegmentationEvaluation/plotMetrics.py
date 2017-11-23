@@ -65,6 +65,7 @@ def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , titl
     max_val = int(np.ceil(max(distanceMap)))
     
     fig, ax = plt.subplots()
+#    n, bins, patches = ax.hist(distanceMap, ec='darkgrey')
     n, bins, patches = ax.hist(distanceMap, ec='darkgrey', bins=range(min_val,max_val))
     
     
@@ -92,7 +93,7 @@ def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , titl
     plt.legend(by_label.values(), by_label.keys(), fontsize=16)
     
     
-    plt.title('Surface to Surface - Euclidean Distances. Patient ' + str(pat_idx+1), fontsize=18)
+    plt.title('Surface to Surface - Euclidean Distances. Patient ' + str(pat_idx), fontsize=18)
     
 #    ax.set_yticklabels(percent_format)
     

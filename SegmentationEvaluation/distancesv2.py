@@ -71,13 +71,13 @@ class DistanceMetrics(object):
         
         # Multiply the binary surface segmentations with the distance maps. The resulting distance
         # maps contain non-zero values only on the surface (they can also contain zero on the surface)
-        self.seg2ref_distance_map = self.reference_distance_map*sitk.Cast(segmented_surface_mask, sitk.sitkFloat32)
-        self.ref2seg_distance_map = self.mask_distance_map*sitk.Cast(reference_surface, sitk.sitkFloat32)
+        self.seg2ref_distance_map = self.mask_distance_map*sitk.Cast(reference_surface, sitk.sitkFloat32) 
+        self.ref2seg_distance_map = self.reference_distance_map*sitk.Cast(segmented_surface_mask, sitk.sitkFloat32)
             
         
         # Get all non-zero distances and then add zero distances if required.
         seg2ref_distance_map_arr = sitk.GetArrayFromImage(self.seg2ref_distance_map)
-        self.seg2ref_distances = list(seg2ref_distance_map_arr[seg2ref_distance_map_arr!=0]/255) 
+        self.seg2ref_distances = list(seg2ref_distance_map_arr[seg2ref_distance_map_arr!=0]/-255) 
 
         ref2seg_distance_map_arr = sitk.GetArrayFromImage(self.ref2seg_distance_map)
         self.ref2seg_distances = list(ref2seg_distance_map_arr[ref2seg_distance_map_arr!=0]/255) 

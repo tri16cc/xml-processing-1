@@ -17,16 +17,16 @@ import plotMetrics as pm
 
 segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 
-rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/studyPatientsMasks/"
+rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/studyPatientsMasks"
 
 for subdir, dirs, files in os.walk(rootdir):
     tumorFilePath  = ''
     ablationSegm = ''
     for file in files:
-        if file == "tumorSegm":
+        if file == "ablationSegm_aligned":
             FilePathName = os.path.join(subdir, file)
             tumorFilePath = os.path.normpath(FilePathName)
-        elif file == "ablationSegm":
+        elif file == "predictedSegm_aligned":
             FilePathName = os.path.join(subdir, file)
             ablationFilePath = os.path.normpath(FilePathName)
         else:
@@ -58,10 +58,10 @@ for idx, seg in enumerate(reference):
     df_volumes_1set = evaloverlap.get_VolumeMetrics()
     df_metrics = pd.concat([df_volumes_1set, df_distances_1set], axis=1)
     df_metrics_all = df_metrics_all.append(df_metrics)
-    df_toplot = df_distances_1set[['Minimum Symmetric Surface Distance', 'Maximum Symmetric Distance', 'Average Symmetric Distance', 'Standard Deviation']]
+    df_toplot = df_distances_1set[[ 'Maximum Symmetric Distance', 'Average Symmetric Distance', 'Standard Deviation']]
     # ploot
-#    pm.plotBarMetrics(pats[idx], idx ,rootdir, df_volumes_1set,  df_toplot )
-# should plot distances here as well
+    pm.plotBarMetrics(pats[idx], idx ,rootdir, df_volumes_1set,  df_toplot )
+    # should plot distances here as well. TO DO generalize the plotBarMetrics functions
     distanceMap_ref2seg = evalmetrics.get_ref2seg_distances()
     n1 = evalmetrics.num_reference_surface_pixels
     # calculate the percentage of contour surface covered by a specific distance
