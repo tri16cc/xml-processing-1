@@ -60,7 +60,7 @@ class SurfaceDistanceMeasures(Enum):
 
 segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 
-rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/perfect_spheres_drawn_amira/"
+rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/studyPatientsMasks/"
 
 for subdir, dirs, files in os.walk(rootdir):
     tumorFilePath  = ''

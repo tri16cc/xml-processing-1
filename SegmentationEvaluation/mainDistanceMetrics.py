@@ -17,8 +17,7 @@ import plotMetrics as pm
 
 segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 
-rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/studyPatientsMasks"
-
+rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/studyPatientsMasks/"
 for subdir, dirs, files in os.walk(rootdir):
     tumorFilePath  = ''
     ablationSegm = ''
@@ -52,24 +51,24 @@ pats = df_patientdata['PatientName']
 df_metrics_all = pd.DataFrame()
 
 for idx, seg in enumerate(reference):
-    evalmetrics = DistanceMetrics(ablations[idx],reference[idx])
+    evalmetrics = DistanceMetrics(ablations[idx],reference[idx], flag_symmetric=False, flag_mask2reference=True, flag_reference2mask=False)
     evaloverlap = VolumeMetrics(ablations[idx],reference[idx])
     df_distances_1set = evalmetrics.get_Distances()
     df_volumes_1set = evaloverlap.get_VolumeMetrics()
     df_metrics = pd.concat([df_volumes_1set, df_distances_1set], axis=1)
     df_metrics_all = df_metrics_all.append(df_metrics)
-    df_toplot = df_distances_1set[[ 'Maximum Symmetric Distance', 'Average Symmetric Distance', 'Standard Deviation']]
+    df_toplot = df_distances_1set[[ 'Maximum Distance', 'Average Distance','Median Distance', 'Standard Deviation']]
     # ploot
     pm.plotBarMetrics(pats[idx], idx ,rootdir, df_volumes_1set,  df_toplot )
     # should plot distances here as well. TO DO generalize the plotBarMetrics functions
     distanceMap_ref2seg = evalmetrics.get_ref2seg_distances()
-    n1 = evalmetrics.num_reference_surface_pixels
+    n1 = evalmetrics.num_segmented_surface_pixels
     # calculate the percentage of contour surface covered by a specific distance
     title = 'ref2seg'
     pm.plotHistDistances(pats[idx], idx, rootdir,  distanceMap_ref2seg, n1, title)
     
     distanceMap_seg2ref = evalmetrics.get_seg2ref_distances()
-    n2 = evalmetrics.num_segmented_surface_pixels
+    n2 = evalmetrics.num_reference_surface_pixels
     title = 'seg2ref'
     pm.plotHistDistances(pats[idx], idx, rootdir,  distanceMap_seg2ref, n2, title)
 #%% Write to excel
@@ -78,7 +77,7 @@ for idx, seg in enumerate(reference):
 df_metrics_all.index = list(range(len(df_metrics_all)))
 df_final = pd.concat([df_patientdata, df_metrics_all], axis=1)
 timestr = time.strftime("%H%M%S-%Y%m%d")
-filename = 'DistanceVolumeMetrics_Pooled_' + timestr +'.xlsx'
+filename = 'DistanceVolumeMetrics_Pooled_Ablations_' + timestr +'.xlsx'
 filepathExcel = os.path.join(rootdir, filename )
 writer = pd.ExcelWriter(filepathExcel)
 df_final.to_excel(writer, index=False, float_format='%.2f')

@@ -27,7 +27,7 @@ import SimpleITK as sitk
 class DistanceMetrics(object):
 
     
-    def __init__(self,mask, reference):
+    def __init__(self, mask , reference, flag_symmetric=False, flag_mask2reference=True, flag_reference2mask=False):
 
         # image read as img[x,y,z]
         reference_segmentation = sitk.ReadImage(reference, sitk.sitkUInt8)
@@ -35,7 +35,7 @@ class DistanceMetrics(object):
         
          
         class SurfaceDistanceMeasuresITK(Enum):
-            hausdorff_distance, min_surface_distance, mean_surface_distance, median_surface_distance, std_surface_distance, rms_surface_distance = range(6)
+            hausdorff_distance, max_distance, min_surface_distance, mean_surface_distance, median_surface_distance, std_surface_distance, rms_surface_distance = range(7)
         
         
         class MedpyMetricDists(Enum):
@@ -46,9 +46,9 @@ class DistanceMetrics(object):
         
         #%%
         reference_surface = sitk.LabelContour(reference_segmentation)
-        reference_surface_array =sitk.GetArrayFromImage(reference_surface)
-        rf_pts = reference_surface_array.nonzero()
-        self.num_reference_surface_pixels = len(list(zip(rf_pts[0], rf_pts[1], rf_pts[2])))
+        reference_surface_array = sitk.GetArrayFromImage(reference_surface)
+        reference_surface_array_NonZero = reference_surface_array.nonzero()
+        self.num_reference_surface_pixels = len(list(zip(reference_surface_array_NonZero[0], reference_surface_array_NonZero[1], reference_surface_array_NonZero[2])))
                         
         # init signed mauerer distance as reference metrics
         self.reference_distance_map = sitk.SignedMaurerDistanceMap(reference_segmentation, squaredDistance=False, useImageSpacing=True)
@@ -56,39 +56,46 @@ class DistanceMetrics(object):
         hausdorff_distance_filter = sitk.HausdorffDistanceImageFilter()
         hausdorff_distance_filter.Execute(reference_segmentation, segmentation)
 
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.hausdorff_distance.value] = hausdorff_distance_filter.GetHausdorffDistance()
+#        surface_distance_results[0,SurfaceDistanceMeasuresITK.hausdorff_distance.value] = hausdorff_distance_filter.GetHausdorffDistance()
         
         #%%
         # get the Contour
         segmented_surface_mask = sitk.LabelContour(segmentation)
-        segmented_surface_mask_array =sitk.GetArrayFromImage(segmented_surface_mask)
-        rf_pts = segmented_surface_mask_array.nonzero()
+        segmented_surface_mask_array = sitk.GetArrayFromImage(segmented_surface_mask )
+        surface_mask_array_NonZero = segmented_surface_mask_array.nonzero()
         # Get the number of pixels in the mask surface by counting all pixels that are non-zero
-        self.num_segmented_surface_pixels = len(list(zip(rf_pts[0], rf_pts[1], rf_pts[2])))
+        self.num_segmented_surface_pixels = len(list(zip(surface_mask_array_NonZero[0],surface_mask_array_NonZero[1], surface_mask_array_NonZero[2])))
         
         # Compute Mauerer Distance
         self.mask_distance_map = sitk.SignedMaurerDistanceMap(segmentation, squaredDistance=False, useImageSpacing=True)
         
         # Multiply the binary surface segmentations with the distance maps. The resulting distance
         # maps contain non-zero values only on the surface (they can also contain zero on the surface)
-        self.seg2ref_distance_map = self.mask_distance_map*sitk.Cast(reference_surface, sitk.sitkFloat32) 
-        self.ref2seg_distance_map = self.reference_distance_map*sitk.Cast(segmented_surface_mask, sitk.sitkFloat32)
+        mask_distance_map_array = sitk.GetArrayFromImage(self.mask_distance_map)
+        reference_distance_map_array = sitk.GetArrayFromImage(self.reference_distance_map)
+        
+#        self.mask_distance_map_arr = sitk.GetArrayFromImage(self.mask_distance_map)
+        self.seg2ref_distance_map = mask_distance_map_array*reference_surface_array
+        self.ref2seg_distance_map = reference_distance_map_array*segmented_surface_mask_array
             
         
-        # Get all non-zero distances and then add zero distances if required.
-        seg2ref_distance_map_arr = sitk.GetArrayFromImage(self.seg2ref_distance_map)
-        self.seg2ref_distances = list(seg2ref_distance_map_arr[seg2ref_distance_map_arr!=0]/-255) 
+        # remove the zeros (indexes) from the mask, respective reference image (eg. ablation & tumor mask)
+        self.seg2ref_distances = list(self.seg2ref_distance_map[reference_surface_array_NonZero]/-255) 
+        self.ref2seg_distances = list(self.ref2seg_distance_map[surface_mask_array_NonZero]/255) 
 
-        ref2seg_distance_map_arr = sitk.GetArrayFromImage(self.ref2seg_distance_map)
-        self.ref2seg_distances = list(ref2seg_distance_map_arr[ref2seg_distance_map_arr!=0]/255) 
-
-        self.all_surface_distances = self.seg2ref_distances + self.ref2seg_distances        
+        if flag_symmetric is True:
+            self.surface_distances = self.seg2ref_distances + self.ref2seg_distances
+        if flag_mask2reference is True:
+            self.surface_distances = self.seg2ref_distances
+        if flag_reference2mask is True:
+            self.surface_distances = self.ref2seg_distances
         #%% Compute the symmetric surface distances min, mean, median, std
-    
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.min_surface_distance.value] = np.min(self.all_surface_distances)
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.mean_surface_distance.value] = np.mean(self.all_surface_distances)
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.median_surface_distance.value] = np.median(self.all_surface_distances)
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.std_surface_distance.value] = np.std(self.all_surface_distances)
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.hausdorff_distance.value] = hausdorff_distance_filter.GetHausdorffDistance()
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.max_distance.value] = np.max(self.surface_distances)
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.min_surface_distance.value] = np.min(self.surface_distances)
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.mean_surface_distance.value] = np.mean(self.surface_distances)
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.median_surface_distance.value] = np.median(self.surface_distances)
+        surface_distance_results[0,SurfaceDistanceMeasuresITK.std_surface_distance.value] = np.std(self.surface_distances)
         
         # Compute the root mean square distance
         ref2seg_distances_squared = np.asarray(self.ref2seg_distances) ** 2
@@ -103,7 +110,7 @@ class DistanceMetrics(object):
                                       columns=[name for name, _ in SurfaceDistanceMeasuresITK.__members__.items()])
         
         # change the name of the columns
-        self.surface_distance_results_df.columns = ['Maximum Symmetric Distance', 'Minimum Symmetric Surface Distance','Average Symmetric Distance', 'Median Symmetric Distance', 'Standard Deviation', 'RMS Symmetric Distance']
+        self.surface_distance_results_df.columns = ['Hausdorff Distance', 'Maximum Distance', 'Minimum Distance','Average Distance', 'Median Distance', 'Standard Deviation', 'RMS Symmetric Distance']
         #%%
         # img read as img[z,y,x]
         img_array = sitk.GetArrayFromImage(reference_segmentation)
