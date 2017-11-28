@@ -13,13 +13,13 @@ import SimpleITK as sitk
 #%%
 class VolumeMetrics(object):
     
-    def __init__(self,mask, reference):
+    def __init__(self,maskFile, referenceFile):
         
-        reference_segmentation = sitk.ReadImage(reference, sitk.sitkUInt8)
-        segmentation = sitk.ReadImage(mask,sitk.sitkUInt8)
+        reference = sitk.ReadImage(referenceFile, sitk.sitkUInt8)
+        mask = sitk.ReadImage(maskFile,sitk.sitkUInt8)
         
-        ref_array = sitk.GetArrayFromImage(reference_segmentation) # convert the sitk image to numpy array 
-        seg_array = sitk.GetArrayFromImage(segmentation)
+        ref_array = sitk.GetArrayFromImage(reference) # convert the sitk image to numpy array 
+        seg_array = sitk.GetArrayFromImage(mask)
         
         class OverlapMeasures(Enum):
             dice, jaccard, volume_similarity, volumetric_overlap_error, relative_vol_difference = range(5)
@@ -27,7 +27,7 @@ class VolumeMetrics(object):
         overlap_results = np.zeros((1,len(OverlapMeasures.__members__.items())))  
         overlap_measures_filter = sitk.LabelOverlapMeasuresImageFilter()
         
-        overlap_measures_filter.Execute(reference_segmentation, segmentation)
+        overlap_measures_filter.Execute(reference, mask)
         overlap_results[0,OverlapMeasures.jaccard.value] = overlap_measures_filter.GetJaccardCoefficient()
         overlap_results[0,OverlapMeasures.dice.value] = overlap_measures_filter.GetDiceCoefficient()
         overlap_results[0,OverlapMeasures.volume_similarity.value] = overlap_measures_filter.GetVolumeSimilarity()
