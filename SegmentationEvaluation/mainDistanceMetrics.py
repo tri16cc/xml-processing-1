@@ -9,7 +9,8 @@ import time
 import pandas as pd
 from distancesv2 import DistanceMetrics 
 from volumemetrics import VolumeMetrics
-import plotMetrics as pm
+import plotDistances as pm
+import distances_boxplots as bp
 #%%
 #plt.style.use('ggplot')
 #plt.style.use('classic')
@@ -17,15 +18,15 @@ import plotMetrics as pm
 
 segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 
-rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/studyPatientsMasks/"
+rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/perfect_spheres_drawn_amira/differentSpheres2"
 for subdir, dirs, files in os.walk(rootdir):
     tumorFilePath  = ''
     ablationSegm = ''
     for file in files:
-        if file == "ablationSegm_aligned":
+        if file == "tumorSegm":
             FilePathName = os.path.join(subdir, file)
             tumorFilePath = os.path.normpath(FilePathName)
-        elif file == "predictedSegm_aligned":
+        elif file == "ablationSegm":
             FilePathName = os.path.join(subdir, file)
             ablationFilePath = os.path.normpath(FilePathName)
         else:
@@ -49,18 +50,19 @@ reference = df_patientdata['TumorFile'].tolist()
 pats = df_patientdata['PatientName']
 #%%
 df_metrics_all = pd.DataFrame()
+distaceMaps_all = []
 
 for idx, seg in enumerate(reference):
+    # set-up the flags wether one wants symmetrics distances or from Ablation2Tumor/Tumor2Ablation
+    # default value: distance Ablation2Tumor surface contour
     evalmetrics = DistanceMetrics(ablations[idx],reference[idx], flag_symmetric=False, flag_mask2reference=True, flag_reference2mask=False)
     evaloverlap = VolumeMetrics(ablations[idx],reference[idx])
     df_distances_1set = evalmetrics.get_Distances()
     df_volumes_1set = evaloverlap.get_VolumeMetrics()
     df_metrics = pd.concat([df_volumes_1set, df_distances_1set], axis=1)
     df_metrics_all = df_metrics_all.append(df_metrics)
-    df_toplot = df_distances_1set[[ 'Maximum Distance', 'Average Distance','Median Distance', 'Standard Deviation']]
-    # ploot
-    pm.plotBarMetrics(pats[idx], idx ,rootdir, df_volumes_1set,  df_toplot )
-    # should plot distances here as well. TO DO generalize the plotBarMetrics functions
+
+    # PLOT Distance Maps from 
     distanceMap_ref2seg = evalmetrics.get_ref2seg_distances()
     n1 = evalmetrics.num_segmented_surface_pixels
     # calculate the percentage of contour surface covered by a specific distance
@@ -68,6 +70,7 @@ for idx, seg in enumerate(reference):
     pm.plotHistDistances(pats[idx], idx, rootdir,  distanceMap_ref2seg, n1, title)
     
     distanceMap_seg2ref = evalmetrics.get_seg2ref_distances()
+    distaceMaps_all.append(distanceMap_seg2ref)
     n2 = evalmetrics.num_reference_surface_pixels
     title = 'seg2ref'
     pm.plotHistDistances(pats[idx], idx, rootdir,  distanceMap_seg2ref, n2, title)
@@ -77,7 +80,7 @@ for idx, seg in enumerate(reference):
 df_metrics_all.index = list(range(len(df_metrics_all)))
 df_final = pd.concat([df_patientdata, df_metrics_all], axis=1)
 timestr = time.strftime("%H%M%S-%Y%m%d")
-filename = 'DistanceVolumeMetrics_Pooled_Ablations_' + timestr +'.xlsx'
+filename = 'DistanceVolumeMetrics_Pooled_' + timestr +'.xlsx'
 filepathExcel = os.path.join(rootdir, filename )
 writer = pd.ExcelWriter(filepathExcel)
 df_final.to_excel(writer, index=False, float_format='%.2f')

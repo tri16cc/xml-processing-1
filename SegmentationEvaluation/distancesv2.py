@@ -18,6 +18,7 @@ import pandas as pd
 from enum import Enum
 from medpy import metric
 import SimpleITK as sitk
+import matplotlib.pyplot as plt
 
 #plt.style.use('ggplot')
 #plt.style.use('classic')
@@ -27,11 +28,11 @@ import SimpleITK as sitk
 class DistanceMetrics(object):
 
     
-    def __init__(self, mask , reference, flag_symmetric=False, flag_mask2reference=True, flag_reference2mask=False):
+    def __init__(self, maskfile , referencefile, flag_symmetric=False, flag_mask2reference=True, flag_reference2mask=False):
 
         ''' Read the images from the filepaths'''
-        reference_segmentation = sitk.ReadImage(reference, sitk.sitkUInt8)
-        segmentation = sitk.ReadImage(mask,sitk.sitkUInt8)
+        reference_segmentation = sitk.ReadImage(referencefile, sitk.sitkUInt8)
+        segmentation = sitk.ReadImage(maskfile,sitk.sitkUInt8) 
         
         ''' init the enum fields for surface dist measures computer with simpleitk'''
         class SurfaceDistanceMeasuresITK(Enum):
@@ -48,7 +49,7 @@ class DistanceMetrics(object):
         ''''
         Mauerer Distance Map for the Reference Object (deemed as "tumor in this particular case")
         Algorithm Pipeline :
-            1. compute the contour surface of the object (18 pixels neighborhood??)
+            1. compute the contour surface of the object (6-pixel-connectivity neighborhood??)
             2. convert from SimpleITK format to Numpy Array Img
             3. remove the zeros from the contour of the object, NOT from the distance map
             4. compute the number of 1's pixels in the contour
@@ -72,7 +73,7 @@ class DistanceMetrics(object):
             
         #%%
         ''' Mauerer Distance Map for the Mask Object (deemed as "ablation" in this particular case)'''
-        segmented_surface_mask = sitk.LabelContour(segmentation)
+        segmented_surface_mask = sitk.LabelContour(segmentation) #aka the ablation file
         segmented_surface_mask_array = sitk.GetArrayFromImage(segmented_surface_mask )
         surface_mask_array_NonZero = segmented_surface_mask_array.nonzero()
         # Get the number of pixels in the mask surface by counting all pixels that are non-zero
@@ -89,7 +90,23 @@ class DistanceMetrics(object):
         '''compute the contour multiplied with the euclidean distances '''
         self.seg2ref_distance_map = mask_distance_map_array*reference_surface_array
         self.ref2seg_distance_map = reference_distance_map_array*segmented_surface_mask_array
-            
+ #%%           
+        '''
+        - plot the distances as heatmap one slice for verification
+        '''
+#        fig1, ax1= plt.subplots()
+#        z = int(np.floor(np.shape(mask_distance_map_array)[0]/2))
+#        heatmap = ax1.imshow(mask_distance_map_array[z,:,:]*(-1))
+#        plt.title('Distance Map for Ablation. 1 Slice Visualization')
+#        plt.colorbar(heatmap)
+#        
+#        fig2, ax2= plt.subplots()
+#        z = int(np.floor(np.shape(self.seg2ref_distance_map)[0]/2))
+#        heatmap = ax2.imshow(self.seg2ref_distance_map[z,:,:]/-255)
+#        plt.title('Ablation to Tumor Surface Distances. 1 Slice Visualization')
+#        plt.colorbar(heatmap)
+        
+#%%
         
         '''remove the zeros from the surface contour(indexes) from the distance maps '''
         self.seg2ref_distances = list(self.seg2ref_distance_map[reference_surface_array_NonZero]/-255) 
