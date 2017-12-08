@@ -33,6 +33,10 @@ def angle_between(epNeedle1,tpNeedle1,epNeedle2,tpNeedle2):
     
     v1 = tpNeedle1_xyz - epNeedle1_xyz
     v2 = tpNeedle2_xyz - epNeedle2_xyz
+    
+    # angle = atan2(vector2.y, vector2.x) - atan2(vector1.y, vector1.x);
+    # if (angle < 0) angle += 2 * M_PI;
+#    angle_tan = np.
         
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
@@ -40,3 +44,5 @@ def angle_between(epNeedle1,tpNeedle1,epNeedle2,tpNeedle2):
     # return the value of the angle in degrees 
     angle_radians = np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
     return degrees(angle_radians)
+
+
