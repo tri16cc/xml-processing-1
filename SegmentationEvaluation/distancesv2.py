@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 class DistanceMetrics(object):
 
     
-    def __init__(self, maskfile , referencefile, flag_symmetric=False, flag_mask2reference=True, flag_reference2mask=False):
+    def __init__(self, maskfile , referencefile, flag_symmetric, flag_mask2reference, flag_reference2mask):
 
         ''' Read the images from the filepaths'''
         reference_segmentation = sitk.ReadImage(referencefile, sitk.sitkUInt8)
