@@ -34,22 +34,20 @@ def plotBinsSurfacePercentage(data, rootdir, flag_all_ranges):
         labels_pos = ['('+ str(x-1)+':'+str(x)+')' for x in range(1,22)]
         xticklabels = labels_neg+labels_pos
         xtickNames = plt.setp(axes, xticklabels=xticklabels)
-        plt.setp(xtickNames, rotation=45, fontsize=10)
+        plt.setp(xtickNames, rotation=45, fontsize=6)
     else:
-        xticklabels = [ r"$(\infty< x < 0$)",r"$(0 \leqslant x < 5$)", r"$(5  \leqslant x   \leqslant 10$)",r"$(10 < x)$"]
+        xticklabels = [ r"$(\infty< x < -10$)",r"$(-10 \leqslant x \leqslant -5$)", r"$(-5 < x \leqslant  0$)", r"$(0< x < 5$)",r"$(5  \leqslant x   \leqslant 10$)",r"$(x > 10)$"]
         xtickNames = plt.setp(axes, xticklabels=xticklabels)
-        plt.setp(xtickNames, fontsize=13, color='black')
+        plt.setp(xtickNames, fontsize=14, color='black')
 
-    axes.tick_params(colors='black', labelsize=13)
+    axes.tick_params(colors='black')
     handles, labels = plt.gca().get_legend_handles_labels()
     by_label = OrderedDict(zip(labels, handles))
-    plt.legend(by_label.values(), by_label.keys(), fontsize=13)
+    plt.legend(by_label.values(), by_label.keys(), fontsize=14)
         
-    #axes.set_xlim([1, 40])
-    #axes.set_ylim([-1, 15])
-    plt.xlabel('Range of Distances [mm]', fontsize=13, color='black')
-    plt.ylabel('Tumor Surface covered by Ablation [%]', fontsize=13, color='black')
-    plt.title('Boxplots for Percentage of Tumor Surface covered by Ablation. 10 Patients (pooled)')
+    plt.xlabel('Range of Distances [mm]', fontsize=14, color='black')
+    plt.ylabel('Tumor Surface covered by Ablation [%]', fontsize=14, color='black')
+    plt.title('Boxplots for Percentage of Tumor Surface covered by Ablation. 10 Patients (pooled)', fontsize=14)
     
     # save figure
     if flag_all_ranges is True:
@@ -57,6 +55,6 @@ def plotBinsSurfacePercentage(data, rootdir, flag_all_ranges):
         
     else:
         figName_hist = 'Boxplots_TheHistogramDistances.png' 
-        figpathHist = os.path.join(rootdir, figName_hist)
-        
+    
+    figpathHist = os.path.join(rootdir, figName_hist)    
     gh.save(figpathHist, width=12, height=10)

@@ -5,12 +5,15 @@ Created on Tue Nov 14 11:43:36 2017
 @author: Raluca Sandu
 """
 import os
+import re
 import time
 import pandas as pd
 import plotHistDistances as pm
 import plotBoxplotSurface as bp
 from distancesv2 import DistanceMetrics 
 from volumemetrics import VolumeMetrics
+import distances_boxplots_all_lesions as bpLesions
+
 #%%
 #plt.style.use('ggplot')
 #plt.style.use('classic')
@@ -49,16 +52,16 @@ df_metrics = pd.DataFrame() # emtpy dataframe to append the segmentation metrics
 ablations = df_patientdata['AblationFile'].tolist()
 reference = df_patientdata['TumorFile'].tolist()
 pats = df_patientdata['PatientName']
+pat_ids = []
 #%%
 '''define empty structures for storing the data into'''
 df_metrics_all = pd.DataFrame()
-distaceMaps_all = []
 # define 2 list for positive and negative ranges of distances [in mm] to plot later in boxplots 
 pos_bins = [[] for x in range(22)]
 neg_bins = [[] for x in range(22)]
-# define 4.lists for the following intervals 0:(<-5mm),1:(-5:0),2:(0-5mm),3:(5-10mm),4:(greater than 10 mm) 
-bins_4intervals = [[] for x in range(4)]
-
+# define 4.lists for the following intervals 0:(<-10mm),1:(-10:-5),1:(-5:0),2:(0-5mm),3:(5-10mm),4:(greater than 10 mm) 
+bins_4intervals = [[] for x in range(6)]
+distanceMaps_allPatients =[]
 #%%
 '''iterate through the lesions&ablations segmentations; plot the histogram of distance'''
     # set-up the flags wether one wants symmetrics distances or from Ablation2Tumor/Tumor2Ablation
@@ -74,13 +77,23 @@ for idx, seg in enumerate(reference):
     df_metrics_all = df_metrics_all.append(df_metrics)
 
     distanceMap_seg2ref = evalmetrics.get_seg2ref_distances()
-    distaceMaps_all.append(distanceMap_seg2ref)
+    distanceMaps_allPatients.append(distanceMap_seg2ref)
     n2 = evalmetrics.num_reference_surface_pixels
     title = 'ablation2tumor'
+
     
-    # function for plotting the distance maps into bars (or histograms) for each tumor (lesion)
-    cols_val, bins = pm.plotHistDistances(pats[idx], idx, rootdir,  distanceMap_seg2ref, n2, title)
-  
+    #%%
+    '''extract the patient id from the folder/file path'''
+    # where pats[idx] contains the name of the folder
+    # and pat_id is extrated from the folder path, find the numeric index written in the folder/file path, assume that is the "true" patient ID
+    try:
+        pat_id_str = re.findall('\\d+', pats[idx])
+        pat_id = int(pat_id_str[0])
+        pat_ids.append(pat_id)
+    except ValueError:
+        print('numeric data not found in the file name')
+        
+    cols_val, bins = pm.plotHistDistances(pats[idx], pat_id, rootdir,  distanceMap_seg2ref, n2, title)
     #%% 
     '''count the percentage of the bins between ranges; plot them wrt surface covered [%]'''
     # 1.iterate through bins. 2for each item in bins add it to new_list[item]+=cols_val
@@ -98,32 +111,51 @@ for idx, seg in enumerate(reference):
     posneg_bins =  neg_bins[:-1]+ pos_bins 
 #%%
     '''sum the bins for specific intervals (eg.0-5,5-10) of each patient then add them to a list for ranges'''   
-    bins_smallerthan0 = 0
-    bins_5_0 = 0
+    bins_smallerthan_minus10 = 0
+    bins_minus10_minus5 = 0
+    bins_minus5_0 = 0
+    bins_0_5 = 0
     bins_5_10 = 0
     bins_greaterthan10 = 0
          
     for idx, item in enumerate(bins[:-1]):
-        if item < 0:
-            bins_smallerthan0 += percent_cols[idx]
+        
+        if item < -10:
+            bins_smallerthan_minus10 += percent_cols[idx]
+        
+        if item >= -10 and item <= -5:
+            bins_minus10_minus5 += percent_cols[idx]
             
-        if item >=0 and item <5:
-            bins_5_0 += percent_cols[idx]
+        if item > -5 and item <= 0:
+            bins_minus5_0 += percent_cols[idx]
   
-        if item>=5 and item <=10:
+        if item > 0 and item < 5 :
+            bins_0_5 += percent_cols[idx]
+            
+        if item >= 5 and item <= 10:
             bins_5_10 += percent_cols[idx]
    
         elif item > 10:
             bins_greaterthan10 += percent_cols[idx]
 
-    bins_4intervals[0].append(bins_smallerthan0)  
-    bins_4intervals[1].append(bins_5_0)    
-    bins_4intervals[2].append(bins_5_10)  
-    bins_4intervals[3].append(bins_greaterthan10)
+    bins_4intervals[0].append(bins_smallerthan_minus10)  
+    bins_4intervals[1].append(bins_minus10_minus5)    
+    bins_4intervals[2].append(bins_minus5_0)  
+    bins_4intervals[3].append(bins_0_5)
+    bins_4intervals[4].append(bins_5_10)
+    bins_4intervals[5].append(bins_greaterthan10)
 
 bp.plotBinsSurfacePercentage(bins_4intervals, rootdir, flag_all_ranges=False)
 bp.plotBinsSurfacePercentage(posneg_bins, rootdir, flag_all_ranges=True)
 
+#%%
+'''plot boxplots of the distanceMaps for each lesion'''
+# sort rows ascending based on pat_id
+df_patientdata['PatientID']  = pat_ids
+df_patientdata['DistanceMaps'] = distanceMaps_allPatients
+df_patients_sorted = df_patientdata.sort_values(['PatientID'], ascending=True)
+data_toplot = df_patients_sorted['DistanceMaps'].tolist()
+bpLesions.plotBoxplots(data_toplot, rootdir)
 #%% 
 ''' save to excel the average of the distance metrics '''
 df_metrics_all.index = list(range(len(df_metrics_all)))
