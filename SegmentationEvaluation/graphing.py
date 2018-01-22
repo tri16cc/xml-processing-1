@@ -82,8 +82,8 @@ def save(path, fignum=None, close=True, width=None, height=None,
             sys.stdout.write("Saving figure to '%s'..." % savepath)
 
         # Actually save the figure
-        plt.savefig(savepath)
-#        plt.savefig(savepath,bbox_inches='tight', dpi=100)
+#        plt.savefig(savepath)
+        plt.savefig(savepath,pad_inches=0)
 
     # Close it
     if close:

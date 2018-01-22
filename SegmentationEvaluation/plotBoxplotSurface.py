@@ -47,7 +47,7 @@ def plotBinsSurfacePercentage(data, rootdir, flag_all_ranges):
         
     plt.xlabel('Range of Distances [mm]', fontsize=14, color='black')
     plt.ylabel('Tumor Surface covered by Ablation [%]', fontsize=14, color='black')
-    plt.title('Boxplots for Percentage of Tumor Surface covered by Ablation. 10 Patients (pooled)', fontsize=14)
+    plt.title('Boxplots for Percentage of Tumor Surface covered by Ablation. 10 Cases (pooled)', fontsize=14)
     
     # save figure
     if flag_all_ranges is True:

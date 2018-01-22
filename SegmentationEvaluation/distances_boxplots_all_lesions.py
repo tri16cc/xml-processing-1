@@ -51,7 +51,7 @@ def plotBoxplots(data, rootdir):
     by_label = OrderedDict(zip(labels, handles))
     plt.legend(by_label.values(), by_label.keys(), fontsize=16)
     
-    plt.title('Boxplots for Euclidean Distances between Tumor and Ablations. 10 Lesions.', fontsize=16)
+    plt.title('Boxplots for Euclidean Distances between Tumor and Ablations. 10 Cases.', fontsize=16)
     plt.xlabel('Lesion', fontsize=16,color='black')
     plt.tick_params(labelsize=16, color='black')
     plt.ylabel('[mm]', fontsize=16, color='black')
