@@ -35,7 +35,9 @@ def plotBinsSurfacePercentage(data, rootdir, flag_all_ranges):
         xticklabels = labels_neg+labels_pos
         xtickNames = plt.setp(axes, xticklabels=xticklabels)
         plt.setp(xtickNames, rotation=45, fontsize=6)
+        
     else:
+        
         xticklabels = [ r"$(\infty< x < -10$)",r"$(-10 \leqslant x \leqslant -5$)", r"$(-5 < x \leqslant  0$)", r"$(0< x < 5$)",r"$(5  \leqslant x   \leqslant 10$)",r"$(x > 10)$"]
         xtickNames = plt.setp(axes, xticklabels=xticklabels)
         plt.setp(xtickNames, fontsize=14, color='black')

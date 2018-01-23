@@ -38,5 +38,9 @@ class VolumeMetrics(object):
                                   columns=[name for name, _ in OverlapMeasures.__members__.items()])
         self.overlap_results_df.columns = ['Dice', 'Jaccard', 'Volume Similarity', 'Volume Overlap Error', 'Relative Volume Difference']
         
+
+    
+    #%%
+
     def get_VolumeMetrics(self):
         return self.overlap_results_df

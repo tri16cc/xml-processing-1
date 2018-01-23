@@ -13,7 +13,6 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 #import seaborn as sns
-from matplotlib.colors import ListedColormap
 plt.style.use('ggplot')
 #%%
 volumes_df = pd.read_excel('volumetricResults.xlsx')
@@ -51,7 +50,6 @@ colors = iter(cm.tab10(np.linspace(0, 1, len(y))))
 labels = volumes_df['Patient number'].tolist()
 labels_1 = ['Case ' + str(x) for x in labels]
 
-
 for xs,ys,lab in zip(x, 1-y2,labels_1):
     ax2.scatter(xs, ys, s=200, marker='o', color=next(colors),label=lab)
 
@@ -61,8 +59,8 @@ ax2.set_ylim([0, 1.04])
 ax2.set_xlim([0.09, 40])
 ax2.set_xscale('log')   
 plt.xlabel(' Tumour Volume (ml)', fontsize=14, color='black')
-plt.ylabel(' Tumour coverage ratio', fontsize=14, color='black')
-plt.title('Tumor coverage ratio with respect to Tumor volume. 10 Cases')
+plt.ylabel(' Tumour Volume Coverage Ratio', fontsize=14, color='black')
+plt.title('Tumor Volume Coverage Ratio with respect to Tumor volume. 10 Cases')
 plt.tick_params(labelsize=14,color='black')
 ax2.tick_params(colors='black', labelsize=14)
 
@@ -73,4 +71,4 @@ leg.get_frame().set_edgecolor('k')
 
 # save figure
 figPath = 'ScatterPlot_volumes.png'
-gh.save(figPath, width=12, height=10)
+#gh.save(figPath, width=12, height=10)

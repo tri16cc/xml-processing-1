@@ -69,7 +69,7 @@ def plotBoxplots(data, rootdir):
     plt.setp(ax2.get_yticklabels(), fontsize=16, color='black')
     ax2.set_ylim([0, 1.04])
     ax2.set_xlim([0.5,len(ys)+0.5])
-    plt.ylabel('Tumour coverage ratio', fontsize=16, color='black')
+    plt.ylabel('Tumour Volume Coverage Ratio', fontsize=16, color='black')
     plt.setp(ax2.get_yticklabels(), color='k')
     plt.xlabel('Case', fontsize=16,color='black')
 #    plt.subplots_adjust(wspace=0, hspace=0)
