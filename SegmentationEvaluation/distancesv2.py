@@ -25,7 +25,6 @@ class DistanceMetrics(object):
     
     def __init__(self, maskfile , referencefile, flag_symmetric, flag_mask2reference, flag_reference2mask):
         
-        print(flag_mask2reference)
         
         ''' Read the images from the filepaths'''
         reference_segmentation = sitk.ReadImage(referencefile, sitk.sitkUInt8)
@@ -33,7 +32,7 @@ class DistanceMetrics(object):
         
         ''' init the enum fields for surface dist measures computer with simpleitk'''
         class SurfaceDistanceMeasuresITK(Enum):
-            hausdorff_distance, max_distance, min_surface_distance, mean_surface_distance, median_surface_distance, std_surface_distance, rms_surface_distance = range(7)
+            hausdorff_distance, max_distance, min_surface_distance, mean_surface_distance, median_surface_distance, std_surface_distance = range(6)
         
         
         class MedpyMetricDists(Enum):
@@ -134,26 +133,19 @@ class DistanceMetrics(object):
         surface_distance_results[0,SurfaceDistanceMeasuresITK.median_surface_distance.value] = np.median(self.surface_distances)
         surface_distance_results[0,SurfaceDistanceMeasuresITK.std_surface_distance.value] = np.std(self.surface_distances)
         
-        # Compute the root mean square distance
-        ref2seg_distances_squared = np.asarray(self.ref2seg_distances) ** 2
-        seg2ref_distances_squared = np.asarray(self.seg2ref_distances) ** 2
-        
-        rms = np.sqrt(1. / (self.num_reference_surface_pixels + self.num_segmented_surface_pixels)) * np.sqrt(seg2ref_distances_squared.sum()  + ref2seg_distances_squared.sum())
-        surface_distance_results[0,SurfaceDistanceMeasuresITK.rms_surface_distance.value] = rms
-        
         # Save to DataFrame
         self.surface_distance_results_df = pd.DataFrame(data=surface_distance_results, index = list(range(1)),
                                       columns=[name for name, _ in SurfaceDistanceMeasuresITK.__members__.items()])
         
         # change the name of the columns
         if flag_symmetric is True:
-            self.surface_distance_results_df.columns = ['Hausdorff', 'Maximum Symmetric', 'Minimum Symmetric', 'Mean Symmetric', 'Median Symmetric', 'Std', 'RMS Symmetric']
+            self.surface_distance_results_df.columns = ['Hausdorff', 'Maximum Symmetric', 'Minimum Symmetric', 'Mean Symmetric', 'Median Symmetric', 'Std']
         
         if flag_reference2mask is True:
-            self.surface_distance_results_df.columns = ['Hausdorff_TA', 'Maximum_TA', 'Minimum_TA', 'Mean_TA', 'Median_TA', 'Std_TA', 'RMS_TA']
+            self.surface_distance_results_df.columns = ['Hausdorff_TA', 'Maximum_TA', 'Minimum_TA', 'Mean_TA', 'Median_TA', 'Std_TA']
 
         if flag_mask2reference is True:
-            self.surface_distance_results_df.columns = ['Hausdorff_AT', 'Maximum_AT', 'Minimum_AT', 'Mean_AT', 'Median_AT', 'Std_AT', 'RMS_AT']
+            self.surface_distance_results_df.columns = ['Hausdorff_AT', 'Maximum_AT', 'Minimum_AT', 'Mean_AT', 'Median_AT', 'Std_AT']
             
         #%%
         ''' use MedPy library for comparision with SimpleITK that values are in the same range'''

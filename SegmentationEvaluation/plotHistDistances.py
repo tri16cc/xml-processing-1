@@ -9,7 +9,7 @@ import numpy as np
 import graphing as gh
 import matplotlib.pyplot as plt
 from collections import OrderedDict
-#plt.style.use('classic')
+#plt.style.use('ggplot')
 #%%    
 def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , title):
 
@@ -69,7 +69,7 @@ def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , titl
     plt.tick_params(labelsize=14,color='black')
     ax.tick_params(colors='black', labelsize=14)
     plt.grid(True)
-    ax.set_xlim([-10, 11])
+    ax.set_xlim([-10, 20])
 
     # edit the y-ticks: change to percentage of surface
     yticks, locs = plt.yticks()
@@ -86,7 +86,7 @@ def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , titl
     by_label = OrderedDict(zip(labels, handles))
     plt.legend(by_label.values(), by_label.keys(), fontsize=14, loc='best')
     
-    plt.title('Ablation to Tumor Euclidean Distances. Patient ' + str(pat_idx), fontsize=14)
+    plt.title(title +' Patient ' + str(pat_idx), fontsize=14)
     
     gh.save(figpathHist, width=12, height=10)
     

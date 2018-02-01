@@ -16,9 +16,17 @@ import DistancesVolumes_twinAxes as twinAxes
 import distances_boxplots_all_lesions as bpLesions
 
 #%%
-#plt.style.use('ggplot')
-#plt.style.use('classic')
-#print(plt.style.available)
+# TO DO : input keyboard prompt user to choose how the distances are computer (ablation to tumor, tumor to ablation)
+#try:
+#    mode=int(input('Choose which distances should be calculated:'))
+#except ValueError:
+#    print("Not a number")
+
+flag_symmetric=False
+flag_ablation2tumor= False
+flag_tumor2ablation= True
+#%%
+
 
 segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 rootdir = "Z:/Public/Raluca&Radek/studyPatientsMasks/GroundTruthDB_ROI/"
@@ -69,17 +77,27 @@ distanceMaps_allPatients =[]
     
 for idx, seg in enumerate(reference):
     
-    evalmetrics = DistanceMetrics(ablations[idx],reference[idx], flag_symmetric=False, flag_mask2reference=True, flag_reference2mask=False)
+    evalmetrics = DistanceMetrics(ablations[idx],reference[idx], flag_symmetric, flag_ablation2tumor, flag_tumor2ablation)
     evaloverlap = VolumeMetrics(ablations[idx],reference[idx])
     df_distances_1set = evalmetrics.get_Distances()
     df_volumes_1set = evaloverlap.get_VolumeMetrics()
     df_metrics = pd.concat([df_volumes_1set, df_distances_1set], axis=1)
     df_metrics_all = df_metrics_all.append(df_metrics)
-
-    distanceMap_seg2ref = evalmetrics.get_seg2ref_distances()
-    distanceMaps_allPatients.append(distanceMap_seg2ref)
-    n2 = evalmetrics.num_reference_surface_pixels
-    title = 'ablation2tumor'
+    
+    if flag_ablation2tumor is True:
+        title = 'Ablation to Tumor Euclidean Distances'
+        distanceMap = evalmetrics.get_seg2ref_distances()
+        distanceMaps_allPatients.append(distanceMap)
+        num_surface_pixels = evalmetrics.num_reference_surface_pixels
+        
+    elif flag_tumor2ablation is True:
+        title = 'Tumor to Ablation Euclidean Distances'
+        distanceMap = evalmetrics.get_ref2seg_distances()
+        distanceMaps_allPatients.append(distanceMap)
+        num_surface_pixels = evalmetrics.num_segmented_surface_pixels
+    else:
+        title = 'Symmetric Distances'
+        #to do : symmetric distances
 
     #%%
     '''extract the patient id from the folder/file path'''
@@ -91,14 +109,16 @@ for idx, seg in enumerate(reference):
         pat_ids.append(pat_id)
     except ValueError:
         print('numeric data not found in the file name')
+        pat_id = "p1" + str(idx)
+        pat_ids.append(pat_id)
         
-    cols_val, bins = pm.plotHistDistances(pats[idx], pat_id, rootdir,  distanceMap_seg2ref, n2, title)
+    cols_val, bins = pm.plotHistDistances(pats[idx], pat_id, rootdir,  distanceMap, num_surface_pixels, title)
     bins_list.append(bins)
     #%% 
     '''count the percentage of the bins between ranges; plot them wrt surface covered [%]'''
     # 1.iterate through bins. 2for each item in bins add it to new_list[item]+=cols_val
     # careful with negative and positive list
-    percent_cols = cols_val/n2 * 100 # change to percentage by dividing each columb by the numbers of voxels on the contour (and in the DistanceMap) 
+    percent_cols = cols_val/num_surface_pixels * 100 # change to percentage by dividing each columb by the numbers of voxels on the contour (and in the DistanceMap) 
     
 #%%
     '''sum the bins for specific intervals (eg.0-5,5-10) of each patient then add them to a list for ranges'''   
@@ -149,10 +169,10 @@ bpLesions.plotBoxplots(data_toplot, rootdir)
 twinAxes.plotBoxplots(data_toplot,rootdir)
 #%% 
 ''' save to excel the average of the distance metrics '''
-#df_metrics_all.index = list(range(len(df_metrics_all)))
-#df_final = pd.concat([df_patientdata, df_metrics_all], axis=1)
-#timestr = time.strftime("%H%M%S-%Y%m%d")
-#filename = 'DistanceVolumeMetrics_Pooled_' + timestr +'.xlsx'
-#filepathExcel = os.path.join(rootdir, filename )
-#writer = pd.ExcelWriter(filepathExcel)
-#df_final.to_excel(writer, index=False, float_format='%.2f')
+df_metrics_all.index = list(range(len(df_metrics_all)))
+df_final = pd.concat([df_patientdata, df_metrics_all], axis=1)
+timestr = time.strftime("%H%M%S-%Y%m%d")
+filename = 'DistanceVolumeMetrics_Pooled_'+ title + '-' + timestr +'.xlsx'
+filepathExcel = os.path.join(rootdir, filename )
+writer = pd.ExcelWriter(filepathExcel)
+df_final.to_excel(writer, index=False, float_format='%.2f')
