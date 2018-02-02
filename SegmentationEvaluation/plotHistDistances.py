@@ -23,7 +23,7 @@ def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , titl
     max_val = int(np.ceil(max(distanceMap)))
     
     fig, ax = plt.subplots()
-#    n, bins, patches = ax.hist(distanceMap, ec='darkgrey')
+#    col_height, bins, patches = ax.hist(distanceMap, ec='darkgrey')
     col_height, bins, patches = ax.hist(distanceMap, ec='darkgrey', bins=range(min_val-1,max_val+1))
     
     voxels_nonablated = []
@@ -62,7 +62,6 @@ def plotHistDistances(pat_name, pat_idx, rootdir, distanceMap, num_voxels , titl
         elif b >= 5:
             plt.setp(p, 'facecolor', 'darkgreen', label='Sufficient Ablation Margin: '+ " %.2f" % sum_perc_ablated + '%')
 
- 
 #%%                   
     '''edit the axes limits and laels'''
     plt.xlabel('[mm]', fontsize=14, color='black')

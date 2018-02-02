@@ -18,12 +18,12 @@ import pandas as pd
 from enum import Enum
 from medpy import metric
 import SimpleITK as sitk
-
+import matplotlib.pyplot as plt
 #%%
 class DistanceMetrics(object):
 
     
-    def __init__(self, maskfile , referencefile, flag_symmetric, flag_mask2reference, flag_reference2mask):
+    def __init__(self, maskfile , referencefile, flag_symmetric, flag_mask2reference, flag_reference2mask, flag_plot):
         
         
         ''' Read the images from the filepaths'''
@@ -90,29 +90,30 @@ class DistanceMetrics(object):
         '''
         - plot the distances as heatmap one slice for verification
         '''
-#        fig1, ax1= plt.subplots()
-#        z = int(np.floor(np.shape(reference_distance_map_array)[0]/2))
-#        heatmap = ax1.imshow(reference_distance_map_array[z,:,:])
-#        plt.title('Distance Map for Tumor. 1 Slice Visualization')
-#        plt.colorbar(heatmap)
-#        
-#        fig2, ax2= plt.subplots()
-#        z = int(np.floor(np.shape(self.ref2seg_distance_map)[0]/2))
-#        heatmap = ax2.imshow(self.ref2seg_distance_map[z,:,:]/255)
-#        plt.title('Tumor to Ablation Surface Distances. 1 Slice Visualization')
-#        plt.colorbar(heatmap)
-#        
-#        fig3, ax3= plt.subplots()
-#        z = int(np.floor(np.shape(mask_distance_map_array)[0]/2))
-#        heatmap = ax3.imshow(mask_distance_map_array[z,:,:])
-#        plt.title('Distance Map for Ablation. 1 Slice Visualization')
-#        plt.colorbar(heatmap)
-#        
-#        fig4, ax4= plt.subplots()
-#        z = int(np.floor(np.shape(self.seg2ref_distance_map)[0]/2))
-#        heatmap = ax4.imshow(self.seg2ref_distance_map[z,:,:]/255)
-#        plt.title('Ablation To Tumor Surface Distances. 1 Slice Visualization')
-#        plt.colorbar(heatmap)
+        if flag_plot is True:
+            fig1, ax1= plt.subplots()
+            z = int(np.floor(np.shape(reference_distance_map_array)[0]/2))
+            heatmap = ax1.imshow(reference_distance_map_array[z,:,:])
+            plt.title('Distance Map for Tumor. 1 Slice Visualization')
+            plt.colorbar(heatmap)
+            
+            fig2, ax2= plt.subplots()
+            z = int(np.floor(np.shape(self.ref2seg_distance_map)[0]/2))
+            heatmap = ax2.imshow(self.ref2seg_distance_map[z,:,:]/255)
+            plt.title('Tumor to Ablation Surface Distances. 1 Slice Visualization')
+            plt.colorbar(heatmap)
+            
+            fig3, ax3= plt.subplots()
+            z = int(np.floor(np.shape(mask_distance_map_array)[0]/2))
+            heatmap = ax3.imshow(mask_distance_map_array[z,:,:])
+            plt.title('Distance Map for Ablation. 1 Slice Visualization')
+            plt.colorbar(heatmap)
+            
+            fig4, ax4= plt.subplots()
+            z = int(np.floor(np.shape(self.seg2ref_distance_map)[0]/2))
+            heatmap = ax4.imshow(self.seg2ref_distance_map[z,:,:]/-255)
+            plt.title('Ablation To Tumor Surface Distances. 1 Slice Visualization')
+            plt.colorbar(heatmap)
         
 #%%        
         '''remove the zeros from the surface contour(indexes) from the distance maps '''

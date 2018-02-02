@@ -25,12 +25,10 @@ import distances_boxplots_all_lesions as bpLesions
 flag_symmetric=False
 flag_ablation2tumor= False
 flag_tumor2ablation= True
+flag_plot = False
 #%%
-
-
 segmentation_data = [] # list of dictionaries containing the filepaths of the segmentations
 rootdir = "Z:/Public/Raluca&Radek/studyPatientsMasks/GroundTruthDB_ROI/"
-#rootdir = "C:/Users/Raluca Sandu/Documents/LiverInterventionsBern_Ablations/studyPatientsMasks/"
 
 for subdir, dirs, files in os.walk(rootdir):
     tumorFilePath  = ''
@@ -77,7 +75,7 @@ distanceMaps_allPatients =[]
     
 for idx, seg in enumerate(reference):
     
-    evalmetrics = DistanceMetrics(ablations[idx],reference[idx], flag_symmetric, flag_ablation2tumor, flag_tumor2ablation)
+    evalmetrics = DistanceMetrics(ablations[idx],reference[idx], flag_symmetric, flag_ablation2tumor, flag_tumor2ablation, flag_plot)
     evaloverlap = VolumeMetrics(ablations[idx],reference[idx])
     df_distances_1set = evalmetrics.get_Distances()
     df_volumes_1set = evaloverlap.get_VolumeMetrics()
@@ -107,7 +105,7 @@ for idx, seg in enumerate(reference):
         pat_id_str = re.findall('\\d+', pats[idx])
         pat_id = int(pat_id_str[0])
         pat_ids.append(pat_id)
-    except ValueError:
+    except Exception:
         print('numeric data not found in the file name')
         pat_id = "p1" + str(idx)
         pat_ids.append(pat_id)
