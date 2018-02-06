@@ -4,6 +4,7 @@ Created on Mon Feb  5 10:20:31 2018
 
 @author: Raluca Sandu
 """
+import numpy as np
 
 class Patient():
         
@@ -11,15 +12,15 @@ class Patient():
         self.lesions = []
         self.patientId = patientId
         
-    
-    def addNewLesion(self):
-        lesion = Lesion()
-        self.addLesion(lesion)
-        return lesion
-    
     def addLesion(self, lesion):
         self.lesions.append(lesion)
-    
+        
+    def addNewLesion(self,location):
+        lesion = Lesion(location)
+        self.addLesion(lesion)
+        return lesion
+
+     
     def getLesions(self):
         return self.lesions
     
@@ -45,7 +46,12 @@ class Lesion():
             raise Exception('Lesion Location not given')
     
     def distanceTo(self, otherLesion):
-        
+        # compute euclidean distances for TPE to check whether the same lesion
+        tp1 = otherLesion.location
+        tp2 = self.lesion.location
+        dist = np.linalg.norm(tp1-tp2)
+        return dist
+        pass
     
     def getNeedles(self):
         return self.needles
@@ -53,8 +59,8 @@ class Lesion():
     def addNeedle(self, needle):
         self.needles.append(needle)
         
-    def newNeedle(self):
-        needle = Needle(False, self)
+    def newNeedle(self, isreference):
+        needle = Needle(isreference, self)
         self.needles.append(needle)
         return needle
     

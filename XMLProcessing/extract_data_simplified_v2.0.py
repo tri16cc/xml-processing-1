@@ -11,7 +11,7 @@ import untangle as ut
 from datetime import datetime
 import IRE_Extract as ie
 
-#%%
+
 
 def elementExists(node, attr):
     '''check if elements exists, as a xml tag or as an attribute'''
@@ -40,11 +40,13 @@ def III_parseTrajectory(trajectories):
         if (xmlTrajectory['type']) and 'IRE' in xmlTrajectory['type']:
             # check if patient[i].lesion[k] already exists
             # if lesion doesn't exist create, otherwise overwrite
-            lesion = Lesion()
-            patient.addLesion(ie.Lesion())
+            targetPoint = xmlTrajectory.TargetPoint.cdata
+            location = np.array([float(i) for i in targetPoint.split()])
+            lesion = patient.addNewLesion(ie.Lesion(location))
             needle1 = lesion.newNeedle()
-            trajectory.set(xmlTrajectory.EntryPoint.cdata)
-            trajectory.set(xmlTrajectory.TargetPoint.cdata)
+#            trajectory.set(xmlTrajectory.EntryPoint.cdata)
+#            trajectory.set(xmlTrajectory.TargetPoint.cdata)
+            # tpNeedle1_xyz = np.array([float(i) for i in tpNeedle.split()])
             for singleTrajectory in xmlTrajectory.Children.Trajectory:
                 parseTrajectory(singleTrajectory)
     
@@ -67,7 +69,7 @@ def II_parseTrajectories(xmlobj):
         print('No trajectory was found in the excel file')
         return None
     
-#%%
+
 xmlfilename = 'multipleLesionsIRE.xml'
 xmlobj = I_parseRecordingXML(xmlfilename,'1')
 patient = ie.Patient(1)
