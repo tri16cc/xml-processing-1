@@ -27,6 +27,25 @@ def elementExists(node, attr):
             return False
 
 
+
+def extractTPES(tpes):
+    '''function to extract the TPEs values'''
+    
+    if elementExists('singleTrajectory.Measurements.Measurement.TPEErrors', 'targetLateral'):
+        targetLateral = tpes['targetLateral'][0:5]
+        targetLongitudinal = tpes['targetLongitudinal'][0:5]
+        targetAngular = tpes['targetAngular'][0:5]
+        targetResidual = tpes['targetResidualError'][0:5]
+    else:
+        # the case where the TPE errors are 0 in the TPE<0>. instead they are attributes of the measurement   
+        targetLateral = tpes['targetLateral'][0:5]
+        targetLongitudinal = tpes['targetLongitudinal'][0:5]
+        targetAngular = tpes['targetAngular'][0:5]
+        targetResidual = tpes['targetResidualError'][0:5]
+        
+    return targetLateral, targetLongitudinal, targetAngular, targetResidual
+
+
 def I_parseRecordingXML(filename, patient):
     try:
         xmlobj = ut.parse(xmlfilename)
@@ -43,26 +62,21 @@ def IV_parseNeedles(childrenTrajectories, lesion):
             print('No Measurement for this needle') 
             # nothing to replace
         else:
-            if elementExists('singleTrajectory.Measurements.Measurement.TPEErrors', 'targetLateral'):
-                targetLateral = singleTrajectory.Measurements.Measurement.TPEErrors['targetLateral'][0:5]
-                targetLongitudinal = singleTrajectory.Measurements.Measurement.TPEErrors['targetLongitudinal'][0:5]
-                targetAngular = singleTrajectory.Measurements.Measurement.TPEErrors['targetAngular'][0:5]
-                targetResidual = singleTrajectory.Measurements.Measurement.TPEErrors['targetResidualError'][0:5]
-            else:
-                # the case where the TPE errors are 0 in the TPE<0>. instead they are attributes of the measurement   
-                targetLateral = singleTrajectory.Measurements.Measurement['targetLateral'][0:5]
-                targetLongitudinal = singleTrajectory.Measurements.Measurement['targetLongitudinal'][0:5]
-                targetAngular = singleTrajectory.Measurements.Measurement['targetAngular'][0:5]
-                targetResidual = singleTrajectory.Measurements.Measurement['targetResidualError'][0:5]
+            targetLateral,targetAngular,targetLongitudinal, targetResidual \
+                = extractTPES(singleTrajectory.Measurements.Measurement.TPEErrors)
                 
          # TO DO: check if the <Measurements> exists, overwrite it
+         #
         needle = lesion.NewNeedle(False)
-        ep = singleTrajectory.Measurements.Measurement.EntryPoint.cdata
-        tp = singleTrajectory.Measurements.Measurement.TargetPoint.cdata
-        needle.setPlannedTrajectory(ie.Trajectory(ep,tp))
+        epV = singleTrajectory.Measurements.Measurement.EntryPoint.cdata
+        tpV = singleTrajectory.Measurements.Measurement.TargetPoint.cdata
+        epP = singleTrajectory.EntryPoint.cdata
+        tpP = singleTrajectory.TargetPoint.cdata
+        needle.setPlannedTrajectory(ie.Trajectory(epP,tpP))
+        needle.setValidationTrajectory(ie.Trajectory(epV,tpV))
         tps = needle.setTPE(ie.TPEErrors())
         tps.setTPEErrors(targetLateral, targetAngular,targetLongitudinal, targetResidual)
-    pass
+    
 
 
 def III_parseTrajectory(trajectories):
@@ -90,7 +104,7 @@ def III_parseTrajectory(trajectories):
             continue
         
         # call function to assign the needles for each lesion
-        IV_parseNeedles(childrenTrajectories, lesion )
+        IV_parseNeedles(childrenTrajectories, lesion)
 
 
 
