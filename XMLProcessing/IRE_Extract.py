@@ -7,9 +7,9 @@ Created on Mon Feb  5 10:20:31 2018
 
 class Patient():
         
-    def __init__(self):
+    def __init__(self,patientId):
         self.lesion = []
-        self.patientId
+        self.patientId = patientId
         
     def addLesion(self, lesion):
         self.lesion.append(lesion)
@@ -68,6 +68,7 @@ class TPEErrors():
         self.euclidean = euclidean
         
     def calculateTPEErrors(self,plannedTrajectory, validationTrajectory,offset):
+        # in case of offset
         pass
 
 class Trajectory():
