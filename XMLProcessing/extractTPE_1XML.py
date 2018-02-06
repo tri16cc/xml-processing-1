@@ -13,6 +13,7 @@ from datetime import datetime
 '''Functions for Parsing the XML Structure'''
 
 def elementExists(node, attr):
+    '''check if elements exists, as a xml tag or as an attribute'''
     try:
         xmlElement = eval(node +'.' + attr)
         return True
@@ -66,10 +67,16 @@ for trajectory in trajectories:
     elif not(trajectory['type'] and 'EG_ATOMIC' in trajectory['type']):
         childrenTrajectory = trajectory
         LesionCount +=1
-        
+
+Lesions = [[] for x in range(LesionCount)]
+
+for trajectory in trajectories:
+    Needle = 0       
     for singletrajectory in childrenTrajectory:
         NeedleCount +=1
+# define lists for lesion and needle
 
+Needles = [[] for x in range(NeedleCount)]
 # count how many trajectories are defined into the children trajectory --> number of needles for each trajectory
 #%%
 for trajectory in trajectories:
@@ -83,7 +90,7 @@ for trajectory in trajectories:
         epRef = ''
         tpRef = ''
     else:
-        print('well fuck')
+        print('MWA Needle')
         continue
     for singleTrajectory in childrenTrajectory:
         if elementExists('singleTrajectory', 'Measurements') is False:
@@ -120,8 +127,6 @@ for trajectory in trajectories:
 #            NeedleCount+=1
             IRE_data.append(single_measurement_errors)
 
-        
-        
 #%%                
 df1 = pd.DataFrame(IRE_data)              
 
