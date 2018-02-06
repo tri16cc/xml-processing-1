@@ -8,20 +8,44 @@ Created on Mon Feb  5 10:20:31 2018
 class Patient():
         
     def __init__(self,patientId):
-        self.lesion = []
+        self.lesions = []
         self.patientId = patientId
         
+    
+    def addNewLesion(self):
+        lesion = Lesion()
+        self.addLesion(lesion)
+        return lesion
+    
     def addLesion(self, lesion):
-        self.lesion.append(lesion)
+        self.lesions.append(lesion)
     
     def getLesions(self):
-        return self.lesion
+        return self.lesions
+    
+    def findLesion(self,lesion):
+        threshold = 2
+        foundLesions = list(filter(lambda l: 
+            l.distanceTo(lesion) < threshold, self.lesions))
+        if len(foundLesions) == 0:
+            return None
+        elif len(foundLesions) == 1:
+            return foundLesions[0]
+        else:
+            raise Exception('Something went wrong')
 
     
 class Lesion():
-    
-    def __init__(self):
+    # location is a numpy array
+    def __init__(self, location):
         self.needles = []
+        if location is not None and len(location) is 3:
+            self.location = location
+        else:
+            raise Exception('Lesion Location not given')
+    
+    def distanceTo(self, otherLesion):
+        
     
     def getNeedles(self):
         return self.needles
