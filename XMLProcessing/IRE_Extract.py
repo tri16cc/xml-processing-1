@@ -79,8 +79,11 @@ class Needle():
     def setValidationTrajectory(self,trajectory):
         self.validation = trajectory
     
-    def setTPE(self, tpe):
-        self.tpeerrors = tpe
+    def setTPE(self, tpes):
+        tpes = TPEErrors()
+        return tpes
+#        self.tpeerrors = tpe
+#        return self.tpeerorrs
         
 
 class TPEErrors():

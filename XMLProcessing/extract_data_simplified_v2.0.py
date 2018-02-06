@@ -7,6 +7,7 @@ Created on Mon Feb  5 15:04:29 2018
 
 import os
 import time
+import numpy as np
 import untangle as ut
 from datetime import datetime
 import IRE_Extract as ie
@@ -25,12 +26,43 @@ def elementExists(node, attr):
         else:
             return False
 
+
 def I_parseRecordingXML(filename, patient):
     try:
-        obj = ut.parse(xmlfilename)
+        xmlobj = ut.parse(xmlfilename)
+        return xmlobj
     except Exception:
         print('XML file structure is broken, cannot read XML')
         return None
+
+
+def IV_parseNeedles(childrenTrajectories, lesion):
+    
+    for singleTrajectory in childrenTrajectories:
+        if elementExists('singleTrajectory', 'Measurements') is False:
+            print('No Measurement for this needle') 
+            # nothing to replace
+        else:
+            if elementExists('singleTrajectory.Measurements.Measurement.TPEErrors', 'targetLateral'):
+                targetLateral = singleTrajectory.Measurements.Measurement.TPEErrors['targetLateral'][0:5]
+                targetLongitudinal = singleTrajectory.Measurements.Measurement.TPEErrors['targetLongitudinal'][0:5]
+                targetAngular = singleTrajectory.Measurements.Measurement.TPEErrors['targetAngular'][0:5]
+                targetResidual = singleTrajectory.Measurements.Measurement.TPEErrors['targetResidualError'][0:5]
+            else:
+                # the case where the TPE errors are 0 in the TPE<0>. instead they are attributes of the measurement   
+                targetLateral = singleTrajectory.Measurements.Measurement['targetLateral'][0:5]
+                targetLongitudinal = singleTrajectory.Measurements.Measurement['targetLongitudinal'][0:5]
+                targetAngular = singleTrajectory.Measurements.Measurement['targetAngular'][0:5]
+                targetResidual = singleTrajectory.Measurements.Measurement['targetResidualError'][0:5]
+                
+         # TO DO: check if the <Measurements> exists, overwrite it
+        needle = lesion.NewNeedle(False)
+        ep = singleTrajectory.Measurements.Measurement.EntryPoint.cdata
+        tp = singleTrajectory.Measurements.Measurement.TargetPoint.cdata
+        needle.setPlannedTrajectory(ie.Trajectory(ep,tp))
+        tps = needle.setTPE(ie.TPEErrors())
+        tps.setTPEErrors(targetLateral, targetAngular,targetLongitudinal, targetResidual)
+    pass
 
 
 def III_parseTrajectory(trajectories):
@@ -43,22 +75,23 @@ def III_parseTrajectory(trajectories):
             targetPoint = xmlTrajectory.TargetPoint.cdata
             location = np.array([float(i) for i in targetPoint.split()])
             lesion = patient.addNewLesion(ie.Lesion(location))
-            needle1 = lesion.newNeedle()
-#            trajectory.set(xmlTrajectory.EntryPoint.cdata)
-#            trajectory.set(xmlTrajectory.TargetPoint.cdata)
-            # tpNeedle1_xyz = np.array([float(i) for i in tpNeedle.split()])
-            for singleTrajectory in xmlTrajectory.Children.Trajectory:
-                parseTrajectory(singleTrajectory)
+            needle1 = lesion.newNeedle(True)
+            ep = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
+            tp = np.array([float(i) for i in xmlTrajectory.TargetPoint.cdata.split()])
+            needle1.setPlannedTrajectory(ie.Trajectory(ep,tp))
+            childrenTrajectories = xmlTrajectory.Children.Trajectory
     
-        elif not(trajectory['type'] and 'EG_ATOMIC' in trajectory['type']):
-            trajectory = ie.Trajectory(False)
-            trajectory = ie.Patient
+        elif not(xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
+            # no reference trajectory defined - special case
+            childrenTrajectories = xmlTrajectory
+            #  special case TO DO
         else:
-            pass
-    
-        if elementExists('singleTrajectory', 'Measurements') is False:
-                print('No Measurement for this needle')
-            else:
+            print('MWA Needle') # and continue to loop through the trajectories
+            continue
+        
+        # call function to assign the needles for each lesion
+        IV_parseNeedles(childrenTrajectories, lesion )
+
 
 
 def II_parseTrajectories(xmlobj):
