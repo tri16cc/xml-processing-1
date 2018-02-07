@@ -20,7 +20,6 @@ class Patient():
         self.addLesion(lesion)
         return lesion
 
-     
     def getLesions(self):
         return self.lesions
     
