@@ -59,7 +59,7 @@ class Lesion():
         self.needles.append(needle)
         
     def newNeedle(self, isreference):
-        needle = Needle(isreference, self)
+        needle = Needle(isreference,self)
         self.needles.append(needle)
         return needle
     
