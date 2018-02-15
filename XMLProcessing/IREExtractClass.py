@@ -55,13 +55,11 @@ class Lesion():
     def getNeedles(self):
         return self.needles
     
-    def addNeedle(self, needle):
-        self.needles.append(needle)
-        
     def newNeedle(self, isreference):
         needle = Needle(isreference,self)
         self.needles.append(needle)
         return needle
+    
     
 class Needle():
     
@@ -78,30 +76,41 @@ class Needle():
     def setValidationTrajectory(self,trajectory):
         self.validation = trajectory
     
-    def setTPE(self, tpes):
-        tpes = TPEErrors()
-        return tpes
-#        self.tpeerrors = tpe
-#        return self.tpeerorrs
+    def setTPEs(self):
+        self.tpeerorrs = TPEErrors()
+        return self.tpeerorrs
+
+    def getTPEs(self):
+        return self.tpeerorrs
+    
+    def getPlannedTrajectory(self):
+        return self.planned
+    
+    def getValidationTrajectory(self):
+        return self.validation
         
 
 class TPEErrors():
     
     def __init__(self):
-        self.lateral = None
         self.angular = None
         self.longitudinal = None
+        self.lateral = None
         self.euclidean = None
+#        self.needle = needle
         
     def setTPEErrors(self, lateral, angular, longitudinal, euclidean):
-        self.lateral = lateral
+
         self.angular = angular
         self.longitudinal = longitudinal
+        self.lateral = lateral
         self.euclidean = euclidean
+      
         
     def calculateTPEErrors(self,plannedTrajectory, validationTrajectory,offset):
-        # in case of offset
+        # in case of offset that wasn't accounted for in the old versions of cascination
         pass
+
 
 class Trajectory():
     

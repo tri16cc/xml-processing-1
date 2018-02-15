@@ -33,15 +33,15 @@ def IV_parseNeedles(childrenTrajectories, lesion):
         INPUT: 1. xml tree structure for child trajectories 2. lesion object
         OUTPUT: doesn't return anything, just sets the TPEs
     '''
-#    print(childrenTrajectories)
     for singleTrajectory in childrenTrajectories:
+
         if elementExists(singleTrajectory,'singleTrajectory', 'Measurements') is False:
-            print('No Measurement for this needle') 
-            # nothing to replace
+            print('No Measurement for this needle')              # nothing to replace
         else:
+            print('trALALALA')
             targetLateral,targetAngular,targetLongitudinal, targetResidual \
                 = extractTPES(singleTrajectory.Measurements.Measurement.TPEErrors)
-                
+            
              # TO DO: check if the <Measurements> exists, overwrite it
              # Search function implemented in IREExract Class
             needle = lesion.NewNeedle(False) # False - the needle is not a reference trajectory
@@ -51,7 +51,7 @@ def IV_parseNeedles(childrenTrajectories, lesion):
             tpP = singleTrajectory.TargetPoint.cdata
             needle.setPlannedTrajectory(ie.Trajectory(epP,tpP))
             needle.setValidationTrajectory(ie.Trajectory(epV,tpV))
-            tps = needle.setTPE(ie.TPEErrors())
+            tps = needle.setTPEs()
             tps.setTPEErrors(targetLateral, targetAngular,targetLongitudinal, targetResidual)
     
 
@@ -72,23 +72,22 @@ def III_parseTrajectory(trajectories):
             location = np.array([float(i) for i in targetPoint.split()])
             # does a different lesion need to be created every time
             lesion = patient.addNewLesion(location)
-            needle1 = lesion.newNeedle(True)
+            needle = lesion.newNeedle(True)
             ep = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
             tp = np.array([float(i) for i in xmlTrajectory.TargetPoint.cdata.split()])
-            needle1.setPlannedTrajectory(ie.Trajectory(ep,tp))
+            needle.setPlannedTrajectory(ie.Trajectory(ep,tp))
             childrenTrajectories = xmlTrajectory.Children.Trajectory
-    
+#            IV_parseNeedles(childrenTrajectories, lesion)
+                            
         elif not(xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
             # TO DO: no reference trajectory defined - CAS old version
             childrenTrajectories = xmlTrajectory
-            # 
+#            IV_parseNeedles(childrenTrajectories, lesion)
         else:
             print('MWA Needle') # and continue to loop through the parent trajectories
             continue
         
-#        return childrenTrajectories, lesion
-        # call function to assign the needles for each lesion
-        IV_parseNeedles(childrenTrajectories, lesion)
+    return childrenTrajectories, lesion
 
 
 
@@ -104,12 +103,12 @@ def II_parseTrajectories(xmlobj):
         return None
 
 #%%   
-xmlfilename = 'multipleLesionsIRE.xml'
+xmlfilename = 'singleTrajectoryTest.xml'
 xmlobj = I_parseRecordingXML(xmlfilename,'1')
 patient = ie.Patient(1)
 if xmlobj is not None:
     trajectories = II_parseTrajectories(xmlobj)
 
 # call the 3rd function to parse the needles
-III_parseTrajectory(trajectories)
+childrenTrajectories, lesion = III_parseTrajectory(trajectories)
     
