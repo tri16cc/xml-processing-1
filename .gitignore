@@ -110,3 +110,8 @@ db.sqlite3
 # xml
 *.xml
 *.iml
+
+# Excel and CSV files
+*.csv
+*.xlsx
+*.xls

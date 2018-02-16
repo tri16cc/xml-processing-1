@@ -8,7 +8,7 @@ from elementExistsXml import elementExists
 
 
 def extractTPES(tpes):
-    '''function to extract the TPEs values
+    '''function to extract the TPEs (target positioning errors) values
         INPUT: singleTrajectory.Measurements.Measurement.TPEErrors
         OUTPUT: target errors as tuple of 4 
     '''
@@ -17,12 +17,12 @@ def extractTPES(tpes):
         targetLateral = tpes['targetLateral'][0:5]
         targetLongitudinal = tpes['targetLongitudinal'][0:5]
         targetAngular = tpes['targetAngular'][0:5]
-        targetResidual = tpes['targetResidualError'][0:5]
+        targetEuclidean = tpes['targetResidualError'][0:5]
     else:
         # the case where the TPE errors are 0 in the TPE<0>. instead they are attributes of the measurement   
         targetLateral = tpes['targetLateral'][0:5]
         targetLongitudinal = tpes['targetLongitudinal'][0:5]
         targetAngular = tpes['targetAngular'][0:5]
-        targetResidual = tpes['targetResidualError'][0:5]
+        targetEuclidean = tpes['targetResidualError'][0:5]
         
-    return targetLateral, targetLongitudinal, targetAngular, targetResidual
+    return targetLateral, targetAngular, targetLongitudinal, targetEuclidean

@@ -97,7 +97,6 @@ class TPEErrors():
         self.longitudinal = None
         self.lateral = None
         self.euclidean = None
-#        self.needle = needle
         
     def setTPEErrors(self, lateral, angular, longitudinal, euclidean):
 
