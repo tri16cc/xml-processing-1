@@ -5,10 +5,10 @@ Created on Thu Feb 15 11:15:43 2018
 @author: Raluca Sandu
 """
 
-def elementExists(node,nodeStr, attrStr):
+def elementExists(node, attrStr):
     '''check if elements exists, as a xml tag or as an attribute'''
     try:
-        xmlElement = eval(nodeStr + '.' + attrStr)
+        xmlElement = eval('node' + '.' + attrStr)
         return True
     except Exception:
         if (node[attrStr]):

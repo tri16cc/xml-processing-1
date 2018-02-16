@@ -13,7 +13,7 @@ def extractTPES(tpes):
         OUTPUT: target errors as tuple of 4 
     '''
     
-    if elementExists(tpes,'tpes', 'targetLateral'):
+    if elementExists(tpes, 'targetLateral'):
         targetLateral = tpes['targetLateral'][0:5]
         targetLongitudinal = tpes['targetLongitudinal'][0:5]
         targetAngular = tpes['targetAngular'][0:5]
