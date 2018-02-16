@@ -15,13 +15,13 @@ import time
 import pandas as pd
 import untangle as ut
 
-
-srvPath = '\\\\cochlea.artorg.unibe.ch\IGT\Projects\LIVER\_Clinical_Data\Interventions'
+# this script is broken and I have no clue why
+srvPath = '\\\\cochlea.artorg.unibe.ch\IGT\Projects\LIVER\_Clinical_Data'
 foundData = []
 
 for dirname, dirnames, filenames in os.walk(srvPath):
-    if dirname.find('datasets') == -1:
-        continue
+#    if dirname.find('datasets') == -1:
+#        continue
     # find the datasets folder
     for filename in filenames:
         # find the xml file ": PatientIntials.xml"
@@ -57,6 +57,7 @@ for dirname, dirnames, filenames in os.walk(srvPath):
                                 # add all the tumor data to a new list
                                 if 'tumor'.casefold() in res.cdata.casefold() or \
                                 'Metastas'.casefold() in res.cdata.casefold() or \
+                                'Met'.casefold() in res.cdata.casefold() or \
                                 'Cyst'.casefold() in res.cdata.casefold():
                                    # remove the "./" in front of the filename
                                     filenameTumor = res.FILENAME.cdata[2:]
