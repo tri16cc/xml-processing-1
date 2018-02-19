@@ -23,6 +23,8 @@ class Patient():
     def getLesions(self):
         return self.lesions
     
+#    def findPatient(self,patientId):
+        
     def findLesion(self,lesion):
         threshold = 2
         foundLesions = list(filter(lambda l: 

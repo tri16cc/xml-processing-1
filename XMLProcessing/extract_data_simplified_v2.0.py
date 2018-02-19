@@ -4,8 +4,8 @@ Created on Mon Feb  5 15:04:29 2018
 
 @author: Raluca Sandu
 """
-from IPython import get_ipython
-get_ipython().magic('reset -sf')
+#from IPython import get_ipython
+#get_ipython().magic('reset -sf')
 
 import numpy as np
 import untangle as ut
@@ -70,6 +70,8 @@ def III_parseTrajectory(trajectories,patient):
             # we just need to retrieve that specific lesion
             # first, find the patient, then find its lesion (?) 
             # the correct amount of lesions is created
+            
+            # function to check if the lesion exists based on location returning true or false
             ep = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
             tp = np.array([float(i) for i in xmlTrajectory.TargetPoint.cdata.split()])
             
@@ -103,10 +105,23 @@ def II_parseTrajectories(xmlobj):
 #%%   
 xmlfilename = 'multipleLesionsIRE.xml'
 xmlobj = I_parseRecordingXML(xmlfilename,'1')
-patient = ie.Patient(1)
+# for this case, 
+patientId = 1
+patients_list =  []
+
 if xmlobj is not None:
+    # parse trajectories
     trajectories = II_parseTrajectories(xmlobj)
+    # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
+    patient = [x for x in patients_list if x.patientId == patientId]
+    if not patient:
+        patient = ie.Patient(patientId)
+   
     III_parseTrajectory(trajectories, patient)
 
-
+#%%
+#patients_list = []
+#patients_list.append(patient)
+# a = [x for x in patients_list if x.patientId ==1]
+# a[0].getLesions()
 # call the 3rd function to parse the needles
