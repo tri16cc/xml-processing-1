@@ -13,7 +13,7 @@ def getInteger(prompt, mustBePositive=False):
     v = None
     while v is None:
         try:
-            vIn = raw_input(prompt + ':')
+            vIn = input(prompt + ':')
             v = int(vIn)
             if mustBePositive and v < 1:
                 print("You must enter a POSITIVE number")
@@ -26,7 +26,7 @@ def getInteger(prompt, mustBePositive=False):
 def getNonEmptyString(prompt):
     v = None
     while v is None or len(v) == 0:
-        v = raw_input(prompt + ':').strip()
+        v = input(prompt + ':').strip()
     return v
 
     
@@ -35,7 +35,7 @@ def getChoice(prompt, choices):
     choices = list(map(lambda L: L.lower(), choices))
     clf_name = None
     while clf_name is None:
-        clf = raw_input(prompt + ' (any of ' + ",".join(choices) + '):').lower()
+        clf = input(prompt + ' (any of ' + ",".join(choices) + '):').lower()
         if clf in choices:
            clf_name = clf 
            return clf_name
