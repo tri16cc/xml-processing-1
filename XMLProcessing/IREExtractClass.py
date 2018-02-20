@@ -19,9 +19,8 @@ class PatientRepo():
     def getPatients(self):
         return self.patients
     
-#    def __getPatient__(self, key):
-        
 
+        
 
 class Patient():
         

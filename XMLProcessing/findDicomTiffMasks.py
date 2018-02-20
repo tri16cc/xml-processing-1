@@ -15,7 +15,7 @@ import time
 import pandas as pd
 import untangle as ut
 
-# this script is broken and I have no clue why
+#
 srvPath = '\\\\cochlea.artorg.unibe.ch\IGT\Projects\LIVER\_Clinical_Data'
 foundData = []
 
