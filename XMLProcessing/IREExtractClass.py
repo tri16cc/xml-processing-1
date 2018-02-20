@@ -6,6 +6,23 @@ Created on Mon Feb  5 10:20:31 2018
 """
 import numpy as np
 
+class PatientRepo():
+    
+    def __init__(self):
+        self.patients = []
+        
+    def addNewPatient(self, patientId):
+        patient = Patient(patientId)
+        self.patients.append(patient)
+        return patient
+    
+    def getPatients(self):
+        return self.patients
+    
+#    def __getPatient__(self, key):
+        
+
+
 class Patient():
         
     def __init__(self,patientId):

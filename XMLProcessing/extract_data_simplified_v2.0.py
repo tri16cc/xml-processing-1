@@ -107,18 +107,21 @@ xmlfilename = 'multipleLesionsIRE.xml'
 xmlobj = I_parseRecordingXML(xmlfilename,'1')
 # for this case, 
 patientId = 1
-patients_list =  []
+patients = ie.PatientRepo()
 
 if xmlobj is not None:
     # parse trajectories
     trajectories = II_parseTrajectories(xmlobj)
     # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
-    patient = [x for x in patients_list if x.patientId == patientId]
+    patient = [x for x in patients if x.patientId == patientId]
     if not patient:
-        patient = ie.Patient(patientId)
-   
-    III_parseTrajectory(trajectories, patient)
-
+        # create patient measuerements
+        one_patient = patients.addNewPatient(patientId)
+        III_parseTrajectory(trajectories, one_patient)
+    else:
+        # update patient measurements
+        III_parseTrajectory(trajectories, patient)
+# list of patients must be created within class --> so it can be easily overwritten    
 #%%
 #patients_list = []
 #patients_list.append(patient)
