@@ -35,11 +35,25 @@ def get_pixels_hu(scans):
     
     return np.array(image, dtype=np.int16)
 
+def read_dicom_dir(dirname):
+    files = os.listdir(dirname)
+    slices = [dicom.read_file(os.path.join(dirname, filename)) for filename in files]
+    slices.sort(key = lambda x: int(x.InstanceNumber))
+    return slices
+
 #%%
 
-rootdir = "\\cochlea.artorg.unibe.ch\IGT\Projects\LIVER\_Clinical_Data\Interventions\Bern\2017"
+rootdir = "\\\\cochlea.artorg.unibe.ch\IGT\Projects\LIVER\_Clinical_Data\Interventions\Bern\\2017\\17-08-25 Pat_Comuzzi Giovanni_0003622770_2018-01-19_11-49-26"
 
-for dirname, dirnames, filenames in os.walk(rootdir):
-        print("dirname:_",dirname)
-        print('dirnames:_', dirnames)
-        print('filenames:_', filenames)
+for dirpath, dirnames, filenames in os.walk(rootdir):
+    rootpath, studyName = os.path.split(dirpath)
+    if studyName == 'IR Data':
+        for dirname in dirnames:
+            dirStudy = os.path.join(dirpath, dirname)
+            print('dirstudy', dirStudy)
+            for series in os.listdir(dirStudy):
+                seriesPath = os.path.join(dirStudy, series)
+                slices = read_dicom_dir(seriesPath)
+                break
+#                print('series',series)
+

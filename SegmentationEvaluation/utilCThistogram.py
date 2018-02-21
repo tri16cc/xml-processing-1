@@ -45,24 +45,17 @@ def normalize(image):
     return image
 
 #%%
-dirname =  'C:/CT_Scan_Needles_HistTest/Series_37/'
+dirname =  'C:/CT_Scan_Needles_HistTest/Series_28'
 files = os.listdir(dirname)
 slices = [dicom.read_file(os.path.join(dirname, filename)) for filename in files]
 slices.sort(key = lambda x: int(x.InstanceNumber))
-try:
-    slice_thickness = np.abs(slices[0].ImagePositionPatient[2] - slices[1].ImagePositionPatient[2])
-except:
-    slice_thickness = np.abs(slices[0].SliceLocation - slices[1].SliceLocation)
-    
-for s in slices:
-    s.SliceThickness = slice_thickness
 
 imgs = get_pixels_hu(slices)
 
 #%%
 ''' plot histogram '''
 fig, ax = plt.subplots()
-col_height, bins, patches = ax.hist(imgs.flatten(), bins=50,ec='darkgrey')
+col_height1, bins1, patches = ax.hist(imgs.flatten(), bins=50,ec='darkgrey')
 plt.xlabel('Hounsfield Units')
 plt.ylabel('Frequency')
 # it seems that the needle is at 3000
