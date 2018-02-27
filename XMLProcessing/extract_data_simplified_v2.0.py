@@ -4,8 +4,8 @@ Created on Mon Feb  5 15:04:29 2018
 
 @author: Raluca Sandu
 """
-#from IPython import get_ipython
-#get_ipython().magic('reset -sf')
+from IPython import get_ipython
+get_ipython().magic('reset -sf')
 
 import numpy as np
 import untangle as ut
@@ -35,23 +35,25 @@ def IV_parseNeedles(childrenTrajectories, lesion):
     '''
     for singleTrajectory in childrenTrajectories:
 
-        if elementExists(singleTrajectory, 'Measurements') is False:
-            print('No Measurement for this needle')              # nothing to replace
-        else:
-            targetLateral,targetAngular,targetLongitudinal, targetEuclidean \
-                = extractTPES(singleTrajectory.Measurements.Measurement.TPEErrors)
-            
-             # TO DO: check if the <Measurements> exists, overwrite it
-             # Search function implemented in IREExract Class
-             # overwrite at the correct needle number
+        epP = np.array([float(i) for i in singleTrajectory.EntryPoint.cdata.split()])
+        tpP = np.array([float(i) for i in singleTrajectory.TargetPoint.cdata.split()])
+        needle = lesion.findNeedle(tpP)
+        if needle is None:
             needle = lesion.newNeedle(False) # False - the needle is not a reference trajectory
+            tps = needle.setTPEs()
+        # add the entry and target points to the needle object
+        needle.setPlannedTrajectory(ie.Trajectory(epP,tpP))
+        
+        if elementExists(singleTrajectory, 'Measurements') is False:
+            print('No Measurement for this needle')  
+        else:
+            # find the right needle to replace the exact tpes
+            # set the validation trajectory
             epV = np.array([float(i) for i in singleTrajectory.Measurements.Measurement.EntryPoint.cdata.split()])
             tpV = np.array([float(i) for i in singleTrajectory.Measurements.Measurement.TargetPoint.cdata.split()])
-            epP = np.array([float(i) for i in singleTrajectory.EntryPoint.cdata.split()])
-            tpP = np.array([float(i) for i in singleTrajectory.TargetPoint.cdata.split()])
-            # add the entry and target points to the needle object
-            needle.setPlannedTrajectory(ie.Trajectory(epP,tpP))
             needle.setValidationTrajectory(ie.Trajectory(epV,tpV))
+            targetLateral,targetAngular,targetLongitudinal, targetEuclidean \
+                = extractTPES(singleTrajectory.Measurements.Measurement.TPEErrors)
             tps = needle.setTPEs()
             tps.setTPEErrors(targetLateral, targetAngular,targetLongitudinal, targetEuclidean)
     
@@ -64,22 +66,23 @@ def III_parseTrajectory(trajectories,patient):
     # lesion level
     for xmlTrajectory in trajectories:
         # check whether it's IRE trajectory
-        if (xmlTrajectory['type']) and 'IRE' in xmlTrajectory['type']:
-            # TO DO: -check if patient[i].lesion[k] already exists
-            # if lesion doesn't exist create, otherwise overwrite the measurements tag (replacing the values)
-            # we just need to retrieve that specific lesion
-            # first, find the patient, then find its lesion (?) 
-            # the correct amount of lesions is created
+        if (xmlTrajectory['type']) and 'IRE' in xmlTrajectory['type']:            
             
-            # function to check if the lesion exists based on location returning true or false
             ep = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
             tp = np.array([float(i) for i in xmlTrajectory.TargetPoint.cdata.split()])
+            # function to check if the lesion exists based on location returning true or false
+            lesion = patient.findLesion(tp) 
             
-            lesion = patient.addNewLesion(tp) # input parameter target point of reference trajectory
-            needle = lesion.newNeedle(True) # true, this is the refernce needle around which the trajectory is planned
+            if lesion is None:
+                lesion = patient.addNewLesion(tp) # input parameter target point of reference trajectory
+                needle = lesion.newNeedle(True) # true, this is the refernce needle around which the trajectory is planned
+            else:
+                # retrieve the needle if already exists
+                needle = lesion.findNeedle(tp)
             
             needle.setPlannedTrajectory(ie.Trajectory(ep,tp))
             childrenTrajectories = xmlTrajectory.Children.Trajectory
+            
             IV_parseNeedles(childrenTrajectories, lesion)
             
         elif not(xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
@@ -102,26 +105,28 @@ def II_parseTrajectories(xmlobj):
         print('No trajectory was found in the excel file')
         return None
 
-#%%   
+##%%   
 xmlfilename = 'multipleLesionsIRE.xml'
 xmlobj = I_parseRecordingXML(xmlfilename,'1')
-# for this case, 
+ 
 patientId = 1
-patients = ie.PatientRepo()
+patientsRepo = ie.PatientRepo()
+
 
 if xmlobj is not None:
     # parse trajectories
     trajectories = II_parseTrajectories(xmlobj)
     # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
+    patients = patientsRepo.getPatients()
     patient = [x for x in patients if x.patientId == patientId]
     if not patient:
         # create patient measuerements
-        one_patient = patients.addNewPatient(patientId)
-        III_parseTrajectory(trajectories, one_patient)
+        patient = patientsRepo.addNewPatient(patientId)
+        III_parseTrajectory(trajectories, patient)
     else:
         # update patient measurements
         III_parseTrajectory(trajectories, patient)
-# list of patients must be created within class --> so it can be easily overwritten    
+
 #%%
 #patients_list = []
 #patients_list.append(patient)

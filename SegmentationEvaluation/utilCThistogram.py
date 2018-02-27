@@ -34,7 +34,7 @@ def get_pixels_hu(scans):
     
     return np.array(image, dtype=np.int16)
 
-'''normaliza the image, segment the liver'''
+'''normaliza the image, segment the liver''' 
     
 def normalize(image):
     MIN_BOUND = 0

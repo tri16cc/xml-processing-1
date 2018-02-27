@@ -38,16 +38,14 @@ class Patient():
 
     def getLesions(self):
         return self.lesions
-    
-#    def findPatient(self,patientId):
         
-    def findLesion(self,lesion):
-        threshold = 2
+    def findLesion(self,lesionlocation):
+        threshold = 1
         foundLesions = list(filter(lambda l: 
-            l.distanceTo(lesion) < threshold, self.lesions))
+            l.distanceTo(lesionlocation) < threshold, self.lesions))
         if len(foundLesions) == 0:
             return None
-        elif len(foundLesions) == 1:
+        elif len(foundLesions) > 0:
             return foundLesions[0]
         else:
             raise Exception('Something went wrong')
@@ -62,10 +60,10 @@ class Lesion():
         else:
             raise Exception('Lesion Location not given')
     
-    def distanceTo(self, otherLesion):
+    def distanceTo(self, lesionlocation):
         # compute euclidean distances for TPE to check whether the same lesion
-        tp1 = otherLesion.location
-        tp2 = self.lesion.location
+        tp1 = lesionlocation
+        tp2 = self.location
         dist = np.linalg.norm(tp1-tp2)
         return dist
         pass
@@ -78,6 +76,17 @@ class Lesion():
         self.needles.append(needle)
         return needle
     
+    def findNeedle(self, needlelocation):
+        threshold = 1
+        foundNeedles = list(filter(lambda l: 
+            l.distanceToNeedle(needlelocation) < threshold, self.needles))
+        if len(foundNeedles) == 0:
+            return None
+        elif len(foundNeedles) > 0:
+            return foundNeedles[0]
+        else:
+            raise Exception('Something went wrong')
+    
     
 class Needle():
     
@@ -88,6 +97,15 @@ class Needle():
         self.tpeerorrs = None
         self.lesion = lesion
     
+    
+    def distanceToNeedle(self, needlelocation):
+        # compute euclidean distances for TPE to check whether the same lesion
+        tp1 = needlelocation
+        tp2 = self.planned.targetpoint
+        dist = np.linalg.norm(tp1-tp2)
+        return dist
+        pass
+        
     def setPlannedTrajectory(self, trajectory):
        self.planned = trajectory
     
@@ -106,6 +124,9 @@ class Needle():
     
     def getValidationTrajectory(self):
         return self.validation
+    
+    def getIsNeedleReference(self):
+        return self.isreference
         
 
 class TPEErrors():
