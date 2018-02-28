@@ -27,20 +27,16 @@ pat_ids = []
 
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
-#        if file extension is *.xml and if it contains the name validation
         fileName,fileExtension = os.path.splitext(file)
         if fileExtension.lower().endswith('.xml') and 'validation'in fileName.lower():
             xmlFilePathName = os.path.join(subdir, file)
-          
             xmlfilename = os.path.normpath(xmlFilePathName)
-            # DO somethings about the patients IDs
             try:
                 pat_id_str = re.findall('\\d+', xmlfilename)
                 pat_id = int(pat_id_str[0])
                 pat_ids.append(pat_id)
             except Exception:
-                print('numeric data not found in the file name')
-
+                print('numeric data not found in the file name', xmlfilename)
                 
             xmlobj = pit.I_parseRecordingXML(xmlfilename, pat_id)
             
@@ -57,7 +53,16 @@ for subdir, dirs, files in os.walk(rootdir):
                 else:
                     # update patient measurements in the PatientsRepository if the patient (id) already exists
                     pit.III_parseTrajectory(trajectories, patient[0])
-#            
-# TO DO: 1) write to CSV/Excel
+
+IRE_data = []
+patients = patientsRepo.getPatients()
+for p in patients:
+    lesions = p.getLesions()
+    patientID = p.patientId
+    for lIdx, l in enumerate(lesions):
+        ie.NeedleToDictWriter.needlesToDict(IRE_data,patientID, lIdx+1, l.getNeedles())        
+
+df = pd.DataFrame(IRE_data)            
+# TO DO: 1) write to CSV/Excel --> DONE
 # TO DO: 2) calculate angle plan, calculate angle validation          
 # CAS- version: 3) database of needles (extract the type of needle from the plan), check if need to account for offset

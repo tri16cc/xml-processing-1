@@ -44,7 +44,7 @@ def IV_parseNeedles(childrenTrajectories, lesion):
         # add the entry and target points to the needle object
         planned = needle.setPlannedTrajectory()
         planned.setTrajectory(epP,tpP)
-        validation = needle.setValidationTrajectory()
+#        validation = needle.setValidationTrajectory()
         
         if elementExists(singleTrajectory, 'Measurements') is False:
             print('No Measurement for this needle')  
@@ -54,6 +54,7 @@ def IV_parseNeedles(childrenTrajectories, lesion):
             # set the validation trajectory
             epV = np.array([float(i) for i in singleTrajectory.Measurements.Measurement.EntryPoint.cdata.split()])
             tpV = np.array([float(i) for i in singleTrajectory.Measurements.Measurement.TargetPoint.cdata.split()])
+            validation = needle.setValidationTrajectory()
             validation.setTrajectory(epV,tpV)
             targetLateral,targetAngular,targetLongitudinal, targetEuclidean \
                 = extractTPES(singleTrajectory.Measurements.Measurement.TPEErrors)
@@ -113,37 +114,38 @@ def II_parseTrajectories(xmlobj):
 
 #%%   
 
-xmlfilename = 'multipleLesionsIRE.xml'
-xmlobj = I_parseRecordingXML(xmlfilename,'1')
- 
-patientId = 1
-patientsRepo = ie.PatientRepo()
-
-
-if xmlobj is not None:
-    # parse trajectories
-    trajectories = II_parseTrajectories(xmlobj)
-    # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
-    patients = patientsRepo.getPatients()
-    patient = [x for x in patients if x.patientId == patientId]
-    if not patient:
-        # create patient measuerements
-        patient = patientsRepo.addNewPatient(patientId)
-        III_parseTrajectory(trajectories, patient)
-    else:
-        # update patient measurements
-        III_parseTrajectory(trajectories, patient)
-        
+#xmlfilename = 'multipleLesionsIRE.xml'
+#xmlobj = I_parseRecordingXML(xmlfilename,'1')
+# 
+#patientId = 1
+#patientsRepo = ie.PatientRepo()
+#
+#
+#if xmlobj is not None:
+#    # parse trajectories
+#    trajectories = II_parseTrajectories(xmlobj)
+#    # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
+#    patients = patientsRepo.getPatients()
+#    patient = [x for x in patients if x.patientId == patientId]
+#    if not patient:
+#        # create patient measuerements
+#        patient = patientsRepo.addNewPatient(patientId)
+#        III_parseTrajectory(trajectories, patient)
+#    else:
+#        # update patient measurements
+#        III_parseTrajectory(trajectories, patient)
+#        
 
 #%%
-IRE_data = []
-patients = patientsRepo.getPatients()
-for p in patients:
-    lesions = p.getLesions()
-    for lIdx, l in enumerate(lesions):
-        ie.NeedleToDictWriter.needlesToDict(IRE_data, lIdx+1, l.getNeedles())
+#IRE_data = []
+#patients = patientsRepo.getPatients()
+#for p in patients:
+#    lesions = p.getLesions()
+#    patientID = p.patientId
 #    for lIdx, l in enumerate(lesions):
-#        needles = l.getNeedles()
+#        ie.NeedleToDictWriter.needlesToDict(IRE_data, patientID, lIdx+1, l.getNeedles())
+##    for lIdx, l in enumerate(lesions):
+##        needles = l.getNeedles()
 #        for xIdx, x in enumerate(needles):
 #            needle_dict = x.to_dict()
 #            needle_dict['lesionNr'] = lIdx
@@ -151,7 +153,3 @@ for p in patients:
 #            IRE_data.append(needle_dict)
         
         
-#        
-#needles = patient.getLesions()[2].getNeedles()
-#df = pd.DataFrame([x.to_dict() for x in patients])
-#df1 = pd.DataFrame([x.to_dict() for x in needles])

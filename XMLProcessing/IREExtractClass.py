@@ -48,9 +48,7 @@ class Patient():
             return foundLesions[0]
         else:
             raise Exception('Something went wrong')
-            
-    def to_dict(self):
-        return {'patientID': self.patientId}
+
 
     
 class Lesion():
@@ -134,28 +132,31 @@ class Needle():
     def getIsNeedleReference(self):
         return self.isreference
         
-        
+    def to_dict(self):
+         return {'PlannedEntryPoint': self.planned.entrypoint,
+                'PlannedTargetPoint' : self.planned.targetpoint,
+                 'ValidationEntryPoint' : self.validation.entrypoint,
+                 'ValidationTargetPoint' : self.validation.targetpoint,
+                 'ReferenceNeedle': self.isreference,
+                'AngularError': self.tpeerorrs.angular,
+                'LateralError': self.tpeerorrs.lateral,
+                'LongitudinalError': self.tpeerorrs.longitudinal,
+                'EuclideanError': self.tpeerorrs.euclidean}
+         
 
 
 class NeedleToDictWriter():
-    def needlesToDict(IRE_data, lesionIdx, needles):
+    
+         
+    def needlesToDict(IRE_data, patientID, lesionIdx, needles):
         for xIdx, x in enumerate(needles):
             needle_dict = x.to_dict()
-            needle_dict['lesionNr'] = lesionIdx
-            needle_dict['needleNr'] = xIdx
+            needle_dict['PatientID'] = patientID
+            needle_dict['LesionNr'] = lesionIdx
+            needle_dict['NeedleNr'] = xIdx
             IRE_data.append(needle_dict)
-            
-    def needleToDict(needle):
-         return {'PlannedEntryPoint': needle.planned.entrypoint,
-                'PlannedTargetPoint' : needle.planned.targetpoint,
-                'ValidationEntryPoint' : needle.validation.entrypoint,
-                'ValidationTargetPoint' : needle.validation.targetpoint,
-                'ReferenceNeedle': needle.isreference,
-                'AngularError': needle.tpeerorrs.angular,
-                'LateralError': needle.tpeerorrs.lateral,
-                'LongitudinalError': needle.tpeerorrs.longitudinal,
-                'EuclideanError': needle.tpeerorrs.euclidean}
         
+
 
 class TPEErrors():
     
