@@ -4,12 +4,12 @@ Created on Mon Feb  5 15:04:29 2018
 
 @author: Raluca Sandu
 """
-from IPython import get_ipython
-get_ipython().magic('reset -sf')
+#from IPython import get_ipython
+#get_ipython().magic('reset -sf')
 
 import numpy as np
 import untangle as ut
-#from datetime import datetime
+import pandas as pd
 import IREExtractClass as ie
 from extractTPEsXml import extractTPES 
 from elementExistsXml import elementExists 
@@ -21,7 +21,7 @@ def I_parseRecordingXML(filename, patient):
     '''
     # TO DO: add the patient ID from the folder name
     try:
-        xmlobj = ut.parse(xmlfilename)
+        xmlobj = ut.parse(filename)
         return xmlobj
     except Exception:
         print('XML file structure is broken, cannot read XML')
@@ -42,16 +42,19 @@ def IV_parseNeedles(childrenTrajectories, lesion):
             needle = lesion.newNeedle(False) # False - the needle is not a reference trajectory
             tps = needle.setTPEs()
         # add the entry and target points to the needle object
-        needle.setPlannedTrajectory(ie.Trajectory(epP,tpP))
+        planned = needle.setPlannedTrajectory()
+        planned.setTrajectory(epP,tpP)
+        validation = needle.setValidationTrajectory()
         
         if elementExists(singleTrajectory, 'Measurements') is False:
             print('No Measurement for this needle')  
+           
         else:
             # find the right needle to replace the exact tpes
             # set the validation trajectory
             epV = np.array([float(i) for i in singleTrajectory.Measurements.Measurement.EntryPoint.cdata.split()])
             tpV = np.array([float(i) for i in singleTrajectory.Measurements.Measurement.TargetPoint.cdata.split()])
-            needle.setValidationTrajectory(ie.Trajectory(epV,tpV))
+            validation.setTrajectory(epV,tpV)
             targetLateral,targetAngular,targetLongitudinal, targetEuclidean \
                 = extractTPES(singleTrajectory.Measurements.Measurement.TPEErrors)
             tps = needle.setTPEs()
@@ -80,7 +83,10 @@ def III_parseTrajectory(trajectories,patient):
                 # retrieve the needle if already exists
                 needle = lesion.findNeedle(tp)
             
-            needle.setPlannedTrajectory(ie.Trajectory(ep,tp))
+            planned = needle.setPlannedTrajectory()
+            planned.setTrajectory(ep,tp)
+            needle.setValidationTrajectory() # empty because the reference needle has no validation trajectory
+
             childrenTrajectories = xmlTrajectory.Children.Trajectory
             
             IV_parseNeedles(childrenTrajectories, lesion)
@@ -105,7 +111,8 @@ def II_parseTrajectories(xmlobj):
         print('No trajectory was found in the excel file')
         return None
 
-##%%   
+#%%   
+
 xmlfilename = 'multipleLesionsIRE.xml'
 xmlobj = I_parseRecordingXML(xmlfilename,'1')
  
@@ -126,10 +133,9 @@ if xmlobj is not None:
     else:
         # update patient measurements
         III_parseTrajectory(trajectories, patient)
+        
 
 #%%
-#patients_list = []
-#patients_list.append(patient)
-# a = [x for x in patients_list if x.patientId ==1]
-# a[0].getLesions()
-# call the 3rd function to parse the needles
+needles = patient.getLesions()[2].getNeedles()
+df = pd.DataFrame([x.to_dict() for x in patients])
+df1 = pd.DataFrame([x.to_dict() for x in needles])
