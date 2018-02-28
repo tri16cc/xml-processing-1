@@ -86,7 +86,7 @@ def III_parseTrajectory(trajectories,patient):
             planned = needle.setPlannedTrajectory()
             planned.setTrajectory(ep,tp)
             needle.setValidationTrajectory() # empty because the reference needle has no validation trajectory
-
+            needle.setTPEs() # init empty TPEs because there are no TPEs for the reference needle
             childrenTrajectories = xmlTrajectory.Children.Trajectory
             
             IV_parseNeedles(childrenTrajectories, lesion)
@@ -136,6 +136,22 @@ if xmlobj is not None:
         
 
 #%%
-needles = patient.getLesions()[2].getNeedles()
-df = pd.DataFrame([x.to_dict() for x in patients])
-df1 = pd.DataFrame([x.to_dict() for x in needles])
+IRE_data = []
+patients = patientsRepo.getPatients()
+for p in patients:
+    lesions = p.getLesions()
+    for lIdx, l in enumerate(lesions):
+        ie.NeedleToDictWriter.needlesToDict(IRE_data, lIdx+1, l.getNeedles())
+#    for lIdx, l in enumerate(lesions):
+#        needles = l.getNeedles()
+#        for xIdx, x in enumerate(needles):
+#            needle_dict = x.to_dict()
+#            needle_dict['lesionNr'] = lIdx
+#            needle_dict['needleNr'] = xIdx
+#            IRE_data.append(needle_dict)
+        
+        
+#        
+#needles = patient.getLesions()[2].getNeedles()
+#df = pd.DataFrame([x.to_dict() for x in patients])
+#df1 = pd.DataFrame([x.to_dict() for x in needles])

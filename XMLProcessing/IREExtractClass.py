@@ -88,6 +88,8 @@ class Lesion():
             return foundNeedles[0]
         else:
             raise Exception('Something went wrong')
+            
+ 
 
     
 class Needle():
@@ -133,14 +135,27 @@ class Needle():
         return self.isreference
         
         
-    def to_dict(self):
-        return {'PlannedEntryPoint': self.planned.entrypoint,
-                'PlannedTargetPoint' : self.planned.targetpoint,
-                'ValidationEntryPoint' : self.validation.entrypoint,
-                'ValidationTargetPoint' : self.validation.targetpoint,
-                'ReferenceNeedle': self.isreference}
-    
-    
+
+
+class NeedleToDictWriter():
+    def needlesToDict(IRE_data, lesionIdx, needles):
+        for xIdx, x in enumerate(needles):
+            needle_dict = x.to_dict()
+            needle_dict['lesionNr'] = lesionIdx
+            needle_dict['needleNr'] = xIdx
+            IRE_data.append(needle_dict)
+            
+    def needleToDict(needle):
+         return {'PlannedEntryPoint': needle.planned.entrypoint,
+                'PlannedTargetPoint' : needle.planned.targetpoint,
+                'ValidationEntryPoint' : needle.validation.entrypoint,
+                'ValidationTargetPoint' : needle.validation.targetpoint,
+                'ReferenceNeedle': needle.isreference,
+                'AngularError': needle.tpeerorrs.angular,
+                'LateralError': needle.tpeerorrs.lateral,
+                'LongitudinalError': needle.tpeerorrs.longitudinal,
+                'EuclideanError': needle.tpeerorrs.euclidean}
+        
 
 class TPEErrors():
     
@@ -162,11 +177,7 @@ class TPEErrors():
         # TO DO: in case of offset that wasn't accounted for in the old versions of cascination
         pass
 
-    def to_dict(self):
-        return {'AngularError': self.angular,
-                'LateralError': self.lateral,
-                'LongitudinalError': self.longitudinal,
-                'EuclideanError': self.euclidean}
+
 
 
 class Trajectory():
