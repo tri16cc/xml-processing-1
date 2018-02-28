@@ -19,7 +19,6 @@ class PatientRepo():
     def getPatients(self):
         return self.patients
     
-
         
 
 class Patient():
@@ -40,7 +39,7 @@ class Patient():
         return self.lesions
         
     def findLesion(self,lesionlocation):
-        threshold = 1
+        threshold = 2
         foundLesions = list(filter(lambda l: 
             l.distanceTo(lesionlocation) < threshold, self.lesions))
         if len(foundLesions) == 0:
@@ -49,6 +48,9 @@ class Patient():
             return foundLesions[0]
         else:
             raise Exception('Something went wrong')
+            
+    def to_dict(self):
+        return {'patientID': self.patientId}
 
     
 class Lesion():
@@ -77,7 +79,7 @@ class Lesion():
         return needle
     
     def findNeedle(self, needlelocation):
-        threshold = 1
+        threshold = 2
         foundNeedles = list(filter(lambda l: 
             l.distanceToNeedle(needlelocation) < threshold, self.needles))
         if len(foundNeedles) == 0:
@@ -86,7 +88,7 @@ class Lesion():
             return foundNeedles[0]
         else:
             raise Exception('Something went wrong')
-    
+
     
 class Needle():
     
@@ -106,11 +108,13 @@ class Needle():
         return dist
         pass
         
-    def setPlannedTrajectory(self, trajectory):
-       self.planned = trajectory
+    def setPlannedTrajectory(self):
+       self.planned = Trajectory()
+       return self.planned
     
-    def setValidationTrajectory(self,trajectory):
-        self.validation = trajectory
+    def setValidationTrajectory(self):
+        self.validation = Trajectory()
+        return self.validation
     
     def setTPEs(self):
         self.tpeerorrs = TPEErrors()
@@ -128,6 +132,15 @@ class Needle():
     def getIsNeedleReference(self):
         return self.isreference
         
+        
+    def to_dict(self):
+        return {'PlannedEntryPoint': self.planned.entrypoint,
+                'PlannedTargetPoint' : self.planned.targetpoint,
+                'ValidationEntryPoint' : self.validation.entrypoint,
+                'ValidationTargetPoint' : self.validation.targetpoint,
+                'ReferenceNeedle': self.isreference}
+    
+    
 
 class TPEErrors():
     
@@ -146,14 +159,25 @@ class TPEErrors():
       
         
     def calculateTPEErrors(self,plannedTrajectory, validationTrajectory,offset):
-        # in case of offset that wasn't accounted for in the old versions of cascination
+        # TO DO: in case of offset that wasn't accounted for in the old versions of cascination
         pass
+
+    def to_dict(self):
+        return {'AngularError': self.angular,
+                'LateralError': self.lateral,
+                'LongitudinalError': self.longitudinal,
+                'EuclideanError': self.euclidean}
 
 
 class Trajectory():
     
-    def __init__(self,entrypoint,targetpoint):
+    def __init__(self):
+        self.entrypoint = None
+        self.targetpoint = None
+    
+    def setTrajectory(self, entrypoint, targetpoint):
         self.entrypoint = entrypoint
         self.targetpoint = targetpoint
+        
 
     
