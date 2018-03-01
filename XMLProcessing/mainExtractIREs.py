@@ -9,13 +9,10 @@ import re
 import time
 import numpy as np
 import pandas as pd
-import untangle as ut
-import AngleNeedles
 from datetime import datetime
 import IREExtractClass as ie
 import parseIREtrajectories as pit 
-from extractTPEsXml import extractTPES 
-from elementExistsXml import elementExists 
+import extractTrajectoriesAngles as eta
 #%%
 
         
@@ -62,7 +59,15 @@ for p in patients:
     for lIdx, l in enumerate(lesions):
         ie.NeedleToDictWriter.needlesToDict(IRE_data,patientID, lIdx+1, l.getNeedles())        
 
-df = pd.DataFrame(IRE_data)            
+df = pd.DataFrame(IRE_data)  
+Angles = []     
+patient_unique = df['PatientID'].unique()     
+for PatientIdx, patient in enumerate(patient_unique):
+    patient_data = df[df['PatientID']==patient]
+    eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data,patient, Angles)
+    
+dfAngles = pd.DataFrame(Angles)        
+    
 # TO DO: 1) write to CSV/Excel --> DONE
-# TO DO: 2) calculate angle plan, calculate angle validation          
+# TO DO: 2) calculate angle plan, calculate angle validation  --> DONE, still must check if the correct plan trajectory is extracted        
 # CAS- version: 3) database of needles (extract the type of needle from the plan), check if need to account for offset
