@@ -135,9 +135,9 @@ class Needle():
     def to_dict(self):
          return {'PlannedEntryPoint': self.planned.entrypoint,
                 'PlannedTargetPoint' : self.planned.targetpoint,
-                 'ValidationEntryPoint' : self.validation.entrypoint,
-                 'ValidationTargetPoint' : self.validation.targetpoint,
-                 'ReferenceNeedle': self.isreference,
+                'ValidationEntryPoint' : self.validation.entrypoint,
+                'ValidationTargetPoint' : self.validation.targetpoint,
+                'ReferenceNeedle': self.isreference,
                 'AngularError': self.tpeerorrs.angular,
                 'LateralError': self.tpeerorrs.lateral,
                 'LongitudinalError': self.tpeerorrs.longitudinal,

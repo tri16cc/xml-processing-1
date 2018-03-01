@@ -9,7 +9,6 @@ Created on Mon Feb  5 15:04:29 2018
 
 import numpy as np
 import untangle as ut
-import pandas as pd
 import IREExtractClass as ie
 from extractTPEsXml import extractTPES 
 from elementExistsXml import elementExists 
