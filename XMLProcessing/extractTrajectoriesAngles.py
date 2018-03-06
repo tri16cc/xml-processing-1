@@ -28,7 +28,7 @@ class ComputeAnglesTrajectories():
                 angle_planned = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[0]], \
                                                            PlannedTargetPoint[combination_angles[0]], \
                                                            PlannedEntryPoint[combination_angles[1]], \
-                                                           PlannedTargetPoint[combination_angles[1]])
+                                                           PlannedTargetPoint[combination_angles[1]]) 
                 
                 
                 if combination_angles[0] != 0 and combination_angles[1] != 0:

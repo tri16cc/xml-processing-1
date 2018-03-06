@@ -38,8 +38,7 @@ class Patient():
     def getLesions(self):
         return self.lesions
         
-    def findLesion(self,lesionlocation):
-        threshold = 2
+    def findLesion(self,lesionlocation, threshold):
         foundLesions = list(filter(lambda l: 
             l.distanceTo(lesionlocation) < threshold, self.lesions))
         if len(foundLesions) == 0:
