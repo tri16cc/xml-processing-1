@@ -15,9 +15,10 @@ import parseIREtrajectories as pit
 import extractTrajectoriesAngles as eta
 #%%
 
-        
+#        
 rootdir = "C:/Users/Raluca Sandu/Documents/MATLAB/My CAS-One Data/"
-
+#rootdir = "C:/IRE_Stockholm_35cases/"
+#
 #instantiate the Patient's Repository class
 patientsRepo = ie.PatientRepo()
 pat_ids = []
@@ -69,5 +70,5 @@ for PatientIdx, patient in enumerate(patient_unique):
 dfAngles = pd.DataFrame(Angles)        
     
 # TO DO: 1) write to CSV/Excel --> DONE
-# TO DO: 2) calculate angle plan, calculate angle validation  --> DONE, still must check if the correct plan trajectory is extracted        
+# TO DO: 2) calculate angle plan, calculate angle validation  --> DONE, still must check if the correct plan trajectory is extracted (seems so)       
 # CAS- version: 3) database of needles (extract the type of needle from the plan), check if need to account for offset
