@@ -16,8 +16,8 @@ import extractTrajectoriesAngles as eta
 #%%
 
 #        
-rootdir = "C:/Users/Raluca Sandu/Documents/MATLAB/My CAS-One Data/"
-#rootdir = "C:/IRE_Stockholm_35cases/"
+#rootdir = "C:/Users/Raluca Sandu/Documents/MATLAB/My CAS-One Data/"
+rootdir = "C:/IRE_Stockholm_allCases/"
 #
 #instantiate the Patient's Repository class
 patientsRepo = ie.PatientRepo()
@@ -41,16 +41,17 @@ for subdir, dirs, files in os.walk(rootdir):
             if xmlobj is not None:
                 # parse trajectories
                 trajectories = pit.II_parseTrajectories(xmlobj)
-                # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
-                patients = patientsRepo.getPatients()
-                patient = [x for x in patients if x.patientId == pat_id]
-                if not patient:
-                    # create patient measuerements if patient is not already in the PatientsRepository
-                    patient = patientsRepo.addNewPatient(pat_id)
-                    pit.III_parseTrajectory(trajectories, patient)
-                else:
-                    # update patient measurements in the PatientsRepository if the patient (id) already exists
-                    pit.III_parseTrajectory(trajectories, patient[0])
+                if trajectories is not None:
+                    # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
+                    patients = patientsRepo.getPatients()
+                    patient = [x for x in patients if x.patientId == pat_id]
+                    if not patient:
+                        # create patient measuerements if patient is not already in the PatientsRepository
+                        patient = patientsRepo.addNewPatient(pat_id)
+                        pit.III_parseTrajectory(trajectories, patient)
+                    else:
+                        # update patient measurements in the PatientsRepository if the patient (id) already exists
+                        pit.III_parseTrajectory(trajectories, patient[0])
 
 IRE_data = []
 patients = patientsRepo.getPatients()
@@ -58,14 +59,14 @@ for p in patients:
     lesions = p.getLesions()
     patientID = p.patientId
     for lIdx, l in enumerate(lesions):
-        ie.NeedleToDictWriter.needlesToDict(IRE_data,patientID, lIdx+1, l.getNeedles())        
+        ie.NeedleToDictWriter.needlesToDict(IRE_data, patientID, lIdx+1, l.getNeedles())
 
 df = pd.DataFrame(IRE_data)  
 Angles = []     
 patient_unique = df['PatientID'].unique()     
 for PatientIdx, patient in enumerate(patient_unique):
-    patient_data = df[df['PatientID']==patient]
-    eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data,patient, Angles)
+    patient_data = df[df['PatientID'] == patient]
+    eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data, patient, Angles)
     
 dfAngles = pd.DataFrame(Angles)        
     

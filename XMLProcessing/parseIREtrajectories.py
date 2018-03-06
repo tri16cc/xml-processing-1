@@ -134,14 +134,18 @@ def II_parseTrajectories(xmlobj):
     '''
     try:
         trajectories = xmlobj.Eagles.Trajectories.Trajectory
-        return trajectories
+        if trajectories is not None:
+            return trajectories
+        else:
+            print('No trajectory was found in the XML file')
+            return None
     except Exception:
-        print('No trajectory was found in the excel file')
+        print('No trajectory was found in the XML file')
         return None
 
 #%%   
-
-#xmlfilename = 'oldCASVersionIRE.xml'
+'''code to parse single file for verification purposes'''
+#xmlfilename = 'tpesIRE.xml'
 #xmlobj = I_parseRecordingXML(xmlfilename,'1')
 # 
 #patientId = 1
