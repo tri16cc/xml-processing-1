@@ -22,8 +22,10 @@ class ComputeAnglesTrajectories():
             PlannedTargetPoint = lesion_data['PlannedTargetPoint'].tolist()
             ValidationEntryPoint = lesion_data['ValidationEntryPoint'].tolist()
             ValidationTargetPoint = lesion_data['ValidationTargetPoint'].tolist()
+            ReferenceNeedle = lesion_data['ReferenceNeedle'].tolist()
 
             for combination_angles in combinations(needles_lesion,2):
+
                 
                 angle_planned = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[0]], \
                                                            PlannedTargetPoint[combination_angles[0]], \
@@ -39,16 +41,35 @@ class ComputeAnglesTrajectories():
                                                                   ValidationTargetPoint[combination_angles[1]])
                 
                 
-                elif combination_angles[0] == 0:
+                if ReferenceNeedle[combination_angles[0]] == True:
+                    
+                    needleA = 'Reference'
+                    needleB = combination_angles[1] 
                     angle_validation = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[0]], \
                                                            PlannedTargetPoint[combination_angles[0]], \
                                                            ValidationEntryPoint[combination_angles[1]], \
                                                            ValidationTargetPoint[combination_angles[1]])
                     
+                elif ReferenceNeedle[combination_angles[0]] is False and ReferenceNeedle[combination_angles[1]] is False:
+                    needleA = combination_angles[0]
+                    needleB = combination_angles[1] 
+                    angle_validation = AngleNeedles.angle_between(ValidationEntryPoint[combination_angles[0]], \
+                                                                  ValidationTargetPoint[combination_angles[0]], \
+                                                                  ValidationEntryPoint[combination_angles[1]], \
+                                                                  ValidationTargetPoint[combination_angles[1]])
+                else:
+                    needleB = 'Reference'
+                    needleA = combination_angles[0]
+                    angle_validation = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[1]], \
+                                                           PlannedTargetPoint[combination_angles[1]], \
+                                                           ValidationEntryPoint[combination_angles[0]], \
+                                                           ValidationTargetPoint[combination_angles[0]])
+                    
+                        
                 needles_angles = {'PatientID': patientID,
                                   'LesionNr': lesion,
-                                  'NeedleA': combination_angles[0],
-                                  'NeedleB':combination_angles[1],
+                                  'NeedleA': needleA,
+                                  'NeedleB': needleB,
                                   'AngleDegrees_planned': float("{0:.2f}".format(angle_planned)),
                                   'AngleDegrees_validation': float("{0:.2f}".format(angle_validation))
                                   }
