@@ -24,19 +24,24 @@ def angle_between(epNeedle1,tpNeedle1,epNeedle2,tpNeedle2):
     """
 #        vector1 = TargetPoint-EntryPoint
 #        vector2 = TargetPoint-EntryPoint
-    
-    epNeedle1_xyz = np.array([float(i) for i in epNeedle1.split()])
-    tpNeedle1_xyz = np.array([float(i) for i in tpNeedle1.split()])
-    
-    epNeedle2_xyz = np.array([float(i) for i in epNeedle2.split()])
-    tpNeedle2_xyz = np.array([float(i) for i in tpNeedle2.split()])
-    
-    v1 = tpNeedle1_xyz - epNeedle1_xyz
-    v2 = tpNeedle2_xyz - epNeedle2_xyz
+
+        # if the vectors are string format
+    # epNeedle1 = np.array([float(i) for i in epNeedle1.split()])
+    # tpNeedle1 = np.array([float(i) for i in tpNeedle1.split()])
+    #
+    # epNeedle2 = np.array([float(i) for i in epNeedle2.split()])
+    # tpNeedle2 = np.array([float(i) for i in tpNeedle2.split()])
+        
+
+
+    if tpNeedle1 is None or epNeedle1 is None or tpNeedle2  is None or epNeedle2 is None:
+        return np.nan
+        
+    v1 = tpNeedle1- epNeedle1
+    v2 = tpNeedle2 - epNeedle2
     
     # angle = atan2(vector2.y, vector2.x) - atan2(vector1.y, vector1.x);
     # if (angle < 0) angle += 2 * M_PI;
-#    angle_tan = np.
         
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
