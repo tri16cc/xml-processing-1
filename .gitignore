@@ -23,7 +23,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.idea/
 MANIFEST
+*.pyc
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -108,3 +110,9 @@ db.sqlite3
 
 # xml
 *.xml
+*.iml
+
+# Excel and CSV files
+*.csv
+*.xlsx
+*.xls
