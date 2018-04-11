@@ -116,3 +116,8 @@ db.sqlite3
 *.csv
 *.xlsx
 *.xls
+
+# Images
+*.tif
+*.jpg
+*.png
