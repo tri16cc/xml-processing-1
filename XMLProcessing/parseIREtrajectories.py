@@ -100,7 +100,8 @@ def III_parseTrajectory(trajectories,patient):
             IV_parseNeedles(childrenTrajectories, lesion)
             
         elif not(xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
-            # CAS older version 2.5
+            continue
+            # the case when CAS XML Log is older version 2.5
             # the distance between needles shouldn't be more than 2.2 according to a paper
             # DISTANCE_BETWEEN_LESIONS [mm]
             lesion = patient.findLesion(lesionlocation=tp, DISTANCE_BETWEEN_LESIONS=25)
@@ -135,6 +136,8 @@ def II_parseTrajectories(xmlobj):
     '''
     try:
         trajectories = xmlobj.Eagles.Trajectories.Trajectory
+        # TO DO: add version
+#        version = xmlobj.Eagles['version']
         if trajectories is not None:
             return trajectories
         else:

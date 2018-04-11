@@ -40,7 +40,7 @@ for subdir, dirs, files in os.walk(rootdir):
             
             if xmlobj is not None:
                 # parse trajectories
-                trajectories = pit.II_parseTrajectories(xmlobj)
+                trajectories = pit.II_parseTrajectories(xmlobj)                
                 if trajectories is not None:
                     # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
                     patients = patientsRepo.getPatients()
@@ -94,16 +94,36 @@ dfPatientsTrajectories[['LongitudinalError']] = dfPatientsTrajectories[['Longitu
 
 dfPatientsTrajectories.sort_values(by=['PatientID','LesionNr','NeedleNr'],inplace=True)
 
+dfTPEs = dfPatientsTrajectories[['PatientID','LesionNr','NeedleNr','ReferenceNeedle','LongitudinalError',\
+                                 'LateralError','EuclideanError','AngularError']]
 
-dfTPEs = dfPatientsTrajectories[['PatientID','LesionNr','NeedleNr','LongitudinalError','LateralError','EuclideanError','AngularError']]
+# select rows where the needle is not a reference, but part of child trajectories
+dfTPEsNoReference = dfTPEs[~(dfTPEs.ReferenceNeedle)]
 #%% 
 ''' write to Excel File'''
-timestr = time.strftime("%Y%m%d-%H%M%S")
-filename = 'IRE_AllPatients_' + timestr + '.xlsx' 
-filepathExcel = os.path.join(rootdir, filename)
-writer = pd.ExcelWriter(filepathExcel)
-dfAngles.to_excel(writer, sheet_name='Angles', index=False, na_rep='NaN')
-dfTPEs.to_excel(writer,sheet_name='TPEs', index=False, na_rep='NaN')
-dfPatientsTrajectories.to_excel(writer,sheet_name='Trajectories', index=False, na_rep='NaN')
+#timestr = time.strftime("%Y%m%d-%H%M%S")
+#filename = 'IRE_AllPatients_' + timestr + '.xlsx' 
+#filepathExcel = os.path.join(rootdir, filename)
+#writer = pd.ExcelWriter(filepathExcel)
+#dfAngles.to_excel(writer, sheet_name='Angles', index=False, na_rep='NaN')
+#dfTPEs.to_excel(writer,sheet_name='TPEs', index=False, na_rep='NaN')
+#dfPatientsTrajectories.to_excel(writer,sheet_name='Trajectories', index=False, na_rep='NaN')
 
 # CAS- version: 3) database of needles (extract the type of needle from the plan), check if need to account for offset
+#%%
+''' number of needles'''
+# question: how many needles (pairs) were used per lesion?
+#grpd_needles = dfTPEs.groupby(['PatientID','NeedleNr']).size().to_frame('Needle Count')
+df_count = dfTPEsNoReference.groupby(['PatientID','LesionNr']).size().to_frame('NeedleCount')
+dfNeedles = dfTPEsNoReference.groupby(['PatientID','LesionNr']).NeedleNr.max().to_frame('TotalNeedles')
+dfNeedlesIndex = dfNeedles.add_suffix('_Count').reset_index()
+
+# question: how many needles (pairs) were used per lesion?
+dfLesionsNeedlePairs = dfNeedlesIndex.groupby(['TotalNeedles_Count']).LesionNr.count()
+dfLesionsIndex = dfLesionsNeedlePairs.add_suffix('_Count').reset_index()
+
+# how many patients & how many lesions
+dfLesionsTotal = dfTPEsNoReference.groupby(['PatientID']).LesionNr.max().to_frame('TotalLesions')
+dfLesionsTotalIndex = dfLesionsTotal.add_suffix('_Count').reset_index()
+
+#dfNeedles.plot.pie(subplots=True,autopct=str(list(dfNeedles.LesionCount)))
