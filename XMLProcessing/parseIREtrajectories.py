@@ -82,7 +82,7 @@ def III_parseTrajectory(trajectories,patient):
         if (xmlTrajectory['type']) and 'IRE' in xmlTrajectory['type']:            
             
             # function to check if the lesion exists based on location returning true or false
-            lesion = patient.findLesion(lesionlocation=tp, threshold=2) 
+            lesion = patient.findLesion(lesionlocation=tp, DISTANCE_BETWEEN_LESIONS=2) 
             
             if lesion is None:
                 lesion = patient.addNewLesion(tp) # input parameter target point of reference trajectory
@@ -102,7 +102,8 @@ def III_parseTrajectory(trajectories,patient):
         elif not(xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
             # CAS older version 2.5
             # the distance between needles shouldn't be more than 2.2 according to a paper
-            lesion = patient.findLesion(lesionlocation=tp, threshold=22.5)
+            # DISTANCE_BETWEEN_LESIONS [mm]
+            lesion = patient.findLesion(lesionlocation=tp, DISTANCE_BETWEEN_LESIONS=25)
            
             if lesion is None:
                 lesion = patient.addNewLesion(tp) #
@@ -144,38 +145,3 @@ def II_parseTrajectories(xmlobj):
         return None
 
 #%%   
-'''code to parse single file for verification purposes'''
-#xmlfilename = 'tpesIRE.xml'
-#xmlobj = I_parseRecordingXML(xmlfilename,'1')
-# 
-#patientId = 1
-#patientsRepo = ie.PatientRepo()
-#
-#
-#if xmlobj is not None:
-#    # parse trajectories
-#    trajectories = II_parseTrajectories(xmlobj)
-#    # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
-#    patients = patientsRepo.getPatients()
-#    patient = [x for x in patients if x.patientId == patientId]
-#    if not patient:
-#        # create patient measurements
-#        patient = patientsRepo.addNewPatient(patientId)
-#        III_parseTrajectory(trajectories, patient)
-#    else:
-#        # update patient measurements
-#        III_parseTrajectory(trajectories, patient)
-#        
-#
-##%%
-#IRE_data = []
-#patients = patientsRepo.getPatients()
-#
-#for p in patients:
-#    lesions = p.getLesions()
-#    patientID = p.patientId
-#    for lIdx, l in enumerate(lesions):
-#        ie.NeedleToDictWriter.needlesToDict(IRE_data, patientID, lIdx+1, l.getNeedles())
-#
-#        
-#IRE_df = pd.DataFrame(IRE_data)

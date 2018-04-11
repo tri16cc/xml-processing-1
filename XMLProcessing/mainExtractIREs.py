@@ -53,6 +53,9 @@ for subdir, dirs, files in os.walk(rootdir):
                         # update patient measurements in the PatientsRepository if the patient (id) already exists
                         pit.III_parseTrajectory(trajectories, patient[0])
 
+#%% 
+'''extract information from the object classes into pandas dataframe'''
+
 IRE_data = []
 patients = patientsRepo.getPatients()
 for p in patients:
@@ -61,15 +64,46 @@ for p in patients:
     for lIdx, l in enumerate(lesions):
         ie.NeedleToDictWriter.needlesToDict(IRE_data, patientID, lIdx+1, l.getNeedles())
 
-df = pd.DataFrame(IRE_data)  
+dfPatientsTrajectories = pd.DataFrame(IRE_data)  
+dfPatientsTrajectories.sort_values(by=['PatientID'])
 Angles = []     
-patient_unique = df['PatientID'].unique()     
+patient_unique = dfPatientsTrajectories['PatientID'].unique()     
 for PatientIdx, patient in enumerate(patient_unique):
-    patient_data = df[df['PatientID'] == patient]
+    patient_data = dfPatientsTrajectories[dfPatientsTrajectories['PatientID'] == patient]
     eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data, patient, Angles)
     
-dfAngles = pd.DataFrame(Angles)        
-    
-# TO DO: 1) write to CSV/Excel --> DONE
-# TO DO: 2) calculate angle plan, calculate angle validation  --> DONE, still must check if the correct plan trajectory is extracted (seems so)       
+dfAngles = pd.DataFrame(Angles) 
+
+#%%   
+'''convert to dataframe & make columns numerical'''
+dfAngles['A_dash'] = '-'
+dfAngles['Electrode Pair'] = dfAngles['NeedleA'].astype(str) + dfAngles['A_dash'] + dfAngles['NeedleB'].astype(str)
+dfAngles = dfAngles[['PatientID', 'LesionNr','Electrode Pair', 'AngleDegrees_planned', 'AngleDegrees_validation']] 
+dfAngles.sort_values(by=['PatientID','Electrode Pair'], inplace=True) 
+dfAngles.apply(pd.to_numeric, errors='ignore', downcast='float').info()
+dfPatientsTrajectories.apply(pd.to_numeric, errors='ignore', downcast='float').info()
+
+dfPatientsTrajectories[['LateralError']] = dfPatientsTrajectories[['LateralError']].apply(pd.to_numeric, downcast='float')
+
+dfPatientsTrajectories[['AngularError']] = dfPatientsTrajectories[['AngularError']].apply(pd.to_numeric, downcast='float')
+
+dfPatientsTrajectories[['EuclideanError']] = dfPatientsTrajectories[['EuclideanError']].apply(pd.to_numeric, downcast='float')
+
+dfPatientsTrajectories[['LongitudinalError']] = dfPatientsTrajectories[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
+
+
+dfPatientsTrajectories.sort_values(by=['PatientID','LesionNr','NeedleNr'],inplace=True)
+
+
+dfTPEs = dfPatientsTrajectories[['PatientID','LesionNr','NeedleNr','LongitudinalError','LateralError','EuclideanError','AngularError']]
+#%% 
+''' write to Excel File'''
+timestr = time.strftime("%Y%m%d-%H%M%S")
+filename = 'IRE_AllPatients_' + timestr + '.xlsx' 
+filepathExcel = os.path.join(rootdir, filename)
+writer = pd.ExcelWriter(filepathExcel)
+dfAngles.to_excel(writer, sheet_name='Angles', index=False, na_rep='NaN')
+dfTPEs.to_excel(writer,sheet_name='TPEs', index=False, na_rep='NaN')
+dfPatientsTrajectories.to_excel(writer,sheet_name='Trajectories', index=False, na_rep='NaN')
+
 # CAS- version: 3) database of needles (extract the type of needle from the plan), check if need to account for offset
