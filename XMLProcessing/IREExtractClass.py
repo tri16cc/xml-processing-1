@@ -38,9 +38,9 @@ class Patient():
     def getLesions(self):
         return self.lesions
         
-    def findLesion(self,lesionlocation, threshold):
+    def findLesion(self,lesionlocation, DISTANCE_BETWEEN_LESIONS):
         foundLesions = list(filter(lambda l: 
-            l.distanceTo(lesionlocation) < threshold, self.lesions))
+            l.distanceTo(lesionlocation) < DISTANCE_BETWEEN_LESIONS, self.lesions))
         if len(foundLesions) == 0:
             return None
         elif len(foundLesions) > 0:
@@ -76,9 +76,9 @@ class Lesion():
         return needle
     
     def findNeedle(self, needlelocation):
-        threshold = 2
+        DISTANCE_BETWEEN_NEEDLES = 2
         foundNeedles = list(filter(lambda l: 
-            l.distanceToNeedle(needlelocation) < threshold, self.needles))
+            l.distanceToNeedle(needlelocation) < DISTANCE_BETWEEN_NEEDLES, self.needles))
         if len(foundNeedles) == 0:
             return None
         elif len(foundNeedles) > 0:
