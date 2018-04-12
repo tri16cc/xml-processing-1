@@ -8,7 +8,6 @@ Created on Mon Feb  5 15:04:29 2018
 #get_ipython().magic('reset -sf')
 
 import numpy as np
-import pandas as pd
 import untangle as ut
 import IREExtractClass as ie
 from extractTPEsXml import extractTPES 
@@ -100,7 +99,7 @@ def III_parseTrajectory(trajectories,patient):
             IV_parseNeedles(childrenTrajectories, lesion)
             
         elif not(xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
-            continue
+#            continue
             # the case when CAS XML Log is older version 2.5
             # the distance between needles shouldn't be more than 2.2 according to a paper
             # DISTANCE_BETWEEN_LESIONS [mm]

@@ -10,9 +10,11 @@ import time
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import matplotlib.pyplot as plt
 import IREExtractClass as ie
 import parseIREtrajectories as pit 
 import extractTrajectoriesAngles as eta
+
 #%%
 
 #        
@@ -67,20 +69,25 @@ for p in patients:
 dfPatientsTrajectories = pd.DataFrame(IRE_data)  
 dfPatientsTrajectories.sort_values(by=['PatientID'])
 Angles = []     
-patient_unique = dfPatientsTrajectories['PatientID'].unique()     
+patient_unique = dfPatientsTrajectories['PatientID'].unique()   
+  
 for PatientIdx, patient in enumerate(patient_unique):
     patient_data = dfPatientsTrajectories[dfPatientsTrajectories['PatientID'] == patient]
     eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data, patient, Angles)
     
 dfAngles = pd.DataFrame(Angles) 
-
+# boxplot for angle degrees planned vs validation
+fig, axes = plt.subplots(figsize=(12, 16))
+dfAngles.boxplot(column=['Planned Angle','Validation Angle'], patch_artist=False)
+plt.ylabel('Angle [$^\circ$]')
 #%%   
 '''convert to dataframe & make columns numerical'''
 dfAngles['A_dash'] = '-'
 dfAngles['Electrode Pair'] = dfAngles['NeedleA'].astype(str) + dfAngles['A_dash'] + dfAngles['NeedleB'].astype(str)
-dfAngles = dfAngles[['PatientID', 'LesionNr','Electrode Pair', 'AngleDegrees_planned', 'AngleDegrees_validation']] 
+dfAngles = dfAngles[['PatientID', 'LesionNr','Electrode Pair', 'Planned Angle', 'Validation Angle','Distance Planned','Distance Validation']] 
 dfAngles.sort_values(by=['PatientID','Electrode Pair'], inplace=True) 
 dfAngles.apply(pd.to_numeric, errors='ignore', downcast='float').info()
+
 dfPatientsTrajectories.apply(pd.to_numeric, errors='ignore', downcast='float').info()
 
 dfPatientsTrajectories[['LateralError']] = dfPatientsTrajectories[['LateralError']].apply(pd.to_numeric, downcast='float')
@@ -99,17 +106,7 @@ dfTPEs = dfPatientsTrajectories[['PatientID','LesionNr','NeedleNr','ReferenceNee
 
 # select rows where the needle is not a reference, but part of child trajectories
 dfTPEsNoReference = dfTPEs[~(dfTPEs.ReferenceNeedle)]
-#%% 
-''' write to Excel File'''
-#timestr = time.strftime("%Y%m%d-%H%M%S")
-#filename = 'IRE_AllPatients_' + timestr + '.xlsx' 
-#filepathExcel = os.path.join(rootdir, filename)
-#writer = pd.ExcelWriter(filepathExcel)
-#dfAngles.to_excel(writer, sheet_name='Angles', index=False, na_rep='NaN')
-#dfTPEs.to_excel(writer,sheet_name='TPEs', index=False, na_rep='NaN')
-#dfPatientsTrajectories.to_excel(writer,sheet_name='Trajectories', index=False, na_rep='NaN')
 
-# CAS- version: 3) database of needles (extract the type of needle from the plan), check if need to account for offset
 #%%
 ''' number of needles'''
 # question: how many needles (pairs) were used per lesion?
@@ -126,4 +123,14 @@ dfLesionsIndex = dfLesionsNeedlePairs.add_suffix('_Count').reset_index()
 dfLesionsTotal = dfTPEsNoReference.groupby(['PatientID']).LesionNr.max().to_frame('TotalLesions')
 dfLesionsTotalIndex = dfLesionsTotal.add_suffix('_Count').reset_index()
 
-#dfNeedles.plot.pie(subplots=True,autopct=str(list(dfNeedles.LesionCount)))
+#%% 
+''' write to Excel File'''
+timestr = time.strftime("%Y%m%d-%H%M%S")
+filename = 'IRE_AllPatients-' + timestr + '.xlsx' 
+filepathExcel = os.path.join(rootdir, filename)
+writer = pd.ExcelWriter(filepathExcel)
+dfAngles.to_excel(writer, sheet_name='Angles', index=False, na_rep='NaN')
+dfTPEs.to_excel(writer,sheet_name='TPEs', index=False, na_rep='NaN')
+dfPatientsTrajectories.to_excel(writer,sheet_name='Trajectories', index=False, na_rep='NaN')
+
+# CAS- version: 3) database of needles (extract the type of needle from the plan), check if need to account for offset
