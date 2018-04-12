@@ -32,8 +32,6 @@ def angle_between(epNeedle1,tpNeedle1,epNeedle2,tpNeedle2):
     # epNeedle2 = np.array([float(i) for i in epNeedle2.split()])
     # tpNeedle2 = np.array([float(i) for i in tpNeedle2.split()])
         
-
-
     if tpNeedle1 is None or epNeedle1 is None or tpNeedle2  is None or epNeedle2 is None:
         return np.nan
         
@@ -48,6 +46,7 @@ def angle_between(epNeedle1,tpNeedle1,epNeedle2,tpNeedle2):
     
     # return the value of the angle in degrees 
     angle_radians = np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+    
     return degrees(angle_radians)
 
 
