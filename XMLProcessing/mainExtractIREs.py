@@ -115,7 +115,7 @@ df_count = dfTPEsNoReference.groupby(['PatientID','LesionNr']).size().to_frame('
 dfNeedles = dfTPEsNoReference.groupby(['PatientID','LesionNr']).NeedleNr.max().to_frame('TotalNeedles')
 dfNeedlesIndex = dfNeedles.add_suffix('_Count').reset_index()
 
-# question: how many needles (pairs) were used per lesion?
+# question: what is the frequency of the needle configuration (3 paired, 4 paired)
 dfLesionsNeedlePairs = dfNeedlesIndex.groupby(['TotalNeedles_Count']).LesionNr.count()
 dfLesionsIndex = dfLesionsNeedlePairs.add_suffix('_Count').reset_index()
 
