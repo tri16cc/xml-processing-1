@@ -8,6 +8,7 @@ Created on Fri Apr 20 16:36:00 2018
 # to do: extract parameters from MWA log files
 # output: text file, one lesion per line
 # data to be extracted:
+    
 '''
     - origin of the tumor mask (x,y,z)
     - spacing of the tumor mask (x,y,z)
@@ -21,3 +22,7 @@ Created on Fri Apr 20 16:36:00 2018
          - predicted ellipse (axes, registration matrix, radius, output: DICOM MASK with same spacing and origin)
     
 '''
+#%%
+
+# TO DO: load an example
+# display
