@@ -7,7 +7,7 @@ Created on Mon Feb  5 10:20:31 2018
 import numpy as np
 
 class PatientRepo():
-    
+
     def __init__(self):
         self.patients = []
         
@@ -75,8 +75,7 @@ class Lesion():
         self.needles.append(needle)
         return needle
     
-    def findNeedle(self, needlelocation):
-        DISTANCE_BETWEEN_NEEDLES = 2
+    def findNeedle(self, needlelocation, DISTANCE_BETWEEN_NEEDLES):
         foundNeedles = list(filter(lambda l: 
             l.distanceToNeedle(needlelocation) < DISTANCE_BETWEEN_NEEDLES, self.needles))
         if len(foundNeedles) == 0:
@@ -86,8 +85,6 @@ class Lesion():
         else:
             raise Exception('Something went wrong')
             
- 
-
     
 class Needle():
     
@@ -97,7 +94,6 @@ class Needle():
         self.validation = None
         self.tpeerorrs = None
         self.lesion = lesion
-    
     
     def distanceToNeedle(self, needlelocation):
         # compute euclidean distances for TPE to check whether the same lesion
@@ -132,6 +128,7 @@ class Needle():
         return self.isreference
         
     def to_dict(self):
+         print('classTPES:', self.tpeerorrs.lateral)
          return {'PlannedEntryPoint': self.planned.entrypoint,
                 'PlannedTargetPoint' : self.planned.targetpoint,
                 'ValidationEntryPoint' : self.validation.entrypoint,
@@ -176,8 +173,6 @@ class TPEErrors():
     def calculateTPEErrors(self,plannedTrajectory, validationTrajectory,offset):
         # TO DO: in case of offset that wasn't accounted for in the old versions of cascination
         pass
-
-
 
 
 class Trajectory():

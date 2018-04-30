@@ -7,19 +7,14 @@ Created on Tue Feb 27 16:49:22 2018
 import os
 import re
 import time
-import numpy as np
 import pandas as pd
-from datetime import datetime
 import matplotlib.pyplot as plt
 import IREExtractClass as ie
 import parseIREtrajectories as pit 
 import extractTrajectoriesAngles as eta
-
 #%%
 
-#        
-#rootdir = "C:/Users/Raluca Sandu/Documents/MATLAB/My CAS-One Data/"
-rootdir = "C:/IRE_Stockholm_allCases/"
+rootdir = "C:/Stockholm Analysis/IRE_Stockholm_allCases/1_Pat_VON GERBER EDVARD WILLIAM IVAR"
 #
 #instantiate the Patient's Repository class
 patientsRepo = ie.PatientRepo()
@@ -37,7 +32,9 @@ for subdir, dirs, files in os.walk(rootdir):
                 pat_ids.append(pat_id)
             except Exception:
                 print('numeric data not found in the file name', xmlfilename)
-                
+#                
+#            xmlfilename = 'oldCASVersionIRE.xml' 
+#            pat_id = 99
             xmlobj = pit.I_parseRecordingXML(xmlfilename, pat_id)
             
             if xmlobj is not None:
@@ -76,10 +73,10 @@ for PatientIdx, patient in enumerate(patient_unique):
     eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data, patient, Angles)
     
 dfAngles = pd.DataFrame(Angles) 
-# boxplot for angle degrees planned vs validation
-fig, axes = plt.subplots(figsize=(12, 16))
-dfAngles.boxplot(column=['Planned Angle','Validation Angle'], patch_artist=False)
-plt.ylabel('Angle [$^\circ$]')
+''' boxplot for angle degrees planned vs validation'''
+#fig, axes = plt.subplots(figsize=(12, 16))
+##dfAngles.boxplot(column=['Planned Angle','Validation Angle'], patch_artist=False)
+##plt.ylabel('Angle [$^\circ$]')
 #%%   
 '''convert to dataframe & make columns numerical'''
 dfAngles['A_dash'] = '-'
@@ -97,7 +94,6 @@ dfPatientsTrajectories[['AngularError']] = dfPatientsTrajectories[['AngularError
 dfPatientsTrajectories[['EuclideanError']] = dfPatientsTrajectories[['EuclideanError']].apply(pd.to_numeric, downcast='float')
 
 dfPatientsTrajectories[['LongitudinalError']] = dfPatientsTrajectories[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
-
 
 dfPatientsTrajectories.sort_values(by=['PatientID','LesionNr','NeedleNr'],inplace=True)
 
