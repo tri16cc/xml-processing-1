@@ -20,7 +20,7 @@ rootdir = r"C:\PatientDatasets_GroundTruth_Database\GroundTruth_2018\GT_23042018
 # instantiate the Patient's Repository class
 patientsRepo = NeedlesInfoClass.PatientRepo()
 pat_ids = []
-pat_id = 10
+pat_id = 0
 
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
@@ -28,15 +28,16 @@ for subdir, dirs, files in os.walk(rootdir):
         if fileExtension.lower().endswith('.xml') and 'validation'in fileName.lower():
             xmlFilePathName = os.path.join(subdir, file)
             xmlfilename = os.path.normpath(xmlFilePathName)
-            # try:
-            #     pat_id_str = re.findall('\\d+', xmlfilename)
-            #     pat_id = int(pat_id_str[0])
-            #     pat_ids.append(pat_id)
-            # except Exception:
-            #     print('numeric data not found in the file name', xmlfilename)
-            pat_id += 1
+            print(xmlfilename)
+            try:
+                # find the numbers before the "_Pat" till the "//"
+                 pat_idx = xmlfilename.find("_Pat")
+                 pat_id_str = re.findall('\\d+', xmlfilename[0:pat_idx])
+                 pat_id = int(pat_id_str[len(pat_id_str)-1])
+                 pat_ids.append(pat_id)
+            except Exception:
+                 print('numeric data not found in the file name', xmlfilename)
             pat_ids.append(pat_id)
-
             xmlobj = parseIREtrajectories.I_parseRecordingXML(xmlfilename)
             if xmlobj is not None:
                 # parse trajectories
@@ -56,17 +57,16 @@ for subdir, dirs, files in os.walk(rootdir):
 #%% extract information from the object classes into pandas dataframe
 needle_data = []
 patients = patientsRepo.getPatients()
-# TODO: find out why there are duplicates
 for p in patients:
     lesions = p.getLesions()
     patientID = p.patientId
     for lIdx, l in enumerate(lesions):
-        NeedlesInfoClass.NeedleToDictWriter.needlesToDict(needle_data, patientID, lIdx+1, l.getNeedles())
+        NeedlesInfoClass.NeedleToDictWriter.needlesToDict(needle_data, patientID, lIdx, l.getNeedles())
 
 dfPatientsTrajectories = pd.DataFrame(needle_data)
-dfPatientsTrajectories.sort_values(by=['PatientID'])
-Angles = []     
-patient_unique = dfPatientsTrajectories['PatientID'].unique()   
+#dfPatientsTrajectories.sort_values(by=['PatientID'])
+#Angles = []     
+#patient_unique = dfPatientsTrajectories['PatientID'].unique()   
 
 #%% dataframes for Angles
 # TODO: flag to cancel Angles if Dataset is MWA

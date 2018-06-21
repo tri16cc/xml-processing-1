@@ -30,7 +30,7 @@ class Patient:
     def addLesion(self, lesion):
         self.lesions.append(lesion)
         
-    def addNewLesion(self,location):
+    def addNewLesion(self, location):
         lesion = Lesion(location)
         self.addLesion(lesion)
         return lesion

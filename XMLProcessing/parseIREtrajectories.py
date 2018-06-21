@@ -11,7 +11,6 @@ import numpy as np
 import untangle as ut
 from extractTPEsXml import extractTPES
 from elementExistsXml import elementExists
-
 # %%
 
 
@@ -41,12 +40,11 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type):
         ep_planning = np.array([float(i) for i in singleTrajectory.EntryPoint.cdata.split()])
         tp_planning = np.array([float(i) for i in singleTrajectory.TargetPoint.cdata.split()])
         # find if the needle exists already in the patient repository
-        if needle_type == 'MWA':
-            # because sometimes the needles seemed to be moved a lot...cross-check needed.
+        # for IRE needles the distance shouldn't be larger than 3 (in theory)
+        if needle_type is "IRE":
             needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
-        elif needle_type == 'IRE':
-            # for IRE needles the distance shouldn't be larger than 3 (in theory)
-            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
+        elif needle_type  is "MWA":
+            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=30)
         # case for new needle not currently saved in database
         if needle is None:
             needle = lesion.newNeedle(False, needle_type)  # False - the needle is not a reference trajectory
@@ -66,18 +64,18 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type):
             tp_validation = np.array([float(i) for i in singleTrajectory.Measurements.Measurement.TargetPoint.cdata.split()])
             validation = needle.setValidationTrajectory()
             validation.setTrajectory(ep_validation, tp_validation)
-            #            print(ep_validation, tp_validation)
-            targetLateral, targetAngular, targetLongitudinal, targetEuclidean \
+            target_lateral, target_angular, target_longitudinal, target_euclidean \
                 = extractTPES(singleTrajectory.Measurements.Measurement)
-            # print("target lateral error after function extraction:", targetLateral)
             tps = needle.setTPEs()
-            tps.setTPEErrors(targetLateral, targetAngular, targetLongitudinal, targetEuclidean)
+            tps.setTPEErrors(target_lateral, target_angular, target_longitudinal, target_euclidean)
+
 
 
 def III_parseTrajectory(trajectories, patient):
     """ Parse Trajectories at lesion level.
     For each lesion, a new Parent Trajectory is defined.
     A lesion is defined when the distance between needles is minimum 35 mm.
+    A patient can have both MWA and IREs
     INPUT:
     - trajectories which is object with Parent Trajectories
     - patient id
@@ -85,24 +83,23 @@ def III_parseTrajectory(trajectories, patient):
     """
     for xmlTrajectory in trajectories:
         # check whether it's IRE trajectory
-        ep = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
-        tp = np.array([float(i) for i in xmlTrajectory.TargetPoint.cdata.split()])
+        ep_planning = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
+        tp_planning = np.array([float(i) for i in xmlTrajectory.TargetPoint.cdata.split()])
 
         if (xmlTrajectory['type']) and 'IRE' in xmlTrajectory['type']:
             needle_type = 'IRE'
             # function to check if the lesion exists based on location returning true or false
-            lesion = patient.findLesion(lesionlocation=tp, DISTANCE_BETWEEN_LESIONS=23)
-
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=23)
             if lesion is None:
-                lesion = patient.addNewLesion(tp)  # input parameter target point of reference trajectory
+                lesion = patient.addNewLesion(tp_planning)  # input parameter target point of reference trajectory
                 needle = lesion.newNeedle(True, needle_type)
                 # true, this is the reference needle around which the trajectory is planned
             else:
-                # lesion was already added to the repo
-                needle = lesion.findNeedle(tp, DISTANCE_BETWEEN_NEEDLES=3)  # retrieve the reference trajectory
+                # lesion was already added to the repository
+                needle = lesion.findNeedle(tp_planning, DISTANCE_BETWEEN_NEEDLES=3)  # retrieve the reference trajectory
 
             planned = needle.setPlannedTrajectory()
-            planned.setTrajectory(ep, tp)
+            planned.setTrajectory(ep_planning, tp_planning)
             needle.setValidationTrajectory()  # empty because the reference needle has no validation trajectory
             needle.setTPEs()  # init empty TPEs because there are no TPEs for the reference needle
             children_trajectories = xmlTrajectory.Children.Trajectory
@@ -112,19 +109,17 @@ def III_parseTrajectory(trajectories, patient):
             # the case when CAS XML Log is older version 2.5
             # the distance between needles shouldn't be more than 22 mm according to a paper
             # DISTANCE_BETWEEN_LESIONS [mm]
-            lesion = patient.findLesion(lesionlocation=tp, DISTANCE_BETWEEN_LESIONS=23)
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=23)
             if lesion is None:
-                lesion = patient.addNewLesion(tp)  #
+                lesion = patient.addNewLesion(tp_planning)
             children_trajectories = xmlTrajectory
             IV_parseNeedles(children_trajectories, lesion, needle_type)
-
         else:
-            print("MWA Needle")  # MWA trajectory, XML structure different
+           # MWA type of needle
             needle_type = "MWA"
-            # change the distance between lesions to minimum 35 mm
-            lesion = patient.findLesion(lesionlocation=tp, DISTANCE_BETWEEN_LESIONS=3)
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=35)
             if lesion is None:
-                lesion = patient.addNewLesion(tp)
+                lesion = patient.addNewLesion(tp_planning)
             children_trajectories = xmlTrajectory
             IV_parseNeedles(children_trajectories, lesion, needle_type)
 
@@ -146,5 +141,4 @@ def II_parseTrajectories(xmlobj):
     except Exception:
         print('No trajectory was found in the XML file')
         return None
-
 
