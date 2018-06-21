@@ -6,7 +6,8 @@ Created on Mon Feb  5 10:20:31 2018
 """
 import numpy as np
 
-class PatientRepo():
+
+class PatientRepo:
 
     def __init__(self):
         self.patients = []
@@ -19,11 +20,10 @@ class PatientRepo():
     def getPatients(self):
         return self.patients
     
-        
 
-class Patient():
+class Patient:
         
-    def __init__(self,patientId):
+    def __init__(self, patientId):
         self.lesions = []
         self.patientId = patientId
         
@@ -38,7 +38,7 @@ class Patient():
     def getLesions(self):
         return self.lesions
         
-    def findLesion(self,lesionlocation, DISTANCE_BETWEEN_LESIONS):
+    def findLesion(self, lesionlocation, DISTANCE_BETWEEN_LESIONS):
         foundLesions = list(filter(lambda l: 
             l.distanceTo(lesionlocation) < DISTANCE_BETWEEN_LESIONS, self.lesions))
         if len(foundLesions) == 0:
@@ -49,8 +49,7 @@ class Patient():
             raise Exception('Something went wrong')
 
 
-    
-class Lesion():
+class Lesion:
     # location is a numpy array
     def __init__(self, location):
         self.needles = []
@@ -70,8 +69,8 @@ class Lesion():
     def getNeedles(self):
         return self.needles
     
-    def newNeedle(self, isreference):
-        needle = Needle(isreference,self)
+    def newNeedle(self, isreference, needle_type):
+        needle = Needle(isreference, needle_type, self)
         self.needles.append(needle)
         return needle
     
@@ -86,14 +85,15 @@ class Lesion():
             raise Exception('Something went wrong')
             
     
-class Needle():
+class Needle:
     
-    def __init__(self, isreference, lesion):
+    def __init__(self, isreference, needle_type, lesion,):
         self.isreference = isreference
         self.planned = None
         self.validation = None
         self.tpeerorrs = None
         self.lesion = lesion
+        self.needle_type = needle_type
     
     def distanceToNeedle(self, needlelocation):
         # compute euclidean distances for TPE to check whether the same lesion
@@ -128,7 +128,7 @@ class Needle():
         return self.isreference
         
     def to_dict(self):
-         print('classTPES:', self.tpeerorrs.lateral)
+         # print('classTPES:', self.tpeerorrs.lateral)
          return {'PlannedEntryPoint': self.planned.entrypoint,
                 'PlannedTargetPoint' : self.planned.targetpoint,
                 'ValidationEntryPoint' : self.validation.entrypoint,
@@ -137,24 +137,29 @@ class Needle():
                 'AngularError': self.tpeerorrs.angular,
                 'LateralError': self.tpeerorrs.lateral,
                 'LongitudinalError': self.tpeerorrs.longitudinal,
-                'EuclideanError': self.tpeerorrs.euclidean}
+                'EuclideanError': self.tpeerorrs.euclidean,
+                'NeedleType': self.needle_type}
          
 
+class NeedleToDictWriter:
+    """ Extracts the needle information into dictionary format.
+    Attributes:
+        needle_data: an empty list to append to.
+        patientID : str specifying patient id
+        lesionIDX: int specifying the needle count
+        needles: needles class object
 
-class NeedleToDictWriter():
-    
-         
-    def needlesToDict(IRE_data, patientID, lesionIdx, needles):
+    """
+    def needlesToDict(needle_data, patientID, lesionIdx, needles):
         for xIdx, x in enumerate(needles):
             needle_dict = x.to_dict()
             needle_dict['PatientID'] = patientID
             needle_dict['LesionNr'] = lesionIdx
             needle_dict['NeedleNr'] = xIdx
-            IRE_data.append(needle_dict)
+            needle_data.append(needle_dict)
         
 
-
-class TPEErrors():
+class TPEErrors:
     
     def __init__(self):
         self.angular = None
@@ -170,12 +175,12 @@ class TPEErrors():
         self.euclidean = euclidean
       
         
-    def calculateTPEErrors(self,plannedTrajectory, validationTrajectory,offset):
+    def calculateTPEErrors(self, plannedTrajectory, validationTrajectory, offset):
         # TO DO: in case of offset that wasn't accounted for in the old versions of cascination
         pass
 
 
-class Trajectory():
+class Trajectory:
     
     def __init__(self):
         self.entrypoint = None
@@ -184,6 +189,3 @@ class Trajectory():
     def setTrajectory(self, entrypoint, targetpoint):
         self.entrypoint = entrypoint
         self.targetpoint = targetpoint
-        
-
-    

@@ -13,7 +13,7 @@ class ComputeAnglesTrajectories():
     
          
     def FromTrajectoriesToNeedles(patient_data, patientID, Angles):
-        
+        # TODO: set condition to None for MWA Needles
         lesion_unique = patient_data['LesionNr'].unique()
     
         for i, lesion in enumerate(lesion_unique):
