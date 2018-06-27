@@ -12,8 +12,8 @@ class PatientRepo:
     def __init__(self):
         self.patients = []
         
-    def addNewPatient(self, patientId):
-        patient = Patient(patientId)
+    def addNewPatient(self, patientId, patient_id_xml, time_intervention):
+        patient = Patient(patientId, patient_id_xml, time_intervention)
         self.patients.append(patient)
         return patient
     
@@ -23,9 +23,11 @@ class PatientRepo:
 
 class Patient:
         
-    def __init__(self, patientId):
+    def __init__(self, patientId, patient_id_xml, time_intervention):
         self.lesions = []
         self.patientId = patientId
+        self.patient_id_xml = patient_id_xml
+        self.time_intervention = time_intervention
         
     def addLesion(self, lesion):
         self.lesions.append(lesion)
@@ -87,14 +89,24 @@ class Lesion:
     
 class Needle:
     
-    def __init__(self, isreference, needle_type, lesion,):
+    def __init__(self, isreference, needle_type, lesion):
         self.isreference = isreference
         self.planned = None
         self.validation = None
         self.tpeerorrs = None
         self.lesion = lesion
         self.needle_type = needle_type
+        # self.ablation_path = None
+        self.tumor_path = None
+        self.needle_specifications = None
+        # TODO: define needle params here as well (?)
+        # extract it from the database at this point?
+        # or just add the id and retrieve the relevant info afterwards?
     
+    def setNeedleSpecifications(self):
+        self.needle_specifications = NeedleSpecifications()
+        return self.needle_specifications
+        
     def distanceToNeedle(self, needlelocation):
         # compute euclidean distances for TPE to check whether the same lesion
         tp1 = needlelocation
@@ -114,6 +126,10 @@ class Needle:
     def setTPEs(self):
         self.tpeerorrs = TPEErrors()
         return self.tpeerorrs
+    
+    def setSegmentationPath(self, path, structure_type):
+        self.structure_path = path
+        self.structure_type = structure_type
 
     def getTPEs(self):
         return self.tpeerorrs
@@ -138,7 +154,8 @@ class Needle:
                 'LateralError': self.tpeerorrs.lateral,
                 'LongitudinalError': self.tpeerorrs.longitudinal,
                 'EuclideanError': self.tpeerorrs.euclidean,
-                'NeedleType': self.needle_type}
+                'NeedleType': self.needle_type,
+                'SegmentationTumorPath': self.tumor_path}
          
 
 class NeedleToDictWriter:
@@ -173,8 +190,7 @@ class TPEErrors:
         self.longitudinal = longitudinal
         self.lateral = lateral
         self.euclidean = euclidean
-      
-        
+
     def calculateTPEErrors(self, plannedTrajectory, validationTrajectory, offset):
         # TO DO: in case of offset that wasn't accounted for in the old versions of cascination
         pass
@@ -189,3 +205,25 @@ class Trajectory:
     def setTrajectory(self, entrypoint, targetpoint):
         self.entrypoint = entrypoint
         self.targetpoint = targetpoint
+        
+        
+class NeedleSpecifications:
+    
+    def __init__(self):
+        self.ablator_id = None
+        self.ablationSystem = None
+        self.ablationSystemVersion = None
+        self.ablatorType =  None
+        self.ablationShapeIndex = None # id field which connects with the MWA Needle Database
+        
+    def setNeedleSpecifications(self, ablator_id, ablationSystem, 
+                                ablationSystemVersion, ablatorType, 
+                                ablationShapeIndex):
+        
+        self.ablator_id = ablator_id
+        self.ablationSystem = ablationSystem
+        self.ablationSystemVersion = ablationSystemVersion
+        self.ablatorType = ablatorType
+        self.ablationShapeIndex = ablationShapeIndex 
+        # id field which connects with the MWA Needle Database
+
