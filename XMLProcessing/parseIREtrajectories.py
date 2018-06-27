@@ -13,7 +13,6 @@ from extractTPEsXml import extractTPES
 from elementExistsXml import elementExists
 # %%
 
-
 def I_parseRecordingXML(filename):
     # try to open and parse the xml filename if error, return message
     try:
@@ -44,14 +43,14 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type):
         if needle_type is "IRE":
             needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
         elif needle_type  is "MWA":
-            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=30)
+            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
         # case for new needle not currently saved in database
         if needle is None:
             needle = lesion.newNeedle(False, needle_type)  # False - the needle is not a reference trajectory
             tps = needle.setTPEs()
             validation = needle.setValidationTrajectory()
 
-            # add the entry and target points to the needle object
+        # add the entry and target points to the needle object
         planned = needle.setPlannedTrajectory()
         planned.setTrajectory(ep_planning, tp_planning)
 
@@ -81,6 +80,7 @@ def III_parseTrajectory(trajectories, patient):
     - patient id
     OUTPUT: list of Needle Trajectories passed to Needle Trajectories function
     """
+
     for xmlTrajectory in trajectories:
         # check whether it's IRE trajectory
         ep_planning = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
@@ -117,7 +117,9 @@ def III_parseTrajectory(trajectories, patient):
         else:
            # MWA type of needle
             needle_type = "MWA"
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=35)
+            # drop the lesion identification for MWA. multiple needles might be 
+            # no clear consensus for minimal distance between lesions
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=100)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)
             children_trajectories = xmlTrajectory
