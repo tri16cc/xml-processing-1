@@ -42,7 +42,7 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type):
         # for IRE needles the distance shouldn't be larger than 3 (in theory)
         if needle_type is "IRE":
             needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
-        elif needle_type  is "MWA":
+        elif needle_type is "MWA":
             needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
         # case for new needle not currently saved in database
         if needle is None:
@@ -53,6 +53,21 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type):
         # add the entry and target points to the needle object
         planned = needle.setPlannedTrajectory()
         planned.setTrajectory(ep_planning, tp_planning)
+
+        # add the segmentation path if it exists
+        if elementExists(singleTrajectory, 'Segmentation'):
+            structure_type = singleTrajectory.Segmentation["StructureType"]
+            needle.setSegmentationPath(singleTrajectory.Segmentation.Path.cdata,
+                                            structure_type)
+
+        # add the needle information
+        needle_params = needle.setNeedleSpecifications()
+        if elementExists(singleTrajectory, 'Ablator'):
+            needle_params.setNeedleSpecifications(singleTrajectory.Ablator["id"],
+                                                  singleTrajectory.Ablator["ablationSystem"],
+                                                  singleTrajectory.Ablator["ablationSystemVersion"],
+                                                  singleTrajectory.Ablator["ablatorType"],
+                                                  singleTrajectory.Ablator.Ablation["AblationShapeIndex"])
 
         if elementExists(singleTrajectory, 'Measurements') is False:
             print('No Measurement for this needle')
@@ -115,7 +130,7 @@ def III_parseTrajectory(trajectories, patient):
             children_trajectories = xmlTrajectory
             IV_parseNeedles(children_trajectories, lesion, needle_type)
         else:
-           # MWA type of needle
+            # MWA type of needle
             needle_type = "MWA"
             # drop the lesion identification for MWA. multiple needles might be 
             # no clear consensus for minimal distance between lesions
@@ -133,10 +148,14 @@ def II_parseTrajectories(xmlobj):
     """
     try:
         trajectories = xmlobj.Eagles.Trajectories.Trajectory
+        series = xmlobj.Eagles.PatientData["seriesNumber"]  # CT series number
+        patient_id_xml = xmlobj.Eagles.PatientData["patientID"]
+        time_intervention = xmlobj.Eagles["time"]
+
         # TO DO: add version
         #        version = xmlobj.Eagles['version']
         if trajectories is not None:
-            return trajectories
+            return trajectories, series, time_intervention, patient_id_xml
         else:
             print('No trajectory was found in the XML file')
             return None
