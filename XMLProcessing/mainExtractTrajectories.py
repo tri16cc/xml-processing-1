@@ -6,6 +6,7 @@ Created on Tue Feb 27 16:49:22 2018
 """
 import os
 import re
+import untangle as ut
 import pandas as pd
 import NeedlesInfoClass
 import parseIREtrajectories
@@ -16,12 +17,16 @@ from customize_dataframe import customize_dataframe
 # TODO: get patient id from the folder name before the intervention
 # TODO: patient naming consistency
 # TODO: add the CT series number as validation on the XML
-#rootdir = r"C:\PatientDatasets_GroundTruth_Database\GroundTruth_2018\GT_23042018"
+# old cas version: segmentations path read the plan.xml and validation.xml from each segmentations folder to find the corresponding trajectory.
+# new cas version: segmentation path in Ablation_Validation.xml
+# find correct plan/validation based on series number
+# drop the csv segmentation paths because we can't tell which segmentations were used
 rootdir = r"C:\PatientDatasets_GroundTruth_Database\GroundTruth_2018\GT_23042018"
 # instantiate the Patient's Repository class
 patientsRepo = NeedlesInfoClass.PatientRepo()
 pat_ids = []
 pat_id = 0
+
 
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
@@ -42,14 +47,15 @@ for subdir, dirs, files in os.walk(rootdir):
             xmlobj = parseIREtrajectories.I_parseRecordingXML(xmlfilename)
             if xmlobj is not None:
                 # parse trajectories
-                trajectories = parseIREtrajectories.II_parseTrajectories(xmlobj)
+                # TODO: condition for when the trajectory is none, set the other params as well.
+                trajectories, series, time_intervention, patient_id_xml = parseIREtrajectories.II_parseTrajectories(xmlobj)
                 if trajectories is not None:
                     # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
                     patients = patientsRepo.getPatients()
                     patient = [x for x in patients if x.patientId == pat_id]
                     if not patient:
                         # create patient measurements if patient is not already in the PatientsRepository
-                        patient = patientsRepo.addNewPatient(pat_id)
+                        patient = patientsRepo.addNewPatient(pat_id, patient_id_xml, time_intervention)
                         parseIREtrajectories.III_parseTrajectory(trajectories, patient)
                     else:
                         # update patient measurements in the PatientsRepository if the patient (id) already exists
@@ -68,7 +74,7 @@ dfPatientsTrajectories = pd.DataFrame(needle_data)
 #dfPatientsTrajectories.sort_values(by=['PatientID'])
 #Angles = []     
 #patient_unique = dfPatientsTrajectories['PatientID'].unique()   
-
+ 
 #%% dataframes for Angles
 # TODO: flag to cancel Angles if Dataset is MWA
 #for PatientIdx, patient in enumerate(patient_unique):
