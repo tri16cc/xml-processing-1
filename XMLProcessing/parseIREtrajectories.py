@@ -6,7 +6,7 @@ Created on Mon Feb  5 15:04:29 2018
 """
 # from IPython import get_ipython
 # get_ipython().magic('reset -sf')
-
+import collections
 import numpy as np
 import untangle as ut
 from extractTPEsXml import extractTPES
@@ -146,6 +146,9 @@ def II_parseTrajectories(xmlobj):
     INPUT: xmlobj tree structured parsed by function
     OUTPUT: Trajectories (if exist) extracted from XML File
     """
+    tuple_results = collections.namedtuple('tuples_results',
+                                       ['trajectories', 'series',
+                                        'time_intervention', 'patient_id_xml'])
     try:
         trajectories = xmlobj.Eagles.Trajectories.Trajectory
         series = xmlobj.Eagles.PatientData["seriesNumber"]  # CT series number
@@ -155,11 +158,16 @@ def II_parseTrajectories(xmlobj):
         # TO DO: add version
         #        version = xmlobj.Eagles['version']
         if trajectories is not None:
-            return trajectories, series, time_intervention, patient_id_xml
+            result = tuple_results(trajectories, series, time_intervention, 
+                                   patient_id_xml)
+            return result
         else:
             print('No trajectory was found in the XML file')
-            return None
+            result = tuple_results(None, None, None, None)
+            return result
     except Exception:
         print('No trajectory was found in the XML file')
-        return None
+        result = tuple_results(None, None, None, None)
+        return result
+       
 
