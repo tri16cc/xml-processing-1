@@ -6,12 +6,17 @@ Created on Mon Feb  5 15:04:29 2018
 """
 # from IPython import get_ipython
 # get_ipython().magic('reset -sf')
+import os
 import collections
 import numpy as np
 import untangle as ut
 from extractTPEsXml import extractTPES
 from elementExistsXml import elementExists
+from splitAllPaths import splitall
+
+
 # %%
+
 
 def I_parseRecordingXML(filename):
     # try to open and parse the xml filename if error, return message
@@ -23,7 +28,7 @@ def I_parseRecordingXML(filename):
         return None
 
 
-def IV_parseNeedles(children_trajectories, lesion, needle_type):
+def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath):
     """ Parse Individual Needle Trajectories per Lesion.
     Extract planning coordinates and  validation needle coordinate.
     Extract the TPE Errors from the validation coordinates.
@@ -46,23 +51,38 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type):
             needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
         # case for new needle not currently saved in database
         if needle is None:
-            needle = lesion.newNeedle(False, needle_type)  # False - the needle is not a reference trajectory
+            needle = lesion.newNeedle(False, needle_type, ct_series)  # False - the needle is not a reference trajectory
             tps = needle.setTPEs()
             validation = needle.setValidationTrajectory()
-
         # add the entry and target points to the needle object
         planned = needle.setPlannedTrajectory()
         planned.setTrajectory(ep_planning, tp_planning)
-
         # add the segmentation path if it exists
         if elementExists(singleTrajectory, 'Segmentation'):
-            structure_type = singleTrajectory.Segmentation["StructureType"]
-            needle.setSegmentationPath(singleTrajectory.Segmentation.Path.cdata,
-                                            structure_type)
-
-        # add the needle information
-        needle_params = needle.setNeedleSpecifications()
+            # check what type of segmentation is, call correct function
+            segmentation_type = singleTrajectory.Segmentation["StructureType"]
+            series_UID = singleTrajectory.Segmentation.SeriesUID.cdata
+            all_paths = splitall(xml_filepath)
+            idx_segmentations = [i for i, s in enumerate(all_paths) if "Study" in s]
+            segmentation_filepath = os.path.join(all_paths[idx_segmentations[0]],
+                                                 all_paths[idx_segmentations[0] + 1],
+                                                 singleTrajectory.Segmentation.Path.cdata[1:])
+            # TODO: add the time at which segmentations were done
+            #  check if the series UID has already been added.
+            segmentation = needle.findSegmentation(series_UID, segmentation_type)
+            if segmentation is None:
+                # add new segmentation instance
+                needle.newSegmentation(segmentation_filepath,
+                                       needle_type,
+                                       ct_series,
+                                       series_UID,
+                                       segmentation_type)
+            else:
+                print("segmentation series already exists")
+        # TODO: attach the needle specifications to the segmentations class
         if elementExists(singleTrajectory, 'Ablator'):
+            # add the needle information
+            needle_params = needle.setNeedleSpecifications()
             needle_params.setNeedleSpecifications(singleTrajectory.Ablator["id"],
                                                   singleTrajectory.Ablator["ablationSystem"],
                                                   singleTrajectory.Ablator["ablationSystemVersion"],
@@ -74,8 +94,10 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type):
         else:
             # find the right needle to replace the exact TPEs
             # set the validation trajectory
-            ep_validation = np.array([float(i) for i in singleTrajectory.Measurements.Measurement.EntryPoint.cdata.split()])
-            tp_validation = np.array([float(i) for i in singleTrajectory.Measurements.Measurement.TargetPoint.cdata.split()])
+            ep_validation = np.array(
+                [float(i) for i in singleTrajectory.Measurements.Measurement.EntryPoint.cdata.split()])
+            tp_validation = np.array(
+                [float(i) for i in singleTrajectory.Measurements.Measurement.TargetPoint.cdata.split()])
             validation = needle.setValidationTrajectory()
             validation.setTrajectory(ep_validation, tp_validation)
             target_lateral, target_angular, target_longitudinal, target_euclidean \
@@ -84,8 +106,7 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type):
             tps.setTPEErrors(target_lateral, target_angular, target_longitudinal, target_euclidean)
 
 
-
-def III_parseTrajectory(trajectories, patient):
+def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath):
     """ Parse Trajectories at lesion level.
     For each lesion, a new Parent Trajectory is defined.
     A lesion is defined when the distance between needles is minimum 35 mm.
@@ -107,12 +128,11 @@ def III_parseTrajectory(trajectories, patient):
             lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=23)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)  # input parameter target point of reference trajectory
-                needle = lesion.newNeedle(True, needle_type)
+                needle = lesion.newNeedle(True, needle_type, ct_series)
                 # true, this is the reference needle around which the trajectory is planned
             else:
                 # lesion was already added to the repository
                 needle = lesion.findNeedle(tp_planning, DISTANCE_BETWEEN_NEEDLES=3)  # retrieve the reference trajectory
-
             planned = needle.setPlannedTrajectory()
             planned.setTrajectory(ep_planning, tp_planning)
             needle.setValidationTrajectory()  # empty because the reference needle has no validation trajectory
@@ -138,7 +158,7 @@ def III_parseTrajectory(trajectories, patient):
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)
             children_trajectories = xmlTrajectory
-            IV_parseNeedles(children_trajectories, lesion, needle_type)
+            IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath)
 
 
 def II_parseTrajectories(xmlobj):
@@ -147,8 +167,8 @@ def II_parseTrajectories(xmlobj):
     OUTPUT: Trajectories (if exist) extracted from XML File
     """
     tuple_results = collections.namedtuple('tuples_results',
-                                       ['trajectories', 'series',
-                                        'time_intervention', 'patient_id_xml'])
+                                           ['trajectories', 'series',
+                                            'time_intervention', 'patient_id_xml'])
     try:
         trajectories = xmlobj.Eagles.Trajectories.Trajectory
         series = xmlobj.Eagles.PatientData["seriesNumber"]  # CT series number
@@ -158,7 +178,7 @@ def II_parseTrajectories(xmlobj):
         # TO DO: add version
         #        version = xmlobj.Eagles['version']
         if trajectories is not None:
-            result = tuple_results(trajectories, series, time_intervention, 
+            result = tuple_results(trajectories, series, time_intervention,
                                    patient_id_xml)
             return result
         else:
@@ -169,5 +189,3 @@ def II_parseTrajectories(xmlobj):
         print('No trajectory was found in the XML file')
         result = tuple_results(None, None, None, None)
         return result
-       
-
