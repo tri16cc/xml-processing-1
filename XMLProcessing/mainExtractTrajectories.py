@@ -11,21 +11,19 @@ import NeedlesInfoClass
 import parseIREtrajectories
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
-
 # %%
 # TODO: user keyboard input to ask for study folder
-# TODO: get patient id from the folder name before the intervention
 # TODO: patient naming consistency
 # TODO: extract the datatime from the segmentations folder(new cas version)
 # old cas version: segmentations path read the plan.xml and validation.xml from each segmentations folder to find the corresponding trajectory.
 # new cas version: segmentation path in Ablation_Validation.xml
 # find correct plan/validation based on series number
 rootdir = r"C:\PatientDatasets_GroundTruth_Database\GroundTruth_2018\GT_23042018"
-# instantiate the Patient's Repository class
+# rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
+
 patientsRepo = NeedlesInfoClass.PatientRepo()
 pat_ids = []
 pat_id = 0
-
 
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
@@ -36,10 +34,11 @@ for subdir, dirs, files in os.walk(rootdir):
             xmlFilePathName = os.path.join(subdir, file)
             xmlfilename = os.path.normpath(xmlFilePathName)
             try:
-                # find the numbers before the "_Pat" till the "//"
-                pat_idx = xmlfilename.find("_Pat")
-                pat_id_str = re.findall('\\d+', xmlfilename[0:pat_idx])
-                pat_id = int(pat_id_str[len(pat_id_str) - 1])
+                # patient folder naming might differ every time
+                pat_idx = xmlfilename.find("Pat_")
+                pat_id_str = re.findall('\\d+', xmlfilename[pat_idx:])
+                # pat_id = int(pat_id_str[len(pat_id_str) - 1])
+                pat_id = int(pat_id_str[0])
                 pat_ids.append(pat_id)
             except Exception:
                 print('numeric data not found in the file name', xmlfilename)
@@ -51,6 +50,7 @@ for subdir, dirs, files in os.walk(rootdir):
                 if trajectories_info.trajectories is None:
                     continue
                 else:
+                    # TODO: use the patient ID in the XML file
                     # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
                     patients = patientsRepo.getPatients()
                     patient = [x for x in patients if x.patientId == pat_id]
@@ -76,9 +76,20 @@ for p in patients:
         needles = lesion.getNeedles()
         # for each needle get the segmentations associated with it
         NeedlesInfoClass.NeedleToDictWriter.needlesToDict(needle_data, patientID, l_idx, lesion.getNeedles())
-
-dfPatientsTrajectories = pd.DataFrame(needle_data)
+#%%
+needle_list = []
+for needles in needle_data:
+    for l in needles:
+        needle_list.append(l)
+        
+dfPatientsTrajectories = pd.DataFrame(needle_list)     
 print("success")
+#%%
+#filename = 'MAVERRIC_NeedleInfo' + '.xlsx'
+#filepathExcel = os.path.join(rootdir, filename)
+#writer = pd.ExcelWriter(filepathExcel)
+#dfPatientsTrajectories.to_excel(writer, sheet_name='TPEs', index=False, na_rep='NaN')
+
 # dfPatientsTrajectories.sort_values(by=['PatientID'])
 # Angles = []
 # patient_unique = dfPatientsTrajectories['PatientID'].unique()
