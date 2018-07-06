@@ -77,6 +77,10 @@ class Lesion:
         return needle
 
     def findNeedle(self, needlelocation, DISTANCE_BETWEEN_NEEDLES):
+        """ Find and return the needles. Based on euclidean distance.
+            Might not work because there is no clear and constant agreement
+            to tell if it's a new needle or the same one which was moved with 50mm.
+        """
         foundNeedles = list(filter(lambda l:
                                    l.distanceToNeedle(needlelocation) < DISTANCE_BETWEEN_NEEDLES, self.needles))
         if len(foundNeedles) == 0:
@@ -87,54 +91,41 @@ class Lesion:
             raise Exception('Something went wrong')
 
 
-class SegmentationTumor:
-    # TODO: add all needles that were validated regardless if they segmentations or not
-    # TODO: add self.datetime_created = datetime_created
-    # TODO: add self.author_segmentation = author
-    # TODO: self.needle_information = (??)
-    def __init__(self, needle, path, needle_type, ct_series, series_UID):
-        # to do. init to none because not all needles have segmentations
+class Segmentation:
+    
+    def __init__(self, needle, path, needle_type, ct_series, series_UID, sphere_radius, segmentation_type):
         self.mask_path = path
         self.needle_type = needle_type
         self.ct_series = ct_series
         self.series_UID = series_UID
+        self.sphere_radius = sphere_radius
         self.needle = needle
+        self.segmentation_type = segmentation_type  # ablation, tumor, vessel (etc)
+        self.needle_specifications = None
+        # TODO: add self.datetime_created = datetime_created
+        
+    def setNeedleSpecifications(self):
+        self.needle_specifications = NeedleSpecifications()
+        return self.needle_specifications
 
 
-    #
-    # # not sure if segmentation info needs to be set outside init
-    # def setSegmentationInfo(self, path, needle_type, ct_series, series_UID):
-    #     self.mask_path = path
-    #     self.needle_type = needle_type
-    #     self.ct_series = ct_series
-    #     self.series_UID = series_UID
+class NeedleSpecifications:
 
+    def __init__(self):
+        self.ablator_id = None
+        self.ablationSystem = None
+        self.ablationSystemVersion = None
+        self.ablatorType = None
+        self.ablationShapeIndex = None  # id field which connects with the MWA Needle Database
 
-    def to_dict(self):
-        return {'PlannedEntryPoint': self.needle.planned.entrypoint,
-                'PlannedTargetPoint': self.needle.planned.targetpoint,
-                'ValidationEntryPoint': self.needle.validation.entrypoint,
-                'ValidationTargetPoint': self.needle.validation.targetpoint,
-                'ReferenceNeedle': self.needle.isreference,
-                'AngularError': self.needle.tpeerorrs.angular,
-                'LateralError': self.needle.tpeerorrs.lateral,
-                'LongitudinalError': self.needle.tpeerorrs.longitudinal,
-                'EuclideanError': self.needle.tpeerorrs.euclidean,
-                'NeedleType': self.needle.needle_type,
-                'TumorPath': self.mask_path,
-                'CT_Series': self.ct_series,
-                'Series_UID': self.series_UID
-                }
-
-
-class SegmentationAblation:
-    # a tumor/ablation can have multiple segmentations done by several radiologists
-    def __init__(self, needle, path, needle_type, ct_series, series_UID):
-        self.mask_path = path
-        self.needle_type = needle_type
-        self.ct_series = ct_series
-        self.series_UID = series_UID
-        self.needle = needle
+    def setNeedleSpecifications(self, ablator_id, ablationSystem,
+                                ablationSystemVersion, ablatorType,
+                                ablationShapeIndex):
+        self.ablator_id = ablator_id
+        self.ablationSystem = ablationSystem
+        self.ablationSystemVersion = ablationSystemVersion
+        self.ablatorType = ablatorType
+        self.ablationShapeIndex = ablationShapeIndex  # id field which connects with the MWA Needle Database
 
 
 class Needle:
@@ -148,12 +139,7 @@ class Needle:
         self.tpeerorrs = None
         self.lesion = lesion
         self.needle_type = needle_type
-        self.needle_specifications = None
         self.ct_series = ct_series
-
-    def setNeedleSpecifications(self):
-        self.needle_specifications = NeedleSpecifications()
-        return self.needle_specifications
 
     def distanceToNeedle(self, needlelocation):
         # compute euclidean distances for TPE to check whether the same lesion
@@ -162,36 +148,6 @@ class Needle:
         dist = np.linalg.norm(tp1 - tp2)
         return dist
         pass
-
-    def findSegmentation(self, series_UID, segmentation_type):
-        # check if the series UID has already been added.
-        if segmentation_type.lower() in {"lesion", "lession", "tumor", "tumour"}:
-            segmentations = self.segmentations_tumor
-        elif segmentation_type.lower() in {"ablation", "ablationzone", "necrosis"}:
-            segmentations = self.segmentations_ablation
-        idx_seg = list(filter(lambda l: l.series_UID == series_UID, segmentations))
-        if len(idx_seg) > 0:
-            print("comparison works")
-            return 1
-        else:
-            print("Series UID not in list")
-            return None
-
-    def newSegmentation(self, path, needle_type, ct_series, series_UID, segmentation_type):
-        if segmentation_type.lower() in {"lesion", "lession", "tumor", "tumour"}:
-            # here self represents the needle
-            segmentation = SegmentationTumor(self, path, needle_type, ct_series, series_UID)
-            self.segmentations_tumor.append(segmentation)
-        elif segmentation_type.lower() in {"ablation", "ablationzone", "necrosis"}:
-            # here self represents the needle
-            segmentation = SegmentationAblation(self, path, needle_type, ct_series, series_UID)
-            self.segmentations_ablation.append(segmentation)
-
-    def getAblationSegmentations(self):
-        return self.segmentations_ablation
-
-    def getTumorSegmentations(self):
-        return self.segmentations_tumor
 
     def setPlannedTrajectory(self):
         self.planned = Trajectory()
@@ -217,6 +173,103 @@ class Needle:
     def getIsNeedleReference(self):
         return self.isreference
 
+    def findSegmentation(self, series_UID, segmentation_type):
+        """ Retrieve Segmentation based on unique SeriesUID (metatag).
+            To use in case the segmentation info appears multiple locations in
+            the folder. In case information needs to be updated with latest path.
+        """
+        if segmentation_type.lower() in {"lesion", "lession", "tumor", "tumour"}:
+            segmentations = self.segmentations_tumor
+        elif segmentation_type.lower() in {"ablation", "ablationzone", "necrosis"}:
+            segmentations = self.segmentations_ablation
+        seg_found = list(filter(lambda l: l.series_UID == series_UID, segmentations))
+        if len(seg_found) > 0:
+            return seg_found[0]
+        else:
+            print("Series UID not in list")
+            return None
+
+    def newSegmentation(self, segmentation_type, path, needle_type, ct_series, series_UID, sphere_radius):
+        """ Instantiate Segmentation Class object.
+            append segmentation object to the correct needle object list.
+            to solve: multiple type of segmentations (eg.vessel) might appear in the future
+        """
+        if segmentation_type.lower() in {"lesion", "lession", "tumor", "tumour"}:
+            segmentation = Segmentation(self, path, needle_type, ct_series, series_UID, sphere_radius,
+                                        segmentation_type)
+            self.segmentations_tumor.append(segmentation)
+            return segmentation
+        elif segmentation_type.lower() in {"ablation", "ablationzone", "necrosis"}:
+            segmentation = Segmentation(self, path, needle_type, ct_series, series_UID, sphere_radius,
+                                        segmentation_type)
+            self.segmentations_ablation.append(segmentation)
+            return segmentation
+
+    def getAblationSegmentations(self):
+        return self.segmentations_ablation
+
+    def getTumorSegmentations(self):
+        return self.segmentations_tumor
+
+    def to_dict(self, patientID, lesionIdx, needle_idx):
+        """ Unpack Needle Object class to dict.
+            Return needle inforation.
+            If one needle has several segmentations, iterate and return all.
+            If no segmentation, return empty fields for the segmentation.
+        """
+        segmentation_tumor = self.segmentations_tumor
+        segmentation_ablation = self.segmentations_ablation
+        dict_one_needle = []
+        # if this needle has segmentation associated with it then output its info
+        if segmentation_tumor:
+            for idx_s, seg in enumerate(segmentation_tumor):
+                one_seg = {'PatientID': patientID,
+                           'LesionNr': lesionIdx,
+                           'NeedleNr': needle_idx,
+                           'PlannedEntryPoint': self.planned.entrypoint,
+                           'PlannedTargetPoint': self.planned.targetpoint,
+                           'ValidationEntryPoint': self.validation.entrypoint,
+                           'ValidationTargetPoint': self.validation.targetpoint,
+                           'ReferenceNeedle': self.isreference,
+                           'AngularError': self.tpeerorrs.angular,
+                           'LateralError': self.tpeerorrs.lateral,
+                           'LongitudinalError': self.tpeerorrs.longitudinal,
+                           'EuclideanError': self.tpeerorrs.euclidean,
+                           'NeedleType': segmentation_tumor[idx_s].needle_type,
+                           'TumorPath': segmentation_tumor[idx_s].mask_path,
+                           'Tumor_CT_Series': segmentation_tumor[idx_s].ct_series,
+                           'Tumor_Series_UID': segmentation_tumor[idx_s].series_UID,
+                           'AblationPath': segmentation_ablation[idx_s].mask_path,
+                           'Ablation_CT_Series': segmentation_ablation[idx_s].ct_series,
+                           'Ablation_Series_UID': segmentation_ablation[idx_s].series_UID
+                           }
+                dict_one_needle.append(one_seg)
+            return dict_one_needle
+        else:
+            # output just the needle and empty segmentation info
+            one_seg = {'PatientID': patientID,
+                       'LesionNr': lesionIdx,
+                       'NeedleNr': needle_idx,
+                       'PlannedEntryPoint': self.planned.entrypoint,
+                       'PlannedTargetPoint': self.planned.targetpoint,
+                       'ValidationEntryPoint': self.validation.entrypoint,
+                       'ValidationTargetPoint': self.validation.targetpoint,
+                       'ReferenceNeedle': self.isreference,
+                       'AngularError': self.tpeerorrs.angular,
+                       'LateralError': self.tpeerorrs.lateral,
+                       'LongitudinalError': self.tpeerorrs.longitudinal,
+                       'EuclideanError': self.tpeerorrs.euclidean,
+                       'NeedleType': self.needle_type,
+                       'TumorPath': '',
+                       'Tumor_CT_Series': '',
+                       'Tumor_Series_UID': '',
+                       'AblationPath': '',
+                       'Ablation_CT_Series': '',
+                       'Ablation_Series_UID': ''
+                       }
+            dict_one_needle.append(one_seg)
+            return dict_one_needle
+
 
 class NeedleToDictWriter:
     """ Extracts the needle information into dictionary format.
@@ -226,18 +279,10 @@ class NeedleToDictWriter:
         lesionIDX: int specifying the needle count
         needles: needles class object
     """
-    # TODO: fix the function, missing self
     def needlesToDict(needle_data, patientID, lesionIdx, needles):
-        for xIdx, needle in enumerate(needles):
-            # a needle can have one or more segmentations
-            segmentations_tumor = needle.getTumorSegmentations()
-            # segmentations_ablation = needle.getAblationSegmentations()
-            for sIdx, segmentation in enumerate(segmentations_tumor):
-                needle_dict = segmentation.to_dict()
-                needle_dict['PatientID'] = patientID
-                needle_dict['LesionNr'] = lesionIdx
-                needle_dict['NeedleNr'] = xIdx
-                needle_data.append(needle_dict)
+        for needle_idx, needle in enumerate(needles):
+            needle_dict = needle.to_dict(patientID, lesionIdx, needle_idx)  # needle_dict is a list type
+            needle_data.append(needle_dict)
 
 
 class TPEErrors:
@@ -268,25 +313,3 @@ class Trajectory:
     def setTrajectory(self, entrypoint, targetpoint):
         self.entrypoint = entrypoint
         self.targetpoint = targetpoint
-
-
-class NeedleSpecifications:
-
-    def __init__(self):
-        self.ablator_id = None
-        self.ablationSystem = None
-        self.ablationSystemVersion = None
-        self.ablatorType = None
-        self.ablationShapeIndex = None  # id field which connects with the MWA Needle Database
-
-    def setNeedleSpecifications(self, ablator_id, ablationSystem,
-                                ablationSystemVersion, ablatorType,
-                                ablationShapeIndex):
-        self.ablator_id = ablator_id
-        self.ablationSystem = ablationSystem
-        self.ablationSystemVersion = ablationSystemVersion
-        self.ablatorType = ablatorType
-        self.ablationShapeIndex = ablationShapeIndex  # id field which connects with the MWA Needle Database
-
-
-
