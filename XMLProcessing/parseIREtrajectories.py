@@ -61,7 +61,7 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
                                               singleTrajectory.Ablator["ablationSystem"],
                                               singleTrajectory.Ablator["ablationSystemVersion"],
                                               singleTrajectory.Ablator["ablatorType"],
-                                              singleTrajectory.Ablator.Ablation["AblationShapeIndex"])
+                                              singleTrajectory.Ablator.Ablation["ablationShapeIndex"])
 
 
 def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath):

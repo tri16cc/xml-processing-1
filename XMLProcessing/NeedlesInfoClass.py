@@ -241,7 +241,9 @@ class Needle:
                            'Tumor_Series_UID': segmentation_tumor[idx_s].series_UID,
                            'AblationPath': segmentation_ablation[idx_s].mask_path,
                            'Ablation_CT_Series': segmentation_ablation[idx_s].ct_series,
-                           'Ablation_Series_UID': segmentation_ablation[idx_s].series_UID
+                           'Ablation_Series_UID': segmentation_ablation[idx_s].series_UID,
+                           'AblationSystem': segmentation_tumor[idx_s].needle_specifications.ablationSystem
+                           
                            }
                 dict_one_needle.append(one_seg)
             return dict_one_needle
@@ -265,7 +267,8 @@ class Needle:
                        'Tumor_Series_UID': '',
                        'AblationPath': '',
                        'Ablation_CT_Series': '',
-                       'Ablation_Series_UID': ''
+                       'Ablation_Series_UID': '',
+                       'AblationSystem': ''
                        }
             dict_one_needle.append(one_seg)
             return dict_one_needle
