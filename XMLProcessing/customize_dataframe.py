@@ -10,6 +10,7 @@ import time
 import pandas as pd
 import matplotlib.pyplot as plt 
 
+
 def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     
     #%% boxplot for angle degrees planned vs validation
