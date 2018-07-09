@@ -242,11 +242,8 @@ class Needle:
                            'AblationPath': segmentation_ablation[idx_s].mask_path,
                            'Ablation_CT_Series': segmentation_ablation[idx_s].ct_series,
                            'Ablation_Series_UID': segmentation_ablation[idx_s].series_UID,
-                           'AblationSystem': segmentation_tumor[idx_s].needle_specifications.ablationSystem,
-                           'AblatorID': segmentation_tumor[idx_s].needle_specifications.ablator_id,
-                           'AblationSystemVersion': segmentation_tumor[idx_s].needle_specifications.ablationSystemVersion,
-                           'AblationShapeIndex': segmentation_tumor[idx_s].needle_specifications.ablationShapeIndex,
-                           'AblatorType': segmentation_tumor[idx_s].needle_specifications.ablatorType
+                           'AblationSystem': segmentation_tumor[idx_s].needle_specifications.ablationSystem
+                           
                            }
                 dict_one_needle.append(one_seg)
             return dict_one_needle
@@ -271,11 +268,7 @@ class Needle:
                        'AblationPath': '',
                        'Ablation_CT_Series': '',
                        'Ablation_Series_UID': '',
-                       'AblationSystem': '',
-                       'AblatorID': '',
-                       'AblationSystemVersion': '',
-                       'AblationShapeIndex': '',
-                       'AblatorType': ''
+                       'AblationSystem': ''
                        }
             dict_one_needle.append(one_seg)
             return dict_one_needle
