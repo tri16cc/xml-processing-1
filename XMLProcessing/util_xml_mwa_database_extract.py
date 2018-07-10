@@ -19,23 +19,31 @@ except Exception:
     print('XML file structure is broken, cannot read XML')
 
 dict_mwa_info = []
-mwa_needle_info = xmlobj.Eagles.Database.MWA
+needles = xmlobj.Eagles.Database.MWA
 # TODO : add all needles
-for needle in mwa_needle_info:
-    # "Acculis MTA" has id=0
-    ablation_params = needle.AblationParameters.Geometry.Shape
-    for idx, ablation_param in enumerate(ablation_params):
-        print(ablation_param)
-        mwa_info = {'NeedleID': needle["id"],
-                    'NeedleType': needle.AblationParameters["systemName"],
-                    'Shape': idx,
-                    'Type': ablation_param["type"],
-                    'Power': ablation_param["power"],
-                    'Time_seconds': ablation_param["time"],
-                    'Radii': ablation_param["radii"],
-                    'Translation': ablation_param["translation"],
-                    'Rotation': ablation_param["rotation"]
-                    }
-        dict_mwa_info.append(mwa_info)
+for needle in needles: 
+        # "Acculis MTA" has id=0
+        try:
+            geometry = needle.AblationParameters.Geometry
+        except Exception:
+            continue
+        for geo in geometry:
+            try:        
+                ablation_params = geo.Shape
+            except Exception:
+                continue
+            for idx, ablation_param in enumerate(ablation_params):
+                mwa_info ={'NeedleID': needle["id"],
+                            'NeedleType': needle.AblationParameters["systemName"],
+                            'Shape': idx,
+                            'Type': ablation_param["type"],
+                            'Power': ablation_param["power"],
+                            'Time_seconds': ablation_param["time"],
+                            'Radii': ablation_param["radii"],
+                            'Translation': ablation_param["translation"],
+                            'Rotation': ablation_param["rotation"]
+                            }
+                dict_mwa_info.append(mwa_info)
             
 df_mwa = pd.DataFrame(dict_mwa_info)
+df_mwa["NeedleName"] = "MWA"
