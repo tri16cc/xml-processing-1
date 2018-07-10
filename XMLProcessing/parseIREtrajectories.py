@@ -17,9 +17,13 @@ from splitAllPaths import splitall
 
 def I_parseRecordingXML(filename):
     # try to open and parse the xml filename if error, return message
+    xml_tree = collections.namedtuple('xml_tree',
+                                      ['trajectories', 'patient_id_xml'])
     try:
         xmlobj = ut.parse(filename)
-        return xmlobj
+        patient_id_xml = xmlobj.Eagles.PatientData["patientID"]
+        result = xml_tree(xmlobj, patient_id_xml)
+        return result
     except Exception:
         print('XML file structure is broken, cannot read XML')
         return None
@@ -94,9 +98,6 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
         # add the entry and target points to the needle object
         planned = needle.setPlannedTrajectory()
         planned.setTrajectory(ep_planning, tp_planning)
-        # add the segmentation path if it exists
-        if elementExists(singleTrajectory, 'Segmentation'):
-            parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_filepath)
         # add the TPEs if they exist in the Measurements field
         if elementExists(singleTrajectory, 'Measurements') is False:
             print('No Measurement for this needle')
@@ -113,6 +114,9 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
                 = extractTPES(singleTrajectory.Measurements.Measurement)
             tps = needle.setTPEs()
             tps.setTPEErrors(target_lateral, target_angular, target_longitudinal, target_euclidean)
+        # add the segmentation path if it exists
+        if elementExists(singleTrajectory, 'Segmentation'):
+            parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_filepath)
 
 
 def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath):

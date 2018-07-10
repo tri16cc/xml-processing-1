@@ -15,9 +15,9 @@ from customize_dataframe import customize_dataframe
 # TODO: user keyboard input to ask for study folder
 # TODO: patient naming consistency
 # TODO: extract the datatime from the segmentations folder(new cas version)
-# old cas version: segmentations path read the plan.xml and validation.xml from each segmentations folder to find the corresponding trajectory.
-# new cas version: segmentation path in Ablation_Validation.xml
-# find correct plan/validation based on series number
+# TODO: extract patient id from xml
+# TODO: add the info from the needle database
+# TODO: run on the old folder version
 rootdir = r"C:\PatientDatasets_GroundTruth_Database\GroundTruth_2018\GT_23042018"
 # rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
 
@@ -28,25 +28,30 @@ pat_id = 0
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
         fileName, fileExtension = os.path.splitext(file)
-        # TODO: add ablation validation xml type of file
         if fileExtension.lower().endswith('.xml') and (
                 'validation' in fileName.lower() or 'plan' in fileName.lower()):
             xmlFilePathName = os.path.join(subdir, file)
             xmlfilename = os.path.normpath(xmlFilePathName)
-            try:
-                # patient folder naming might differ every time
-                pat_idx = xmlfilename.find("Pat_")
-                pat_id_str = re.findall('\\d+', xmlfilename[pat_idx:])
-                # pat_id = int(pat_id_str[len(pat_id_str) - 1])
-                pat_id = int(pat_id_str[0])
-                pat_ids.append(pat_id)
-            except Exception:
-                print('numeric data not found in the file name', xmlfilename)
-            pat_ids.append(pat_id)
+            ## to use only when there is a numeric id in the patient folder
+#            try:
+#                # patient folder naming might differ every time
+#                pat_idx = xmlfilename.find("Pat_")
+#                pat_id_str = re.findall('\\d+', xmlfilename[pat_idx:])
+#                # pat_id = int(pat_id_str[len(pat_id_str) - 1])
+#                pat_id = int(pat_id_str[0])
+#                pat_ids.append(pat_id)
+#            except Exception:
+#                print('numeric data not found in the file name', xmlfilename)
+
             xmlobj = parseIREtrajectories.I_parseRecordingXML(xmlfilename)
+
             if xmlobj is not None:
+                pat_id = xmlobj.patient_id_xml
+                if pat_id is None:
+                    print("No Patient ID found in the XML ", xmlfilename)
+                pat_ids.append(pat_id)
                 # parse trajectories and other patient specific info
-                trajectories_info = parseIREtrajectories.II_parseTrajectories(xmlobj)
+                trajectories_info = parseIREtrajectories.II_parseTrajectories(xmlobj.trajectories)
                 if trajectories_info.trajectories is None:
                     continue
                 else:
@@ -102,3 +107,4 @@ print("success")
 # dfAngles = pd.DataFrame(Angles)
 ## call the customize_dataframe to make columns numerical, write with 2 decimals
 # customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir)
+

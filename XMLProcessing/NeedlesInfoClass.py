@@ -213,7 +213,7 @@ class Needle:
 
     def to_dict(self, patientID, lesionIdx, needle_idx):
         """ Unpack Needle Object class to dict.
-            Return needle inforation.
+            Return needle information.
             If one needle has several segmentations, iterate and return all.
             If no segmentation, return empty fields for the segmentation.
         """
@@ -242,8 +242,11 @@ class Needle:
                            'AblationPath': segmentation_ablation[idx_s].mask_path,
                            'Ablation_CT_Series': segmentation_ablation[idx_s].ct_series,
                            'Ablation_Series_UID': segmentation_ablation[idx_s].series_UID,
-                           'AblationSystem': segmentation_tumor[idx_s].needle_specifications.ablationSystem
-                           
+                           'AblationSystem': segmentation_tumor[idx_s].needle_specifications.ablationSystem,
+                           'AblatorID': segmentation_tumor[idx_s].needle_specifications.ablator_id,
+                           'AblationSystemVersion': segmentation_tumor[idx_s].needle_specifications.ablationSystemVersion,
+                           'AblationShapeIndex': segmentation_tumor[idx_s].needle_specifications.ablationShapeIndex,
+                           'AblatorType': segmentation_tumor[idx_s].needle_specifications.ablatorType,
                            }
                 dict_one_needle.append(one_seg)
             return dict_one_needle
@@ -268,7 +271,11 @@ class Needle:
                        'AblationPath': '',
                        'Ablation_CT_Series': '',
                        'Ablation_Series_UID': '',
-                       'AblationSystem': ''
+                       'AblationSystem': '',
+                       'AblatorID': '',
+                       'AblationSystemVersion':'',
+                       'AblationShapeIndex':'',
+                       'AblatorType': '',
                        }
             dict_one_needle.append(one_seg)
             return dict_one_needle
