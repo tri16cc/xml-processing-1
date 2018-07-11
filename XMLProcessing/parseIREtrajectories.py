@@ -67,7 +67,7 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
                                               singleTrajectory.Ablator.Ablation["ablationShapeIndex"])
 
 
-def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath):
+def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention):
     """ Parse Individual Needle Trajectories per Lesion.
     Extract planning coordinates and  validation needle coordinate.
     Extract the TPE Errors from the validation coordinates.
@@ -91,7 +91,7 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
         # case for new needle not currently saved in database
         if needle is None:
             # add the needle to lesion class and init its parameters
-            needle = lesion.newNeedle(False, needle_type, ct_series)  # False - the needle is not a reference trajectory
+            needle = lesion.newNeedle(False, needle_type, ct_series,time_intervention)  # False - the needle is not a reference trajectory
             tps = needle.setTPEs()
             validation = needle.setValidationTrajectory()
         # add the entry and target points to the needle object
@@ -118,7 +118,7 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
             parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_filepath)
 
 
-def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath):
+def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_intervention):
     """ Parse Trajectories at lesion level.
     For each lesion, a new Parent Trajectory is defined.
     A lesion is defined when the distance between needles is minimum 35 mm.
@@ -139,7 +139,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath):
             lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=23)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)  # input parameter target point of reference trajectory
-                needle = lesion.newNeedle(True, needle_type, ct_series)
+                needle = lesion.newNeedle(True, needle_type, ct_series, time_intervention)
                 # true, this is the reference needle around which the trajectory is planned
             else:
                 # lesion was already added to the repository
@@ -169,7 +169,8 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath):
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)
             children_trajectories = xmlTrajectory
-            IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath)
+            IV_parseNeedles(children_trajectories, lesion, needle_type,
+                            ct_series, xml_filepath, time_intervention)
 
 
 def II_parseTrajectories(xmlobj):

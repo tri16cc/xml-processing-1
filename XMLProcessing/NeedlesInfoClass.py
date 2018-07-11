@@ -5,15 +5,14 @@ Created on Mon Feb  5 10:20:31 2018
 @author: Raluca Sandu
 """
 import numpy as np
-import pandas as pd
 
 class PatientRepo:
 
     def __init__(self):
         self.patients = []
 
-    def addNewPatient(self, patientId, patient_id_xml, time_intervention):
-        patient = Patient(patientId, patient_id_xml, time_intervention)
+    def addNewPatient(self, patientId, patient_id_xml):
+        patient = Patient(patientId, patient_id_xml)
         self.patients.append(patient)
         return patient
 
@@ -23,11 +22,11 @@ class PatientRepo:
 
 class Patient:
 
-    def __init__(self, patientId, patient_id_xml, time_intervention):
+    def __init__(self, patientId, patient_id_xml):
         self.lesions = []
         self.patientId = patientId
         self.patient_id_xml = patient_id_xml
-        self.time_intervention = time_intervention
+
 
     def addLesion(self, lesion):
         self.lesions.append(lesion)
@@ -71,8 +70,9 @@ class Lesion:
     def getNeedles(self):
         return self.needles
 
-    def newNeedle(self, isreference, needle_type, ct_series):
-        needle = Needle(self, isreference, needle_type, ct_series)  # here self represents the lesion
+    def newNeedle(self, isreference, needle_type, ct_series, time_intervention):
+        # here self represents the lesion
+        needle = Needle(self, isreference, needle_type, ct_series, time_intervention)  
         self.needles.append(needle)
         return needle
 
@@ -103,15 +103,12 @@ class Segmentation:
         self.segmentation_type = segmentation_type  # ablation, tumor, vessel (etc)
         self.needle_specifications = None
         self.ellipsoid_info =  None
-        # TODO: add self.datetime_created = datetime_created
+#         TODO: add self.datetime_created = datetime_created
         
     def setNeedleSpecifications(self):
         self.needle_specifications = NeedleSpecifications()
         return self.needle_specifications
     
-    def setEllipsoidInfo(self):
-        self.ellipsoid_info = EllipsoidInfo()
-        return self.ellipsoid_info
 
 
 class NeedleSpecifications:
@@ -135,7 +132,7 @@ class NeedleSpecifications:
 
 class Needle:
 
-    def __init__(self, lesion, isreference, needle_type, ct_series):
+    def __init__(self, lesion, isreference, needle_type, ct_series, time_intervention):
         self.segmentations_tumor = []
         self.segmentations_ablation = []
         self.isreference = isreference
@@ -145,6 +142,7 @@ class Needle:
         self.lesion = lesion
         self.needle_type = needle_type
         self.ct_series = ct_series
+        self.time_intervention = time_intervention
 
     def distanceToNeedle(self, needlelocation):
         # compute euclidean distances for TPE to check whether the same lesion
@@ -231,6 +229,7 @@ class Needle:
                 one_seg = {'PatientID': patientID,
                            'LesionNr': lesionIdx,
                            'NeedleNr': needle_idx,
+                           'TimeIntervention' : self.time_intervention,
                            'PlannedEntryPoint': self.planned.entrypoint,
                            'PlannedTargetPoint': self.planned.targetpoint,
                            'ValidationEntryPoint': self.validation.entrypoint,
@@ -260,6 +259,7 @@ class Needle:
             one_seg = {'PatientID': patientID,
                        'LesionNr': lesionIdx,
                        'NeedleNr': needle_idx,
+                       'TimeIntervention' : self.time_intervention,
                        'PlannedEntryPoint': self.planned.entrypoint,
                        'PlannedTargetPoint': self.planned.targetpoint,
                        'ValidationEntryPoint': self.validation.entrypoint,
