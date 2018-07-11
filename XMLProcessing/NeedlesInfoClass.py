@@ -5,7 +5,7 @@ Created on Mon Feb  5 10:20:31 2018
 @author: Raluca Sandu
 """
 import numpy as np
-
+import pandas as pd
 
 class PatientRepo:
 
@@ -102,11 +102,16 @@ class Segmentation:
         self.needle = needle
         self.segmentation_type = segmentation_type  # ablation, tumor, vessel (etc)
         self.needle_specifications = None
+        self.ellipsoid_info =  None
         # TODO: add self.datetime_created = datetime_created
         
     def setNeedleSpecifications(self):
         self.needle_specifications = NeedleSpecifications()
         return self.needle_specifications
+    
+    def setEllipsoidInfo(self):
+        self.ellipsoid_info = EllipsoidInfo()
+        return self.ellipsoid_info
 
 
 class NeedleSpecifications:
