@@ -20,7 +20,6 @@ except Exception:
 
 dict_mwa_info = []
 needles = xmlobj.Eagles.Database.MWA
-# TODO : add all needles
 for needle in needles: 
         # "Acculis MTA" has id=0
         try:
@@ -34,8 +33,8 @@ for needle in needles:
                 continue
             for idx, ablation_param in enumerate(ablation_params):
                 mwa_info ={'NeedleID': needle["id"],
-                            'NeedleType': needle.AblationParameters["systemName"],
-                            'Shape': idx,
+                            'AblationSystem': needle.AblationParameters["systemName"],
+                            'AblationShapeIndex': idx,
                             'Type': ablation_param["type"],
                             'Power': ablation_param["power"],
                             'Time_seconds': ablation_param["time"],
@@ -47,3 +46,9 @@ for needle in needles:
             
 df_mwa = pd.DataFrame(dict_mwa_info)
 df_mwa["NeedleName"] = "MWA"
+
+#%% write to Excel
+filename_excel = 'CAS_IR_MWA_NeedleDatabase' + '.xlsx'
+writer = pd.ExcelWriter(filename_excel)
+df_mwa.to_excel(writer, sheet_name='MWA', index=False, na_rep='NaN')
+
