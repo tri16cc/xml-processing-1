@@ -58,7 +58,6 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
         print("segmentation series already exists")
 
     if elementExists(singleTrajectory, 'Ablator'):
-        # TODO: extract the specific MWA info to dict. relate with MWA database log
         needle_params = segmentation.setNeedleSpecifications()
         # TODO: add singleTrajectory.Ablator["readableName"],
         needle_params.setNeedleSpecifications(singleTrajectory.Ablator["id"],
