@@ -93,9 +93,10 @@ class Lesion:
 
 class Segmentation:
     
-    def __init__(self, needle, path, source_path, needle_type, ct_series, series_UID, sphere_radius, segmentation_type):
-        self.mask_path = path
+    def __init__(self, needle, source_path, path, needle_type, ct_series, series_UID, sphere_radius, segmentation_type):
+
         self.source_path = source_path
+        self.mask_path = path
         self.needle_type = needle_type
         self.ct_series = ct_series
         self.series_UID = series_UID
@@ -191,18 +192,18 @@ class Needle:
             print("Series UID not in list")
             return None
 
-    def newSegmentation(self, segmentation_type, path, source_path, needle_type, ct_series, series_UID, sphere_radius):
+    def newSegmentation(self, segmentation_type, source_path, mask_path, needle_type, ct_series, series_UID, sphere_radius):
         """ Instantiate Segmentation Class object.
             append segmentation object to the correct needle object list.
             to solve: multiple type of segmentations (eg.vessel) might appear in the future
         """
         if segmentation_type.lower() in {"lesion", "lession", "tumor", "tumour"}:
-            segmentation = Segmentation(self, source_path, path, needle_type, ct_series, series_UID, sphere_radius,
+            segmentation = Segmentation(self, source_path, mask_path, needle_type, ct_series, series_UID, sphere_radius,
                                         segmentation_type)
             self.segmentations_tumor.append(segmentation)
             return segmentation
         elif segmentation_type.lower() in {"ablation", "ablationzone", "necrosis"}:
-            segmentation = Segmentation(self, source_path, path, needle_type, ct_series, series_UID, sphere_radius,
+            segmentation = Segmentation(self, source_path, mask_path, needle_type, ct_series, series_UID, sphere_radius,
                                         segmentation_type)
             self.segmentations_ablation.append(segmentation)
             return segmentation
@@ -240,11 +241,11 @@ class Needle:
                            'EuclideanError': self.tpeerorrs.euclidean,
                            'NeedleType': segmentation_tumor[idx_s].needle_type,
                            'TumorPath': segmentation_tumor[idx_s].mask_path,
-                           'SourceTumorPath': segmentation_tumor[idx_s].source_path,
-                           'SourceAblationPath': segmentation_ablation[idx_s].source_path,
+                           'PlanTumorPath': segmentation_tumor[idx_s].source_path,
+                           'AblationPath': segmentation_ablation[idx_s].mask_path,
                            'Tumor_CT_Series': segmentation_tumor[idx_s].ct_series,
                            'Tumor_Series_UID': segmentation_tumor[idx_s].series_UID,
-                           'AblationPath': segmentation_ablation[idx_s].mask_path,
+                           'ValidationAblationPath': segmentation_ablation[idx_s].source_path,
                            'Ablation_CT_Series': segmentation_ablation[idx_s].ct_series,
                            'Ablation_Series_UID': segmentation_ablation[idx_s].series_UID,
                            'AblationSystem': segmentation_tumor[idx_s].needle_specifications.ablationSystem,
@@ -272,11 +273,11 @@ class Needle:
                        'EuclideanError': self.tpeerorrs.euclidean,
                        'NeedleType': self.needle_type,
                        'TumorPath': '',
-                       'SourceTumorPath': '',
-                       'SourceAblationPath': '',
+                       'PlanTumorPath': '',
+                       'AblationPath': '',
                        'Tumor_CT_Series': '',
                        'Tumor_Series_UID': '',
-                       'AblationPath': '',
+                       'ValidationAblationPath': '',
                        'Ablation_CT_Series': '',
                        'Ablation_Series_UID': '',
                        'AblationSystem': '',

@@ -53,8 +53,8 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
     if segmentation is None:
         # add it to the needle list, otherwise update it.
         segmentation = needle.newSegmentation(segmentation_type,
-                                              segmentation_filepath,
                                               source_filepath,
+                                              segmentation_filepath,
                                               needle_type,
                                               ct_series,
                                               series_UID,
