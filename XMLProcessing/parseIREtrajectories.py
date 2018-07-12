@@ -43,13 +43,18 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
         segmentation_filepath = os.path.join(all_paths[idx_segmentations[0]],
                                              all_paths[idx_segmentations[0] + 1],
                                              singleTrajectory.Segmentation.Path.cdata[1:])
+        idx_pat = [i for i, s in enumerate(all_paths) if "Pat" in s]
+        source_filepath = os.path.join(all_paths[idx_pat[1]],
+                                       all_paths[idx_pat[1] + 1],
+                                       all_paths[idx_pat[1] + 2])
     # TODO: add the time at which segmentations were done in the folder name (new version). 
-    #  check if the series UID has already been added.
+    #  check if the series UID has already been added.]
     segmentation = needle.findSegmentation(series_UID, segmentation_type)
     if segmentation is None:
         # add it to the needle list, otherwise update it.
         segmentation = needle.newSegmentation(segmentation_type,
                                               segmentation_filepath,
+                                              source_filepath,
                                               needle_type,
                                               ct_series,
                                               series_UID,

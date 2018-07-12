@@ -6,6 +6,7 @@ Created on Mon Feb  5 10:20:31 2018
 """
 import numpy as np
 
+
 class PatientRepo:
 
     def __init__(self):
@@ -26,7 +27,6 @@ class Patient:
         self.lesions = []
         self.patientId = patientId
         self.patient_id_xml = patient_id_xml
-
 
     def addLesion(self, lesion):
         self.lesions.append(lesion)
@@ -93,8 +93,9 @@ class Lesion:
 
 class Segmentation:
     
-    def __init__(self, needle, path, needle_type, ct_series, series_UID, sphere_radius, segmentation_type):
+    def __init__(self, needle, path, source_path, needle_type, ct_series, series_UID, sphere_radius, segmentation_type):
         self.mask_path = path
+        self.source_path = source_path
         self.needle_type = needle_type
         self.ct_series = ct_series
         self.series_UID = series_UID
@@ -102,14 +103,12 @@ class Segmentation:
         self.needle = needle
         self.segmentation_type = segmentation_type  # ablation, tumor, vessel (etc)
         self.needle_specifications = None
-        self.ellipsoid_info =  None
-#         TODO: add self.datetime_created = datetime_created
-        
+        self.ellipsoid_info = None
+
     def setNeedleSpecifications(self):
         self.needle_specifications = NeedleSpecifications()
         return self.needle_specifications
     
-
 
 class NeedleSpecifications:
 
@@ -192,18 +191,18 @@ class Needle:
             print("Series UID not in list")
             return None
 
-    def newSegmentation(self, segmentation_type, path, needle_type, ct_series, series_UID, sphere_radius):
+    def newSegmentation(self, segmentation_type, path, source_path, needle_type, ct_series, series_UID, sphere_radius):
         """ Instantiate Segmentation Class object.
             append segmentation object to the correct needle object list.
             to solve: multiple type of segmentations (eg.vessel) might appear in the future
         """
         if segmentation_type.lower() in {"lesion", "lession", "tumor", "tumour"}:
-            segmentation = Segmentation(self, path, needle_type, ct_series, series_UID, sphere_radius,
+            segmentation = Segmentation(self, source_path, path, needle_type, ct_series, series_UID, sphere_radius,
                                         segmentation_type)
             self.segmentations_tumor.append(segmentation)
             return segmentation
         elif segmentation_type.lower() in {"ablation", "ablationzone", "necrosis"}:
-            segmentation = Segmentation(self, path, needle_type, ct_series, series_UID, sphere_radius,
+            segmentation = Segmentation(self, source_path, path, needle_type, ct_series, series_UID, sphere_radius,
                                         segmentation_type)
             self.segmentations_ablation.append(segmentation)
             return segmentation
@@ -241,6 +240,8 @@ class Needle:
                            'EuclideanError': self.tpeerorrs.euclidean,
                            'NeedleType': segmentation_tumor[idx_s].needle_type,
                            'TumorPath': segmentation_tumor[idx_s].mask_path,
+                           'SourceTumorPath': segmentation_tumor[idx_s].source_path,
+                           'SourceAblationPath': segmentation_ablation[idx_s].source_path,
                            'Tumor_CT_Series': segmentation_tumor[idx_s].ct_series,
                            'Tumor_Series_UID': segmentation_tumor[idx_s].series_UID,
                            'AblationPath': segmentation_ablation[idx_s].mask_path,
@@ -271,6 +272,8 @@ class Needle:
                        'EuclideanError': self.tpeerorrs.euclidean,
                        'NeedleType': self.needle_type,
                        'TumorPath': '',
+                       'SourceTumorPath': '',
+                       'SourceAblationPath': '',
                        'Tumor_CT_Series': '',
                        'Tumor_Series_UID': '',
                        'AblationPath': '',
@@ -278,8 +281,8 @@ class Needle:
                        'Ablation_Series_UID': '',
                        'AblationSystem': '',
                        'AblatorID': '',
-                       'AblationSystemVersion':'',
-                       'AblationShapeIndex':'',
+                       'AblationSystemVersion': '',
+                       'AblationShapeIndex': '',
                        'AblatorType': '',
                        }
             dict_one_needle.append(one_seg)
