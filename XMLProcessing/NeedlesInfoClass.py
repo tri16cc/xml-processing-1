@@ -70,9 +70,9 @@ class Lesion:
     def getNeedles(self):
         return self.needles
 
-    def newNeedle(self, isreference, needle_type, ct_series, time_intervention):
+    def newNeedle(self, isreference, needle_type, ct_series):
         # here self represents the lesion
-        needle = Needle(self, isreference, needle_type, ct_series, time_intervention)  
+        needle = Needle(self, isreference, needle_type, ct_series)
         self.needles.append(needle)
         return needle
 
@@ -132,17 +132,17 @@ class NeedleSpecifications:
 
 class Needle:
 
-    def __init__(self, lesion, isreference, needle_type, ct_series, time_intervention):
+    def __init__(self, lesion, isreference, needle_type, ct_series):
         self.segmentations_tumor = []
         self.segmentations_ablation = []
         self.isreference = isreference
         self.planned = None
         self.validation = None
         self.tpeerorrs = None
+        self.time_intervention = None
         self.lesion = lesion
         self.needle_type = needle_type
         self.ct_series = ct_series
-        self.time_intervention = time_intervention
 
     def distanceToNeedle(self, needlelocation):
         # compute euclidean distances for TPE to check whether the same lesion
@@ -151,6 +151,9 @@ class Needle:
         dist = np.linalg.norm(tp1 - tp2)
         return dist
         pass
+
+    def setTimeIntervention(self, time_intervention):
+        self.time_intervention = time_intervention
 
     def setPlannedTrajectory(self):
         self.planned = Trajectory()

@@ -98,10 +98,10 @@ for index, row in df_patients_trajectories.iterrows():
 # concatenate to df_patients_trajectories
 df_ellipse = pd.DataFrame(ellipse_data)
 df_final = pd.concat([df_patients_trajectories, df_ellipse], axis=1, join_axes=[df_ellipse.index])
-print("success")
+
 #%%  write to excel final list.
 timestr = strftime("%Y%m%d-%H%M%S")
-filename = 'Patients_MWA_IR_SegmentationPaths' + timestr + '.xlsx'
+filename = 'Patients_MWA_Interventions-' + timestr + '.xlsx'
 filepathExcel = os.path.join(rootdir, filename)
 writer = pd.ExcelWriter(filepathExcel)
 # df_final.sort_values(by=['PatientID'], inplace=True)
@@ -115,6 +115,8 @@ df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
 df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
 df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
 df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
+writer.save()
+print("success")
 # %% dataframes for Angles
 # Angles = []
 # patient_unique = dfPatientsTrajectories['PatientID'].unique()

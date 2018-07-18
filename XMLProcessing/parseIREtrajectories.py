@@ -89,14 +89,14 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
         # find if the needle exists already in the patient repository
         # for IRE needles the distance shouldn't be larger than 3 (in theory)
         if needle_type is "IRE":
-            # TODO: modify the distance between the needles accordingly
+            # TODO: modify the distance between the IRE needles accordingly
             needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
         elif needle_type is "MWA":
             needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
         # case for new needle not currently saved in database
         if needle is None:
             # add the needle to lesion class and init its parameters
-            needle = lesion.newNeedle(False, needle_type, ct_series,time_intervention)  # False - the needle is not a reference trajectory
+            needle = lesion.newNeedle(False, needle_type, ct_series)  # False - the needle is not a reference trajectory
             tps = needle.setTPEs()
             validation = needle.setValidationTrajectory()
         # add the entry and target points to the needle object
@@ -108,6 +108,9 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
         else:
             # find the right needle to replace the exact TPEs
             # set the validation trajectory
+            # set the time of intervention from XML
+            # TODO: calculate length of needle
+            # TODO: extract entry lateral
             ep_validation = np.array(
                 [float(i) for i in singleTrajectory.Measurements.Measurement.EntryPoint.cdata.split()])
             tp_validation = np.array(
@@ -117,7 +120,11 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
             target_lateral, target_angular, target_longitudinal, target_euclidean \
                 = extractTPES(singleTrajectory.Measurements.Measurement)
             tps = needle.setTPEs()
+            # TODO: set time intervention
+            needle.setTimeIntervention(time_intervention)
+            # set TPE errors
             tps.setTPEErrors(target_lateral, target_angular, target_longitudinal, target_euclidean)
+
         # add the segmentation path if it exists
         if elementExists(singleTrajectory, 'Segmentation'):
             parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_filepath)
@@ -144,7 +151,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=23)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)  # input parameter target point of reference trajectory
-                needle = lesion.newNeedle(True, needle_type, ct_series, time_intervention)
+                needle = lesion.newNeedle(True, needle_type, ct_series)
                 # true, this is the reference needle around which the trajectory is planned
             else:
                 # lesion was already added to the repository
