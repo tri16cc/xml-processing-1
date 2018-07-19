@@ -12,8 +12,8 @@ class PatientRepo:
     def __init__(self):
         self.patients = []
 
-    def addNewPatient(self, patientId, patient_id_xml):
-        patient = Patient(patientId, patient_id_xml)
+    def addNewPatient(self, patientId, patient_id_xml, patient_name):
+        patient = Patient(patientId, patient_id_xml, patient_name)
         self.patients.append(patient)
         return patient
 
@@ -23,10 +23,11 @@ class PatientRepo:
 
 class Patient:
 
-    def __init__(self, patientId, patient_id_xml):
+    def __init__(self, patientId, patient_id_xml, patient_name):
         self.lesions = []
         self.patientId = patientId
         self.patient_id_xml = patient_id_xml
+        self.patient_name = patient_name
 
     def addLesion(self, lesion):
         self.lesions.append(lesion)
@@ -140,6 +141,7 @@ class Needle:
         self.validation = None
         self.tpeerorrs = None
         self.time_intervention = None
+        self.cas_version = None
         self.lesion = lesion
         self.needle_type = needle_type
         self.ct_series = ct_series
@@ -151,6 +153,9 @@ class Needle:
         dist = np.linalg.norm(tp1 - tp2)
         return dist
         pass
+
+    def setCASversion(self, cas_version):
+        self.cas_version = cas_version
 
     def setTimeIntervention(self, time_intervention):
         self.time_intervention = time_intervention
@@ -232,6 +237,7 @@ class Needle:
                 one_seg = {'PatientID': patientID,
                            'LesionNr': lesionIdx,
                            'NeedleNr': needle_idx,
+                           'CAS_Version' : self.cas_version,
                            'TimeIntervention' : self.time_intervention,
                            'PlannedEntryPoint': self.planned.entrypoint,
                            'PlannedTargetPoint': self.planned.targetpoint,
@@ -264,6 +270,7 @@ class Needle:
             one_seg = {'PatientID': patientID,
                        'LesionNr': lesionIdx,
                        'NeedleNr': needle_idx,
+                       'CAS_Version' : self.cas_version,
                        'TimeIntervention' : self.time_intervention,
                        'PlannedEntryPoint': self.planned.entrypoint,
                        'PlannedTargetPoint': self.planned.targetpoint,

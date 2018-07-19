@@ -7,26 +7,49 @@ Created on Mon Feb  5 15:04:29 2018
 # from IPython import get_ipython
 # get_ipython().magic('reset -sf')
 import os
+import re
 import collections
 import numpy as np
 import untangle as ut
+import xml.etree.ElementTree as ET
 from extractTPEsXml import extractTPES
 from elementExistsXml import elementExists
 from splitAllPaths import splitall
 # %%
 
+
 def I_parseRecordingXML(filename):
     # try to open and parse the xml filename if error, return message
     xml_tree = collections.namedtuple('xml_tree',
-                                      ['trajectories', 'patient_id_xml'])
+                                      ['trajectories', 'patient_id_xml', 'patient_name'])
     try:
         xmlobj = ut.parse(filename)
         patient_id_xml = xmlobj.Eagles.PatientData["patientID"]
-        result = xml_tree(xmlobj, patient_id_xml)
+        all_paths = splitall(filename)
+        ix_patient_folder_name = [i for i,s in enumerate(all_paths) if "Pat_" in s]
+        patient_folder_name = all_paths[ix_patient_folder_name[0]]
+        patient_id = re.search("\d", patient_folder_name)  # numerical id
+        ix_patient_id = int(patient_id.start())
+        underscore = re.search("_", patient_folder_name[ix_patient_id:])
+        ix_underscore = int(underscore.start())
+        if patient_id_xml is None:
+            patient_id_xml = patient_folder_name[ix_patient_id:ix_underscore+ix_patient_id]
+        patient_name = patient_folder_name[0:ix_patient_id]
+        result = xml_tree(xmlobj, patient_id_xml, patient_name)
         return result
+    # TODO: make exception specific
     except Exception:
-        print('XML file structure is broken, cannot read XML')
-        return None
+        # attempt to remove weird characters by rewriting the files
+        # print('XML file structure is broken, cannot read XML')
+        xmlobj = ET.parse(filename, parser=ET.XMLParser(encoding='ISO-8859-1'))
+        root = xmlobj.getroot()
+        root[0].attrib.pop('seriesPath', None)
+        xmlobj.write(filename)
+        # recursive calling which doesn't work now for some reason.
+        return 1
+        # I_parseRecordingXML(filename)
+        #TODO check if CAS load XML files with missing 'seriesPath' attribute
+        # return None
 
 
 def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_filepath):
@@ -72,7 +95,7 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
                                               singleTrajectory.Ablator.Ablation["ablationShapeIndex"])
 
 
-def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention):
+def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention, cas_version):
     """ Parse Individual Needle Trajectories per Lesion.
     Extract planning coordinates and  validation needle coordinate.
     Extract the TPE Errors from the validation coordinates.
@@ -120,8 +143,8 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
             target_lateral, target_angular, target_longitudinal, target_euclidean \
                 = extractTPES(singleTrajectory.Measurements.Measurement)
             tps = needle.setTPEs()
-            # TODO: set time intervention
             needle.setTimeIntervention(time_intervention)
+            needle.setCASversion(cas_version)
             # set TPE errors
             tps.setTPEErrors(target_lateral, target_angular, target_longitudinal, target_euclidean)
 
@@ -130,7 +153,7 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
             parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_filepath)
 
 
-def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_intervention):
+def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_intervention, cas_version):
     """ Parse Trajectories at lesion level.
     For each lesion, a new Parent Trajectory is defined.
     A lesion is defined when the distance between needles is minimum 35 mm.
@@ -171,7 +194,8 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)
             children_trajectories = xmlTrajectory
-            IV_parseNeedles(children_trajectories, lesion, needle_type)
+            IV_parseNeedles(children_trajectories, lesion, needle_type,
+                            ct_series, xml_filepath, time_intervention, cas_version)
         else:
             # MWA type of needle
             needle_type = "MWA"
@@ -182,7 +206,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
                 lesion = patient.addNewLesion(tp_planning)
             children_trajectories = xmlTrajectory
             IV_parseNeedles(children_trajectories, lesion, needle_type,
-                            ct_series, xml_filepath, time_intervention)
+                            ct_series, xml_filepath, time_intervention, cas_version)
 
 
 def II_parseTrajectories(xmlobj):
@@ -192,22 +216,23 @@ def II_parseTrajectories(xmlobj):
     """
     tuple_results = collections.namedtuple('tuples_results',
                                            ['trajectories', 'series',
-                                            'time_intervention', 'patient_id_xml'])
+                                            'time_intervention', 'patient_id_xml',
+                                            'cas_version'])
     try:
         trajectories = xmlobj.Eagles.Trajectories.Trajectory
         series = xmlobj.Eagles.PatientData["seriesNumber"]  # CT series number
         patient_id_xml = xmlobj.Eagles.PatientData["patientID"]
         time_intervention = xmlobj.Eagles["time"]
-        # TODO: add version : xmlobj.Eagles['version']
+        cas_version = xmlobj.Eagles["version"]
         if trajectories is not None:
             result = tuple_results(trajectories, series, time_intervention,
-                                   patient_id_xml)
+                                   patient_id_xml, cas_version)
             return result
         else:
             print('No trajectory was found in the XML file')
-            result = tuple_results(None, None, None, None)
+            result = tuple_results(None, None, None, None, None)
             return result
     except Exception:
         print('No trajectory was found in the XML file')
-        result = tuple_results(None, None, None, None)
+        result = tuple_results(None, None, None, None, None)
         return result
