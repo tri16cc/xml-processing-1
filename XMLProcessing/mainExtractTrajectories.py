@@ -12,9 +12,10 @@ import parseIREtrajectories
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
 # %%
-# TODO: user keyboard input to ask for study folder
-# TODO: extract the datatime from the segmentations folder(new cas version)
-rootdir = r"C:\PatientDatasets_GroundTruth_Database\GroundTruth_2018\GT_23042018"
+# TODO: user keyboard input to ask for study folder. convert to exe.
+# rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
+rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
+# rootdir = r"C:\PatientDatasets_GroundTruth_Database\GroundTruth_2018\GT_23042018"
 #rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
 
 patientsRepo = NeedlesInfoClass.PatientRepo()
@@ -31,41 +32,47 @@ for subdir, dirs, files in os.walk(rootdir):
 
             xmlobj = parseIREtrajectories.I_parseRecordingXML(xmlfilename)
 
-            if xmlobj is not None:
+            if xmlobj is 1:
+                # file was re-written of weird characters so we need to re-open it.
+                xmlobj = parseIREtrajectories.I_parseRecordingXML(xmlfilename)
+            if xmlobj is not None and xmlobj!=1:
                 pat_id = xmlobj.patient_id_xml
-                if pat_id is None:
-                    print("No Patient ID found in the XML ", xmlfilename)
                 pat_ids.append(pat_id)
                 # parse trajectories and other patient specific info
                 trajectories_info = parseIREtrajectories.II_parseTrajectories(xmlobj.trajectories)
                 if trajectories_info.trajectories is None:
-                    continue
+                    continue # no trajectories found in this xml, go on to the next file.
                 else:
                     # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
                     patients = patientsRepo.getPatients()
-                    patient = [x for x in patients if x.patientId == pat_id]
+                    patient = [x for x in patients if x.patient_id_xml == pat_id]
                     if not patient:
                         # create patient measurements if patient is not already in the PatientsRepository
                         patient = patientsRepo.addNewPatient(pat_id,
-                                                             trajectories_info.patient_id_xml)
+                                                             xmlobj.patient_name)
                         parseIREtrajectories.III_parseTrajectory(trajectories_info.trajectories, patient,
                                                                  trajectories_info.series, xmlfilename,
-                                                                 trajectories_info.time_intervention)
+                                                                 trajectories_info.time_intervention,
+                                                                 trajectories_info.cas_version)
                     else:
                         # update patient measurements in the PatientsRepository if the patient (id) already exists
+                        # patient[0] because the returned result is a list with one element.
                         parseIREtrajectories.III_parseTrajectory(trajectories_info.trajectories, patient[0],
                                                                  trajectories_info.series, xmlfilename,
-                                                                 trajectories_info.time_intervention)
+                                                                 trajectories_info.time_intervention,
+                                                                 trajectories_info.cas_version)
+
 # %% extract information from the object classes into pandas dataframe
 needle_data = []
 patients = patientsRepo.getPatients()
 for p in patients:
     lesions = p.getLesions()
-    patientID = p.patientId
+    patientID = p.patient_id_xml
+    patientName = p.patient_name
     for l_idx, lesion in enumerate(lesions):
         needles = lesion.getNeedles()
         # for each needle get the segmentations associated with it
-        NeedlesInfoClass.NeedleToDictWriter.needlesToDict(needle_data, patientID, l_idx, lesion.getNeedles())
+        NeedlesInfoClass.NeedleToDictWriter.needlesToDict(needle_data,  patientID,  patientName,l_idx, lesion.getNeedles())
 # unwrap class object and write to dictionary.
 needle_list = []
 for needles in needle_data:
