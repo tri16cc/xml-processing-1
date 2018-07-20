@@ -12,8 +12,8 @@ class PatientRepo:
     def __init__(self):
         self.patients = []
 
-    def addNewPatient(self, patientId, patient_id_xml, patient_name):
-        patient = Patient(patientId, patient_id_xml, patient_name)
+    def addNewPatient(self, patient_id_xml, patient_name):
+        patient = Patient(patient_id_xml, patient_name)
         self.patients.append(patient)
         return patient
 
@@ -23,9 +23,8 @@ class PatientRepo:
 
 class Patient:
 
-    def __init__(self, patientId, patient_id_xml, patient_name):
+    def __init__(self, patient_id_xml, patient_name):
         self.lesions = []
-        self.patientId = patientId
         self.patient_id_xml = patient_id_xml
         self.patient_name = patient_name
 
@@ -222,7 +221,7 @@ class Needle:
     def getTumorSegmentations(self):
         return self.segmentations_tumor
 
-    def to_dict(self, patientID, lesionIdx, needle_idx):
+    def to_dict(self, patientID, patient_name, lesionIdx, needle_idx):
         """ Unpack Needle Object class to dict.
             Return needle information.
             If one needle has several segmentations, iterate and return all.
@@ -235,6 +234,7 @@ class Needle:
         if segmentation_tumor:
             for idx_s, seg in enumerate(segmentation_tumor):
                 one_seg = {'PatientID': patientID,
+                           'PatientName': patient_name,
                            'LesionNr': lesionIdx,
                            'NeedleNr': needle_idx,
                            'CAS_Version' : self.cas_version,
@@ -267,7 +267,9 @@ class Needle:
             return dict_one_needle
         else:
             # output just the needle and empty segmentation info
+            # 'PatientName': patientName,
             one_seg = {'PatientID': patientID,
+                       'PatientName': patient_name,
                        'LesionNr': lesionIdx,
                        'NeedleNr': needle_idx,
                        'CAS_Version' : self.cas_version,
@@ -308,9 +310,9 @@ class NeedleToDictWriter:
         lesionIDX: int specifying the needle count
         needles: needles class object
     """
-    def needlesToDict(needle_data, patientID, lesionIdx, needles):
+    def needlesToDict(needle_data, patientID, patient_name, lesionIdx, needles):
         for needle_idx, needle in enumerate(needles):
-            needle_dict = needle.to_dict(patientID, lesionIdx, needle_idx)  # needle_dict is a list type
+            needle_dict = needle.to_dict(patientID, patient_name, lesionIdx, needle_idx)  # needle_dict is a list type
             needle_data.append(needle_dict)
 
 

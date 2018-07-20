@@ -4,18 +4,45 @@ Created on Mon Feb  5 15:04:29 2018
 
 @author: Raluca Sandu
 """
-# from IPython import get_ipython
-# get_ipython().magic('reset -sf')
 import os
 import re
 import collections
 import numpy as np
 import untangle as ut
+
 import xml.etree.ElementTree as ET
 from extractTPEsXml import extractTPES
 from elementExistsXml import elementExists
 from splitAllPaths import splitall
 # %%
+
+def extract_patient_id(filename, patient_id_xml, patient_name_flag=True):
+    """ Extract patient id & patient name from folder name.
+    Assumes root folder name is of the type: Pat_John Smith_0013768450_2017-08-04_08-19-25
+    The patient_id will be in this  case = 0013768450
+    The patient_id is assumed to be an unique instance
+    Note: Only for log files missing patient_id in the attributes
+    :param filename: a norm path of the xml log file.
+    :param patient_id_xml: string representing numerical id or None
+    :param patient_name_flag: bool whether patient name should be written or not.
+    :return: patient_id_xml (numerical patient id)
+    """
+    all_paths = splitall(filename)
+    ix_patient_folder_name = [i for i, s in enumerate(all_paths) if "Pat_" in s]
+    patient_folder_name = all_paths[ix_patient_folder_name[0]]
+    patient_id = re.search("\d", patient_folder_name)  # numerical id
+    ix_patient_id = int(patient_id.start())
+    underscore = re.search("_", patient_folder_name[ix_patient_id:])
+    ix_underscore = int(underscore.start())
+
+    if patient_id_xml is None:
+        patient_id_xml = patient_folder_name[ix_patient_id:ix_underscore + ix_patient_id]
+    if patient_name_flag:
+        patient_name = patient_folder_name[0:ix_patient_id]
+    else:
+        patient_name = None
+
+    return patient_id_xml, patient_name
 
 
 def I_parseRecordingXML(filename):
@@ -25,31 +52,20 @@ def I_parseRecordingXML(filename):
     try:
         xmlobj = ut.parse(filename)
         patient_id_xml = xmlobj.Eagles.PatientData["patientID"]
-        all_paths = splitall(filename)
-        ix_patient_folder_name = [i for i,s in enumerate(all_paths) if "Pat_" in s]
-        patient_folder_name = all_paths[ix_patient_folder_name[0]]
-        patient_id = re.search("\d", patient_folder_name)  # numerical id
-        ix_patient_id = int(patient_id.start())
-        underscore = re.search("_", patient_folder_name[ix_patient_id:])
-        ix_underscore = int(underscore.start())
-        if patient_id_xml is None:
-            patient_id_xml = patient_folder_name[ix_patient_id:ix_underscore+ix_patient_id]
-        patient_name = patient_folder_name[0:ix_patient_id]
+        patient_id_xml, patient_name = extract_patient_id(filename, patient_id_xml, patient_name_flag=True)
         result = xml_tree(xmlobj, patient_id_xml, patient_name)
         return result
-    # TODO: make exception specific
     except Exception:
-        # attempt to remove weird characters by rewriting the files
-        # print('XML file structure is broken, cannot read XML')
-        xmlobj = ET.parse(filename, parser=ET.XMLParser(encoding='ISO-8859-1'))
-        root = xmlobj.getroot()
-        root[0].attrib.pop('seriesPath', None)
-        xmlobj.write(filename)
-        # recursive calling which doesn't work now for some reason.
-        return 1
-        # I_parseRecordingXML(filename)
-        #TODO check if CAS load XML files with missing 'seriesPath' attribute
-        # return None
+        try:
+            # attempt to remove weird characters by rewriting the files
+            xmlobj = ET.parse(filename, parser=ET.XMLParser(encoding='ISO-8859-1'))
+            root = xmlobj.getroot()
+            root[0].attrib.pop('seriesPath', None)
+            xmlobj.write(filename)
+            return 1
+        except Exception:
+            print("This file could not be parse:", filename)
+            return None
 
 
 def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_filepath):
@@ -70,7 +86,7 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
         source_filepath = os.path.join(all_paths[idx_pat[1]],
                                        all_paths[idx_pat[1] + 1],
                                        all_paths[idx_pat[1] + 2])
-    # TODO: add the time at which segmentations were done in the folder name (new version). 
+    # TODO: add the time at which segmentations were done in the folder name (new version).
     #  check if the series UID has already been added.]
     segmentation = needle.findSegmentation(series_UID, segmentation_type)
     if segmentation is None:
@@ -211,28 +227,31 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
 
 def II_parseTrajectories(xmlobj):
     """ Parse upper-level trajectories structure.
-    INPUT: xmlobj tree structured parsed by function
-    OUTPUT: Trajectories (if exist) extracted from XML File
+    :param:  xmlobj tree structured parsed by library such as untangle, XMLTree etc.
+    :return: Trajectories (if they exist) extracted from XML File
+    :return: CT SeriesNumber
+    :return: time_intervention
+    :return: cas_version
     """
     tuple_results = collections.namedtuple('tuples_results',
-                                           ['trajectories', 'series',
-                                            'time_intervention', 'patient_id_xml',
+                                           ['trajectories',
+                                            'series',
+                                            'time_intervention',
                                             'cas_version'])
     try:
         trajectories = xmlobj.Eagles.Trajectories.Trajectory
         series = xmlobj.Eagles.PatientData["seriesNumber"]  # CT series number
-        patient_id_xml = xmlobj.Eagles.PatientData["patientID"]
+
         time_intervention = xmlobj.Eagles["time"]
         cas_version = xmlobj.Eagles["version"]
         if trajectories is not None:
-            result = tuple_results(trajectories, series, time_intervention,
-                                   patient_id_xml, cas_version)
+            result = tuple_results(trajectories, series, time_intervention, cas_version)
             return result
         else:
             print('No trajectory was found in the XML file')
-            result = tuple_results(None, None, None, None, None)
+            result = tuple_results(None, None, None, None)
             return result
     except Exception:
         print('No trajectory was found in the XML file')
-        result = tuple_results(None, None, None, None, None)
+        result = tuple_results(None, None, None, None)
         return result
