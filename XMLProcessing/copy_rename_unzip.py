@@ -5,16 +5,17 @@ Created on Wed Jun  6 10:10:24 2018
 @author: Raluca Sandu
 """
 
+import re
 import os
 import sys
+# from ftfy import fix_text
+import string
 import shutil
 import zipfile
 import pandas as pd
-from splitAllPaths import splitall as split_paths
+from splitAllPaths import splitall
 
 
-# TODO 6. remove the German umlauts and the French umlauts from the names
-# TODO 7. create excel with name of each patient folder given root folder
 def copytree(src, dst, symlinks=False, ignore=None):
     for item in os.listdir(src):
         s = os.path.join(src, item)
@@ -30,10 +31,24 @@ def copytree(src, dst, symlinks=False, ignore=None):
             shutil.copy2(s, d)
 
 
+def get_patient_folder_name(filename):
+    """  Rename folder & fix patient name for weird unicode characters.
+
+    :param filename: filepath to be split
+    :return: filepath without trailing
+    """
+    all_paths = splitall(filename)
+    ix_patient_folder_name = [i for i, s in enumerate(all_paths) if "Pat_" in s]
+    patient_folder_name = all_paths[ix_patient_folder_name[0]]
+
+    return patient_folder_name
+
+
 def copy_rename(src_dir, dst_dir, keyword):
     """
-    Copy all patient folders from src_dir to dest_dir and save the filenames to Excel
-    Removes the trailing numbers at the beginning of the file folder
+    Copy specific patient folder(s) from src_dir to dest_dir and save the filenames to Excel.
+    Removes the trailing numbers at the beginning of the file folder.
+    Remove weird unicode characters.
     :param src_dir: [string]. source directory where the files are
     :param dst_dir: [string]. destination directory where the files will be copied
     :param keyword: [string]. here keyword = "Pat". a repeating keyword to identify main patient folder
@@ -41,37 +56,33 @@ def copy_rename(src_dir, dst_dir, keyword):
     """
     dict_filenames = []
     pat_counter = 0
-    # Copy all patient folders from src_dir to dest_dir'''
-    copytree(src_dir, dst_dir)
+
     # iterate through each pat directory and rename it
-    for dirs in os.listdir(dst_dir):
-        if not os.path.isdir(os.path.join(dst_dir, dirs)):
+    for dirs in os.listdir(src_dir):
+        if not os.path.isdir(os.path.join(src_dir, dirs)):
             continue
         else:
             # if any of the patient names has been found
             if keyword in dirs:
-                # save filenames and filepaths to dict
-                pat_folder_name = dirs[dirs.find(keyword):]
-                pat_filepath = os.path.join(dst_dir, dirs[dirs.find(keyword):])
-                pat_counter += 1
-                patient_info = {"PatientID": pat_counter,
-                                "Patient Folder Name": pat_folder_name,
-                                "Filepath to Patient Folder": pat_filepath
-                                }
-                dict_filenames.append(patient_info)
-                # rename folder
-                os.rename(os.path.join(dst_dir, dirs),
-                          os.path.join(dst_dir, dirs[dirs.find(keyword):]))
-    # write to dataframe
-    df_filenames = pd.DataFrame(dict_filenames)
-    filename = 'PatientDatasets_PathInfo_' + '.xlsx'
-    filepath_excel = os.path.join(dst_dir, filename)
-    writer = pd.ExcelWriter(filepath_excel)
-    df_filenames.to_excel(writer, index=False)
-    writer.save()
+                # TODO: find index of PatString and remove all the numbers before Pat
+                pat_folder_name = get_patient_folder_name(dirs)
+                printable = set(string.printable)
+                pat_folder_renamed = ''.join(filter(lambda x: x in string.printable, pat_folder_name))
+                # we have to rename before copying because non-ascii characters can't be parsed
+                os.rename(os.path.join(src_dir, dirs),
+                          os.path.join(src_dir, pat_folder_renamed))
+                pat_filepath_src = os.path.join(src_dir, pat_folder_renamed)
+                pat_filepath_dst = os.path.join(dst_dir, pat_folder_renamed)
+                # create empty folder with patient filepath name
+                if not os.path.exists(pat_filepath_dst):
+                    os.makedirs(pat_filepath_dst)
+                # copy the folder with the folder name
+                copytree(pat_filepath_src, pat_filepath_dst)
 
 
-def move_unzip(dst_dir, keyword):
+
+
+def move_unzip(dst_dir):
     """
     Move Study to Root folder and Unzip XML Recordings
     :param dst_dir: 
@@ -82,14 +93,14 @@ def move_unzip(dst_dir, keyword):
         index_xml = [i for i, s in enumerate(dirs) if 'XML' in s]
         if index_ir:
             # move Study folder to root patient folder
-            # TODO: only if necesary!! condition needed
             ir_data_dir = dirs[index_ir[0]]
             src = os.path.join(path, ir_data_dir)
-            all_folders = split_paths(src)
-            index = [i for i, s in enumerate(all_folders) if keyword in s]
+            all_folders = splitall(src)
+            index = [i for i, s in enumerate(all_folders) if "Pat_" in s]
             dst = os.path.join(dst_dir, all_folders[index[0]])
             copytree(src, dst)
         if index_xml:
+            # TODO: Error unzipping if filename too long. Must solve
             # unzip the XML Recordings
             xml_dir = dirs[index_xml[0]]
             xml_dir = os.path.join(path, xml_dir)
@@ -122,10 +133,9 @@ keywords = ["Pat_"]
 print("Keyword for Patient Folder(s): ", keywords)
 # look for the keywords in a list of folder.
 # if keyword is "Pat" it selects all patients
-# if keyword is "Pat_JohnSmith" it looks for patient John Smith
-# if a list of keywords has been proided (as in list of patient names) it searches for each of them
+
 for keyword_folder_name in keywords:
-    # copy_rename(source_directory, destination_directory, keyword_folder_name)
-    move_unzip(destination_directory, keyword_folder_name)
-#   src_dir = "C:\develop\data\PATS" # source directory from where to copy the folders/files
-#   dst_dir = "C:\develop\data\TEST_DIR" # destination directory to where copy folders/files
+    copy_rename(source_directory, destination_directory, keyword_folder_name)
+# unzip XML Recordings folders and move StudyXX to root folder.
+move_unzip(destination_directory)
+
