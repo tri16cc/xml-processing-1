@@ -8,7 +8,6 @@ Created on Wed Jun  6 10:10:24 2018
 import re
 import os
 import sys
-# from ftfy import fix_text
 import string
 import shutil
 import zipfile
@@ -37,7 +36,7 @@ def copy_rename(src_dir, dst_dir, keyword):
     Remove weird unicode characters.
     :param src_dir: [string]. source directory where the files are
     :param dst_dir: [string]. destination directory where the files will be copied
-    :param keyword: [string]. here keyword = "Pat". a repeating keyword to identify main patient folder
+    :param keyword: [string]. here keyword = "Pat" or Pat_JohnSmith to identify main patient folder
     :return: Excel with saved filenames and filepathss
     """
     dict_filenames = []
@@ -109,26 +108,26 @@ def move_unzip(dst_dir):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) < 4:
+        print(" To few arguments, please specify a source directory, a destination directory and a keyword for every"
+              " patients folder name. Please specify keyword [keyword(string), keyword(string)] ")
+        exit()
+    else:
+        # source_directory = r"C:\Patients_Cochlea\Datasets"
+        source_directory = os.path.normpath(sys.argv[1])
+        print("Source Directory:", source_directory)
+        destination_directory = os.path.normpath(sys.argv[2])
+        # destination_directory = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
+        print("Destination Directory:", destination_directory)
+        keywords = sys.argv[3]
+        # keywords = ["Pat_"]
+        print("Keyword for Patient Folder(s): ", keywords)
 
-    #     print(" To few arguments, please specify a source directory, a destination directory and a keyword for every"
-    #           " patients folder name. Please specify keyword [keyword(string), keyword(string)] ")
-    #     exit()
-    # else:
-    source_directory = r"C:\Patients_Cochlea\Datasets"
-    #    source_directory = os.path.normpath(sys.argv[1])
-    print("Source Directory:", source_directory)
-    # destination_directory = os.path.normpath(sys.argv[2])
-    destination_directory = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
-    print("Destination Directory:", destination_directory)
-    # keywords = sys.argv[3]
-    keywords = ["Pat_"]
-    print("Keyword for Patient Folder(s): ", keywords)
+        # look for the keywords in a list of folder.
+        # if keyword is "Pat" it selects all patients
 
-    # look for the keywords in a list of folder.
-    # if keyword is "Pat" it selects all patients
-
-    for keyword_folder_name in keywords:
-        copy_rename(source_directory, destination_directory, keyword_folder_name)
-    # unzip XML Recordings folders and move StudyXX to root folder.
-    move_unzip(destination_directory)
+        for keyword_folder_name in keywords:
+            copy_rename(source_directory, destination_directory, keyword_folder_name)
+        # unzip XML Recordings folders and move StudyXX to root folder.
+        move_unzip(destination_directory)
 
