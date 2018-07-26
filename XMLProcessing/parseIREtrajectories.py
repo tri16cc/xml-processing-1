@@ -33,7 +33,10 @@ def extract_patient_id(filename, patient_id_xml, patient_name_flag=True):
     patient_id = re.search("\d", patient_folder_name)  # numerical id
     ix_patient_id = int(patient_id.start())
     underscore = re.search("_", patient_folder_name[ix_patient_id:])
-    ix_underscore = int(underscore.start())
+    if underscore is None:
+        ix_underscore = len(patient_folder_name)-1
+    else:
+        ix_underscore = int(underscore.start())
 
     if patient_id_xml is None:
         patient_id_xml = patient_folder_name[ix_patient_id:ix_underscore + ix_patient_id]
@@ -69,6 +72,14 @@ def I_parseRecordingXML(filename):
 
 
 def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_filepath):
+    """ Parse segmentation information.
+    :param singleTrajectory: XML Tree Element.
+    :param needle: Class Object Needle
+    :param needle_type: MWA, IRE, RF, etc.
+    :param ct_series: CT_Series number. Not unique.
+    :param xml_filepath:  absolute filepath of the XML Log file currently parsed.
+    :return: segmentation information
+    """
     segmentation_type = singleTrajectory.Segmentation["StructureType"]
     if singleTrajectory.Segmentation["TypeOfSegmentation"].lower() in {"sphere"}:
         series_UID = singleTrajectory.Segmentation["SphereRadius"]  # add the radius for search purposes
@@ -141,6 +152,7 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
         # add the entry and target points to the needle object
         planned = needle.setPlannedTrajectory()
         planned.setTrajectory(ep_planning, tp_planning)
+        planned.setLenghtNeedle()
         # add the TPEs if they exist in the Measurements field
         if elementExists(singleTrajectory, 'Measurements') is False:
             print('No Measurement for this needle')
@@ -148,21 +160,22 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
             # find the right needle to replace the exact TPEs
             # set the validation trajectory
             # set the time of intervention from XML
-            # TODO: calculate length of needle
-            # TODO: extract entry lateral
+
             ep_validation = np.array(
                 [float(i) for i in singleTrajectory.Measurements.Measurement.EntryPoint.cdata.split()])
             tp_validation = np.array(
                 [float(i) for i in singleTrajectory.Measurements.Measurement.TargetPoint.cdata.split()])
             validation = needle.setValidationTrajectory()
             validation.setTrajectory(ep_validation, tp_validation)
-            target_lateral, target_angular, target_longitudinal, target_euclidean \
+
+            entry_lateral, target_lateral, target_angular, target_longitudinal, target_euclidean \
                 = extractTPES(singleTrajectory.Measurements.Measurement)
+
             tps = needle.setTPEs()
             needle.setTimeIntervention(time_intervention)
             needle.setCASversion(cas_version)
             # set TPE errors
-            tps.setTPEErrors(target_lateral, target_angular, target_longitudinal, target_euclidean)
+            tps.setTPEErrors(entry_lateral, target_lateral, target_angular, target_longitudinal, target_euclidean)
 
         # add the segmentation path if it exists
         if elementExists(singleTrajectory, 'Segmentation'):
