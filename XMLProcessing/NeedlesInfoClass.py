@@ -233,110 +233,96 @@ class Needle:
         dict_one_needle = defaultdict(list)
         max_no_segmentations = max(len(segmentations_ablation), len(segmentations_tumor))
         if max_no_segmentations > 0:
-            for idx_s in range(max_no_segmentations):
-                if dict_one_needle:
-                    dict_one_needle['PatientID'].append(patientID)
-                    dict_one_needle['PatientName'].append(patient_name)
-                    dict_one_needle['LesionNr'].append(lesionIdx)
-                    dict_one_needle['NeedleNr'].append(needle_idx)
-                    dict_one_needle['CAS_Version'].append(self.cas_version)
-                    dict_one_needle['TimeIntervention'].append(self.time_intervention)
-                    dict_one_needle['PlannedEntryPoint'].append(self.planned.entrypoint)
-                    dict_one_needle['PlannedTargetPoint'].append(self.planned.targetpoint)
-                    dict_one_needle['PlannedNeedleLength'].append(self.planned.length_needle)
-                    dict_one_needle['ValidationEntryPoint'].append(self.validation.entrypoint)
-                    dict_one_needle['ValidationTargetPoint'].append(self.validation.targetpoint)
-                    dict_one_needle['ReferenceNeedle'].append(self.isreference)
-                    dict_one_needle['EntryLateral'].append(self.tpeerorrs.entry_lateral)
-                    dict_one_needle['AngularError'].append(self.tpeerorrs.angular)
-                    dict_one_needle['LateralError'].append(self.tpeerorrs.lateral)
-                    dict_one_needle['LongitudinalError'].append(self.tpeerorrs.longitudinal)
-                    dict_one_needle['EuclideanError'].append(self.tpeerorrs.euclidean)
-                    try:
-                        dict_one_needle['NeedleType'].append(segmentations_tumor[idx_s].needle_type)
-                        dict_one_needle['TumorPath'].append(segmentations_tumor[idx_s].mask_path)
-                        dict_one_needle['PlanTumorPath'].append(segmentations_tumor[idx_s].source_path)
-                        dict_one_needle['Tumor_CT_Series'].append(segmentations_tumor[idx_s].ct_series)
-                        dict_one_needle['Tumor_Series_UID'].append(segmentations_tumor[idx_s].series_UID)
-                    except Exception:
-                        dict_one_needle['NeedleType'].append(None)
-                        dict_one_needle['TumorPath'].append(None)
-                        dict_one_needle['PlanTumorPath'].append(None)
-                        dict_one_needle['Tumor_CT_Series'].append(None)
-                        dict_one_needle['Tumor_Series_UID'].append(None)
-                    try:
-                        dict_one_needle['AblationPath'].append('something')
-                        dict_one_needle['ValidationAblationPath'].append('something')
-                        dict_one_needle['Ablation_CT_Series'].append(segmentations_ablation[idx_s].ct_series)
-                        dict_one_needle['Ablation_Series_UID'].append(segmentations_ablation[idx_s].series_UID)
-                        dict_one_needle['AblationSystem'].append(segmentations_tumor[idx_s].needle_specifications.ablationSystem)
-                        dict_one_needle['AblatorID'].append(segmentations_ablation[idx_s].needle_specifications.ablator_id)
-                        dict_one_needle['AblationSystemVersion'].append(segmentations_ablation[idx_s].needle_specifications.ablationSystemVersion)
-                        dict_one_needle['AblationShapeIndex'].append(segmentations_ablation[idx_s].needle_specifications.ablationShapeIndex)
-                        dict_one_needle['AblatorType'].append(segmentations_ablation[idx_s].needle_specifications.ablatorType)
-                    except Exception:
-                        dict_one_needle['AblationPath'].append(None)
-                        dict_one_needle['ValidationAblationPath'].append(None)
-                        dict_one_needle['Ablation_CT_Series'].append(None)
-                        dict_one_needle['Ablation_Series_UID'].append(None)
-                        dict_one_needle['AblationSystem'].append(None)
-                        dict_one_needle['AblatorID'].append(None)
-                        dict_one_needle['AblationSystemVersion'].append(None)
-                        dict_one_needle['AblationShapeIndex'].append(None)
-                        dict_one_needle['AblatorType'].append(None)
-                else:
-                    dict_one_needle['PatientID'] = [patientID]
-                    dict_one_needle['PatientName'] = [ patient_name]
-                    dict_one_needle['LesionNr'].append(lesionIdx)
-                    dict_one_needle['NeedleNr'].append(needle_idx)
-                    dict_one_needle['CAS_Version'].append(self.cas_version)
-                    dict_one_needle['TimeIntervention'].append(self.time_intervention)
-                    dict_one_needle['PlannedEntryPoint'].append(self.planned.entrypoint)
-                    dict_one_needle['PlannedTargetPoint'].append(self.planned.targetpoint)
-                    dict_one_needle['PlannedNeedleLength'].append(self.planned.length_needle)
-                    dict_one_needle['ValidationEntryPoint'].append(self.validation.entrypoint)
-                    dict_one_needle['ValidationTargetPoint'].append(self.validation.targetpoint)
-                    dict_one_needle['ReferenceNeedle'].append(self.isreference)
-                    dict_one_needle['EntryLateral'].append(self.tpeerorrs.entry_lateral)
-                    dict_one_needle['AngularError'].append(self.tpeerorrs.angular)
-                    dict_one_needle['LateralError'].append(self.tpeerorrs.lateral)
-                    dict_one_needle['LongitudinalError'].append(self.tpeerorrs.longitudinal)
-                    dict_one_needle['EuclideanError'].append(self.tpeerorrs.euclidean)
+            for idx_s in range(0, max_no_segmentations):
+                    # dict_one_needle['PatientID'] = [patientID]
+                    # dict_one_needle['PatientName'] = [ patient_name]
+                    # if the default dict already has data, start appending. otherwise initialize to defaultdict
+                dict_one_needle['PatientID'].append(patientID)
+                dict_one_needle['PatientName'].append(patient_name)
+                dict_one_needle['LesionNr'].append(lesionIdx)
+                dict_one_needle['NeedleNr'].append(needle_idx)
+                dict_one_needle['CAS_Version'].append(self.cas_version)
+                dict_one_needle['TimeIntervention'].append(self.time_intervention)
+                dict_one_needle['PlannedEntryPoint'].append(self.planned.entrypoint)
+                dict_one_needle['PlannedTargetPoint'].append(self.planned.targetpoint)
+                dict_one_needle['PlannedNeedleLength'].append(self.planned.length_needle)
+                dict_one_needle['ValidationEntryPoint'].append(self.validation.entrypoint)
+                dict_one_needle['ValidationTargetPoint'].append(self.validation.targetpoint)
+                dict_one_needle['ReferenceNeedle'].append(self.isreference)
+                dict_one_needle['EntryLateral'].append(self.tpeerorrs.entry_lateral)
+                dict_one_needle['AngularError'].append(self.tpeerorrs.angular)
+                dict_one_needle['LateralError'].append(self.tpeerorrs.lateral)
+                dict_one_needle['LongitudinalError'].append(self.tpeerorrs.longitudinal)
+                dict_one_needle['EuclideanError'].append(self.tpeerorrs.euclidean)
+                try:
+                    # try catch block if there is no tumor segmentation at the respective index
+                    dict_one_needle['NeedleType'].append(segmentations_tumor[idx_s].needle_type)
+                    dict_one_needle['TumorPath'].append(segmentations_tumor[idx_s].mask_path)
+                    dict_one_needle['PlanTumorPath'].append(segmentations_tumor[idx_s].source_path)
+                    dict_one_needle['Tumor_CT_Series'].append(segmentations_tumor[idx_s].ct_series)
+                    dict_one_needle['Tumor_Series_UID'].append(segmentations_tumor[idx_s].series_UID)
+                except Exception:
+                    dict_one_needle['NeedleType'].append(None)
+                    dict_one_needle['TumorPath'].append(None)
+                    dict_one_needle['PlanTumorPath'].append(None)
+                    dict_one_needle['Tumor_CT_Series'].append(None)
+                    dict_one_needle['Tumor_Series_UID'].append(None)
+                try:
+                    # try catch block if there is no tumor segmentation at the respective index
+                    dict_one_needle['AblationPath'].append(segmentations_ablation[idx_s].mask_path)
+                    dict_one_needle['ValidationAblationPath'].append(segmentations_ablation[idx_s].source_path)
+                    dict_one_needle['Ablation_CT_Series'].append(segmentations_ablation[idx_s].ct_series)
+                    dict_one_needle['Ablation_Series_UID'].append(segmentations_ablation[idx_s].series_UID)
+                    dict_one_needle['AblationSystem'].append(segmentations_tumor[idx_s].needle_specifications.ablationSystem)
+                    dict_one_needle['AblatorID'].append(segmentations_ablation[idx_s].needle_specifications.ablator_id)
+                    dict_one_needle['AblationSystemVersion'].append(segmentations_ablation[idx_s].needle_specifications.ablationSystemVersion)
+                    dict_one_needle['AblationShapeIndex'].append(segmentations_ablation[idx_s].needle_specifications.ablationShapeIndex)
+                    dict_one_needle['AblatorType'].append(segmentations_ablation[idx_s].needle_specifications.ablatorType)
+                except Exception:
+                    dict_one_needle['AblationPath'].append(None)
+                    dict_one_needle['ValidationAblationPath'].append(None)
+                    dict_one_needle['Ablation_CT_Series'].append(None)
+                    dict_one_needle['Ablation_Series_UID'].append(None)
+                    dict_one_needle['AblationSystem'].append(None)
+                    dict_one_needle['AblatorID'].append(None)
+                    dict_one_needle['AblationSystemVersion'].append(None)
+                    dict_one_needle['AblationShapeIndex'].append(None)
+                    dict_one_needle['AblatorType'].append(None)
+            return dict_one_needle
+
         else:
-            dict_one_needle['PatientID'].append(patientID)
-            dict_one_needle['PatientName'].append(patient_name)
-            dict_one_needle['LesionNr'].append(lesionIdx)
-            dict_one_needle['NeedleNr'].append(needle_idx)
-            dict_one_needle['CAS_Version'].append(self.cas_version)
-            dict_one_needle['TimeIntervention'].append(self.time_intervention)
-            dict_one_needle['PlannedEntryPoint'].append(self.planned.entrypoint)
-            dict_one_needle['PlannedTargetPoint'].append(self.planned.targetpoint)
-            dict_one_needle['PlannedNeedleLength'].append(self.planned.length_needle)
-            dict_one_needle['ValidationEntryPoint'].append(self.validation.entrypoint)
-            dict_one_needle['ValidationTargetPoint'].append(self.validation.targetpoint)
-            dict_one_needle['ReferenceNeedle'].append(self.isreference)
-            dict_one_needle['EntryLateral'].append(self.tpeerorrs.entry_lateral)
-            dict_one_needle['AngularError'].append(self.tpeerorrs.angular)
-            dict_one_needle['LateralError'].append(self.tpeerorrs.lateral)
-            dict_one_needle['LongitudinalError'].append(self.tpeerorrs.longitudinal)
-            dict_one_needle['EuclideanError'].append(self.tpeerorrs.euclidean)
-            dict_one_needle['NeedleType'].append(None)
-            dict_one_needle['TumorPath'].append(None)
-            dict_one_needle['PlanTumorPath'].append(None)
-            dict_one_needle['Tumor_CT_Series'].append(None)
-            dict_one_needle['Tumor_Series_UID'].append(None)
-            dict_one_needle['AblationPath'].append(None)
-            dict_one_needle['ValidationAblationPath'].append(None)
-            dict_one_needle['Ablation_CT_Series'].append(None)
-            dict_one_needle['Ablation_Series_UID'].append(None)
-            dict_one_needle['AblationSystem'].append(None)
-            dict_one_needle['AblatorID'].append(None)
-            dict_one_needle['AblationSystemVersion'].append(None)
-            dict_one_needle['AblationShapeIndex'].append(None)
-            dict_one_needle['AblatorType'].append(None)
-
-
-
+            # no segmentations have been found for this needle
+            dict_one_needle['PatientID'] = [patientID]
+            dict_one_needle['PatientName']= [patient_name]
+            dict_one_needle['LesionNr'] = [lesionIdx]
+            dict_one_needle['NeedleNr'] = [needle_idx]
+            dict_one_needle['CAS_Version'] = [self.cas_version]
+            dict_one_needle['TimeIntervention'] = [self.time_intervention]
+            dict_one_needle['PlannedEntryPoint'] = [self.planned.entrypoint]
+            dict_one_needle['PlannedTargetPoint'] = [self.planned.targetpoint]
+            dict_one_needle['PlannedNeedleLength'] = [self.planned.length_needle]
+            dict_one_needle['ValidationEntryPoint'] = [self.validation.entrypoint]
+            dict_one_needle['ValidationTargetPoint'] = [self.validation.targetpoint]
+            dict_one_needle['ReferenceNeedle'] = [self.isreference]
+            dict_one_needle['EntryLateral'] = [self.tpeerorrs.entry_lateral]
+            dict_one_needle['AngularError'] = [self.tpeerorrs.angular]
+            dict_one_needle['LateralError'] = [self.tpeerorrs.lateral]
+            dict_one_needle['LongitudinalError'] = [self.tpeerorrs.longitudinal]
+            dict_one_needle['EuclideanError'] = [self.tpeerorrs.euclidean]
+            dict_one_needle['NeedleType'] = None
+            dict_one_needle['TumorPath'] = None
+            dict_one_needle['PlanTumorPath'] = None
+            dict_one_needle['Tumor_CT_Series'] = None
+            dict_one_needle['Tumor_Series_UID'] = None
+            dict_one_needle['AblationPath'] = None
+            dict_one_needle['ValidationAblationPath'] = None
+            dict_one_needle['Ablation_CT_Series'] = None
+            dict_one_needle['Ablation_Series_UID'] = None
+            dict_one_needle['AblationSystem'] = None
+            dict_one_needle['AblatorID'] = None
+            dict_one_needle['AblationSystemVersion'] = None
+            dict_one_needle['AblationShapeIndex'] = None
+            dict_one_needle['AblatorType'] = None
             return dict_one_needle
 
 
@@ -350,9 +336,12 @@ class NeedleToDictWriter:
     """
 
     def needlesToDict(needle_data, patientID, patient_name, lesionIdx, needles):
-        for needle_idx, needle in enumerate(needles):
-            needle_dict = needle.to_dict(patientID, patient_name, lesionIdx, needle_idx)  # needle_dict is a list type
-            needle_data.append(needle_dict)
+        if len(needles)>0:
+            for needle_idx, needle in enumerate(needles):
+                needle_dict = needle.to_dict(patientID, patient_name, lesionIdx, needle_idx)  # needle_dict is a list type
+                needle_data.append(needle_dict)
+        else:
+            print(patientID)
 
 
 class TPEErrors:
