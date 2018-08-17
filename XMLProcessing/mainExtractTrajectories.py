@@ -12,8 +12,9 @@ import parseIREtrajectories
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
 # %%
-rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
+# rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
 # rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
+rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed\Pat_Vonlanthen Gilbert_0008372870_2018-01-19_11-00-31"
 #rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
 
 patientsRepo = NeedlesInfoClass.PatientRepo()
@@ -80,7 +81,11 @@ else:
             except Exception:
                 print('Class Extraction Error', patientName)
     # unwrap class object and write to dictionary.
+    # TODO: check patient Volantherm blabla
     needle_list = []
+    df_needles = pd.DataFrame.from_dict(needle_data)
+
+    # TODO: might be redundant
     for needles in needle_data:
         for l in needles:
             needle_list.append(l)

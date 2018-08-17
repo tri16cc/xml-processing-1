@@ -155,7 +155,8 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
         planned.setLenghtNeedle()
         # add the TPEs if they exist in the Measurements field
         if elementExists(singleTrajectory, 'Measurements') is False:
-            print('No Measurement for this needle')
+            # print('No Measurement for this needle')
+            pass
         else:
             # find the right needle to replace the exact TPEs
             # set the validation trajectory
@@ -261,10 +262,12 @@ def II_parseTrajectories(xmlobj):
             result = tuple_results(trajectories, series, time_intervention, cas_version)
             return result
         else:
-            print('No trajectory was found in the XML file')
+            # TODO: better error message
+            # print('No trajectory was found in the XML file')
             result = tuple_results(None, None, None, None)
             return result
     except Exception:
-        print('No trajectory was found in the XML file')
+        # TODO: better error message
+        # print('No trajectory was found in the XML file')
         result = tuple_results(None, None, None, None)
         return result

@@ -93,7 +93,7 @@ class Lesion:
 
 class Segmentation:
 
-    def __init__(self, needle, source_path, path, needle_type, ct_series, series_UID, sphere_radius, segmentation_type):
+    def __init__(self, needle, source_path, path, needle_type, ct_series, series_UID, sphere_radius, segmentation_type, segmentation_datetime):
         self.source_path = source_path
         self.mask_path = path
         self.needle_type = needle_type
@@ -102,8 +102,9 @@ class Segmentation:
         self.sphere_radius = sphere_radius
         self.needle = needle
         self.segmentation_type = segmentation_type  # ablation, tumor, vessel (etc)
+        self.segmentation_datetime = segmentation_datetime
         self.needle_specifications = None
-        self.ellipsoid_info = None
+        self.ellipsoid_info = None # TODO: is this instantiated?
 
     def setNeedleSpecifications(self):
         self.needle_specifications = NeedleSpecifications()
@@ -198,7 +199,8 @@ class Needle:
             print("Series UID not in list")
             return None
 
-    def newSegmentation(self, segmentation_type, source_path, mask_path, needle_type, ct_series, series_UID,
+    def newSegmentation(self, segmentation_datetime, segmentation_type, source_path, mask_path, needle_type,
+                        ct_series, series_UID,
                         sphere_radius):
         """ Instantiate Segmentation Class object.
             append segmentation object to the correct needle object list.
@@ -206,12 +208,12 @@ class Needle:
         """
         if segmentation_type.lower() in {"lesion", "lession", "tumor", "tumour"}:
             segmentation = Segmentation(self, source_path, mask_path, needle_type, ct_series, series_UID, sphere_radius,
-                                        segmentation_type)
+                                        segmentation_type,segmentation_datetime)
             self.segmentations_tumor.append(segmentation)
             return segmentation
         elif segmentation_type.lower() in {"ablation", "ablationzone", "necrosis"}:
             segmentation = Segmentation(self, source_path, mask_path, needle_type, ct_series, series_UID, sphere_radius,
-                                        segmentation_type)
+                                        segmentation_type,segmentation_datetime)
             self.segmentations_ablation.append(segmentation)
             return segmentation
 
@@ -261,14 +263,16 @@ class Needle:
                     dict_one_needle['PlanTumorPath'].append(segmentations_tumor[idx_s].source_path)
                     dict_one_needle['Tumor_CT_Series'].append(segmentations_tumor[idx_s].ct_series)
                     dict_one_needle['Tumor_Series_UID'].append(segmentations_tumor[idx_s].series_UID)
+                    dict_one_needle["Tumor_Segmentation_Datetime"].append(segmentations_tumor[idx_s].segmentation_datetime)
                 except Exception:
                     dict_one_needle['NeedleType'].append(None)
                     dict_one_needle['TumorPath'].append(None)
                     dict_one_needle['PlanTumorPath'].append(None)
                     dict_one_needle['Tumor_CT_Series'].append(None)
                     dict_one_needle['Tumor_Series_UID'].append(None)
+                    dict_one_needle["Tumor_Segmentation_Datetime"].append(None)
                 try:
-                    # try catch block if there is no tumor segmentation at the respective index
+                    # try catch block if there is no ablation segmentation at the respective index
                     dict_one_needle['AblationPath'].append(segmentations_ablation[idx_s].mask_path)
                     dict_one_needle['ValidationAblationPath'].append(segmentations_ablation[idx_s].source_path)
                     dict_one_needle['Ablation_CT_Series'].append(segmentations_ablation[idx_s].ct_series)
@@ -278,6 +282,7 @@ class Needle:
                     dict_one_needle['AblationSystemVersion'].append(segmentations_ablation[idx_s].needle_specifications.ablationSystemVersion)
                     dict_one_needle['AblationShapeIndex'].append(segmentations_ablation[idx_s].needle_specifications.ablationShapeIndex)
                     dict_one_needle['AblatorType'].append(segmentations_ablation[idx_s].needle_specifications.ablatorType)
+                    dict_one_needle["Ablation_Segmentation_Datetime"].append(segmentations_ablation[idx_s].segmentation_datetime)
                 except Exception:
                     dict_one_needle['AblationPath'].append(None)
                     dict_one_needle['ValidationAblationPath'].append(None)
@@ -288,6 +293,7 @@ class Needle:
                     dict_one_needle['AblationSystemVersion'].append(None)
                     dict_one_needle['AblationShapeIndex'].append(None)
                     dict_one_needle['AblatorType'].append(None)
+                    dict_one_needle['Ablation_Segmentation_Datetime'].append(None)
             return dict_one_needle
 
         else:
@@ -314,6 +320,7 @@ class Needle:
             dict_one_needle['PlanTumorPath'] = None
             dict_one_needle['Tumor_CT_Series'] = None
             dict_one_needle['Tumor_Series_UID'] = None
+            dict_one_needle['Tumor_Segmentation_Datetime'] = None
             dict_one_needle['AblationPath'] = None
             dict_one_needle['ValidationAblationPath'] = None
             dict_one_needle['Ablation_CT_Series'] = None
