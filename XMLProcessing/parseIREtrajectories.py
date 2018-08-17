@@ -90,36 +90,49 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
         sphere_radius = ''
         all_paths = splitall(xml_filepath)
         idx_segmentations = [i for i, s in enumerate(all_paths) if "Study" in s]
-        segmentation_filepath = os.path.join(all_paths[idx_segmentations[0]],
-                                             all_paths[idx_segmentations[0] + 1],
-                                             singleTrajectory.Segmentation.Path.cdata[1:])
+        idx_cas_recordings = [i for i, s in enumerate(all_paths) if "CAS-One Recordings" in s]
+        segmentation_datetime = all_paths[idx_cas_recordings[0] + 1]
+        segmentation_filepath = os.path.join(*all_paths[0:len(all_paths)-1], singleTrajectory.Segmentation.Path.cdata[1:])
+
+        # segmentation_filepath = os.path.join(all_paths[idx_segmentations[0]],
+        #                                      all_paths[idx_segmentations[0] + 1],
+        #                                      all_paths[idx_cas_recordings[0]],
+        #                                      segmentation_datetime,
+        #                                      singleTrajectory.Segmentation.Path.cdata[1:])
         idx_pat = [i for i, s in enumerate(all_paths) if "Pat" in s]
         source_filepath = os.path.join(all_paths[idx_pat[1]],
                                        all_paths[idx_pat[1] + 1],
                                        all_paths[idx_pat[1] + 2])
     # TODO: add the time at which segmentations were done in the folder name (new version).
-    #  check if the series UID has already been added.]
-    segmentation = needle.findSegmentation(series_UID, segmentation_type)
-    if segmentation is None:
-        # add it to the needle list, otherwise update it.
-        segmentation = needle.newSegmentation(segmentation_type,
-                                              source_filepath,
-                                              segmentation_filepath,
-                                              needle_type,
-                                              ct_series,
-                                              series_UID,
-                                              sphere_radius)
-    else:
-        print("segmentation series already exists")
+    # check if folder empty. if true don't add the segmentation to the needles.
+    if os.listdir(segmentation_filepath):
+        #  check if the series UID has already been added.
+        segmentation = needle.findSegmentation(series_UID, segmentation_type)
+        if segmentation is None:
+            # append to the list of segmentations based on time of the intervention
+            segmentation = needle.newSegmentation(segmentation_datetime,
+                                                  segmentation_type,
+                                                  source_filepath,
+                                                  segmentation_filepath,
+                                                  needle_type,
+                                                  ct_series,
+                                                  series_UID,
+                                                  sphere_radius)
 
-    if elementExists(singleTrajectory, 'Ablator'):
-        needle_params = segmentation.setNeedleSpecifications()
-        # TODO: add singleTrajectory.Ablator["readableName"],
-        needle_params.setNeedleSpecifications(singleTrajectory.Ablator["id"],
-                                              singleTrajectory.Ablator["ablationSystem"],
-                                              singleTrajectory.Ablator["ablationSystemVersion"],
-                                              singleTrajectory.Ablator["ablatorType"],
-                                              singleTrajectory.Ablator.Ablation["ablationShapeIndex"])
+            if elementExists(singleTrajectory, 'Ablator'):
+                needle_params = segmentation.setNeedleSpecifications()
+                needle_params.setNeedleSpecifications(singleTrajectory.Ablator["id"],
+                                                      singleTrajectory.Ablator["ablationSystem"],
+                                                      singleTrajectory.Ablator["ablationSystemVersion"],
+                                                      singleTrajectory.Ablator["ablatorType"],
+                                                      singleTrajectory.Ablator.Ablation["ablationShapeIndex"])
+        else:
+            # pass
+            print("segmentation series already exists")
+    else:
+        print("Segmentation Folder Empty")
+
+
 
 
 def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention, cas_version):
@@ -161,7 +174,6 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
             # find the right needle to replace the exact TPEs
             # set the validation trajectory
             # set the time of intervention from XML
-
             ep_validation = np.array(
                 [float(i) for i in singleTrajectory.Measurements.Measurement.EntryPoint.cdata.split()])
             tp_validation = np.array(
