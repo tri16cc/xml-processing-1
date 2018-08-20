@@ -238,7 +238,6 @@ class Needle:
             for idx_s in range(0, max_no_segmentations):
                     # dict_one_needle['PatientID'] = [patientID]
                     # dict_one_needle['PatientName'] = [ patient_name]
-                    # if the default dict already has data, start appending. otherwise initialize to defaultdict
                 dict_one_needle['PatientID'].append(patientID)
                 dict_one_needle['PatientName'].append(patient_name)
                 dict_one_needle['LesionNr'].append(lesionIdx)
@@ -294,8 +293,8 @@ class Needle:
                     dict_one_needle['AblationShapeIndex'].append(None)
                     dict_one_needle['AblatorType'].append(None)
                     dict_one_needle['Ablation_Segmentation_Datetime'].append(None)
-            return dict_one_needle
 
+            return dict_one_needle
         else:
             # no segmentations have been found for this needle
             dict_one_needle['PatientID'] = [patientID]
@@ -346,6 +345,8 @@ class NeedleToDictWriter:
         if len(needles)>0:
             for needle_idx, needle in enumerate(needles):
                 needle_dict = needle.to_dict(patientID, patient_name, lesionIdx, needle_idx)  # needle_dict is a list type
+                # TODO: unpack before appending if multiple segmentations are available for a needle
+                # TODO: iterate through each value of the dictionary - but how??
                 needle_data.append(needle_dict)
         else:
             print(patientID)

@@ -82,7 +82,9 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
     """
     segmentation_type = singleTrajectory.Segmentation["StructureType"]
     if singleTrajectory.Segmentation["TypeOfSegmentation"].lower() in {"sphere"}:
-        series_UID = singleTrajectory.Segmentation["SphereRadius"]  # add the radius for search purposes
+        # add the radius for search purposes when the series uid is missing.
+        # if a sphere is used for annotation, no DICOM mask will be generated in the background
+        series_UID = singleTrajectory.Segmentation["SphereRadius"]
         sphere_radius = singleTrajectory.Segmentation["SphereRadius"]
         segmentation_filepath = ''
     else:
@@ -93,19 +95,20 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
         idx_cas_recordings = [i for i, s in enumerate(all_paths) if "CAS-One Recordings" in s]
         segmentation_datetime = all_paths[idx_cas_recordings[0] + 1]
         segmentation_filepath = os.path.join(*all_paths[0:len(all_paths)-1], singleTrajectory.Segmentation.Path.cdata[1:])
-
-        # segmentation_filepath = os.path.join(all_paths[idx_segmentations[0]],
-        #                                      all_paths[idx_segmentations[0] + 1],
-        #                                      all_paths[idx_cas_recordings[0]],
-        #                                      segmentation_datetime,
-        #                                      singleTrajectory.Segmentation.Path.cdata[1:])
         idx_pat = [i for i, s in enumerate(all_paths) if "Pat" in s]
+        # extract the filepath of the source CT series
+        all_paths_segmentation = splitall(singleTrajectory.Segmentation.Path.cdata[1:])
+        idx_series = [i for i, s in enumerate(all_paths_segmentation) if "Series" in s]
+        str_to_split = all_paths_segmentation[idx_series[0]]
+        series_no = [int(s) for s in str_to_split.split("_") if s.isdigit()]
+        series_no_source = "Series_" + str(series_no[0])
         source_filepath = os.path.join(all_paths[idx_pat[1]],
                                        all_paths[idx_pat[1] + 1],
-                                       all_paths[idx_pat[1] + 2])
-    # TODO: add the time at which segmentations were done in the folder name (new version).
-    # check if folder empty. if true don't add the segmentation to the needles.
-    if os.listdir(segmentation_filepath):
+                                       series_no_source)
+
+    # check if folder exists in the current path adress extracted from the XML. if false, the segmentations are stored into another folder.
+    # check if folder is empty. if true don't add the segmentation to the needles.
+    if os.path.exists(segmentation_filepath) and os.listdir(segmentation_filepath):
         #  check if the series UID has already been added.
         segmentation = needle.findSegmentation(series_UID, segmentation_type)
         if segmentation is None:
@@ -127,11 +130,10 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
                                                       singleTrajectory.Ablator["ablatorType"],
                                                       singleTrajectory.Ablator.Ablation["ablationShapeIndex"])
         else:
-            # pass
-            print("segmentation series already exists")
+            pass # do nothing
+            # print("segmentation series already exists")
     else:
         print("Segmentation Folder Empty")
-
 
 
 
