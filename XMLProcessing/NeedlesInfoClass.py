@@ -223,7 +223,7 @@ class Needle:
     def getTumorSegmentations(self):
         return self.segmentations_tumor
 
-    def to_dict(self, patientID, patient_name, lesionIdx, needle_idx):
+    def to_dict(self, patientID, patient_name, lesionIdx, needle_idx, dict_one_needle):
         """ Unpack Needle Object class to dict.
             Return needle information.
             If one needle has several segmentations, iterate and return all.
@@ -231,13 +231,11 @@ class Needle:
         """
         segmentations_tumor = self.segmentations_tumor
         segmentations_ablation = self.segmentations_ablation
-        # TODO: the number of tumor and ablation segmentations is not always the same.
-        dict_one_needle = defaultdict(list)
+        # the number of tumor and ablation segmentations is not always the same.
+        # dict_one_needle = defaultdict(list)
         max_no_segmentations = max(len(segmentations_ablation), len(segmentations_tumor))
         if max_no_segmentations > 0:
             for idx_s in range(0, max_no_segmentations):
-                    # dict_one_needle['PatientID'] = [patientID]
-                    # dict_one_needle['PatientName'] = [ patient_name]
                 dict_one_needle['PatientID'].append(patientID)
                 dict_one_needle['PatientName'].append(patient_name)
                 dict_one_needle['LesionNr'].append(lesionIdx)
@@ -293,42 +291,41 @@ class Needle:
                     dict_one_needle['AblationShapeIndex'].append(None)
                     dict_one_needle['AblatorType'].append(None)
                     dict_one_needle['Ablation_Segmentation_Datetime'].append(None)
-
             return dict_one_needle
         else:
             # no segmentations have been found for this needle
-            dict_one_needle['PatientID'] = [patientID]
-            dict_one_needle['PatientName']= [patient_name]
-            dict_one_needle['LesionNr'] = [lesionIdx]
-            dict_one_needle['NeedleNr'] = [needle_idx]
-            dict_one_needle['CAS_Version'] = [self.cas_version]
-            dict_one_needle['TimeIntervention'] = [self.time_intervention]
-            dict_one_needle['PlannedEntryPoint'] = [self.planned.entrypoint]
-            dict_one_needle['PlannedTargetPoint'] = [self.planned.targetpoint]
-            dict_one_needle['PlannedNeedleLength'] = [self.planned.length_needle]
-            dict_one_needle['ValidationEntryPoint'] = [self.validation.entrypoint]
-            dict_one_needle['ValidationTargetPoint'] = [self.validation.targetpoint]
-            dict_one_needle['ReferenceNeedle'] = [self.isreference]
-            dict_one_needle['EntryLateral'] = [self.tpeerorrs.entry_lateral]
-            dict_one_needle['AngularError'] = [self.tpeerorrs.angular]
-            dict_one_needle['LateralError'] = [self.tpeerorrs.lateral]
-            dict_one_needle['LongitudinalError'] = [self.tpeerorrs.longitudinal]
-            dict_one_needle['EuclideanError'] = [self.tpeerorrs.euclidean]
-            dict_one_needle['NeedleType'] = None
-            dict_one_needle['TumorPath'] = None
-            dict_one_needle['PlanTumorPath'] = None
-            dict_one_needle['Tumor_CT_Series'] = None
-            dict_one_needle['Tumor_Series_UID'] = None
-            dict_one_needle['Tumor_Segmentation_Datetime'] = None
-            dict_one_needle['AblationPath'] = None
-            dict_one_needle['ValidationAblationPath'] = None
-            dict_one_needle['Ablation_CT_Series'] = None
-            dict_one_needle['Ablation_Series_UID'] = None
-            dict_one_needle['AblationSystem'] = None
-            dict_one_needle['AblatorID'] = None
-            dict_one_needle['AblationSystemVersion'] = None
-            dict_one_needle['AblationShapeIndex'] = None
-            dict_one_needle['AblatorType'] = None
+            dict_one_needle['PatientID'].append(patientID)
+            dict_one_needle['PatientName'].append(patient_name)
+            dict_one_needle['LesionNr'].append(lesionIdx)
+            dict_one_needle['NeedleNr'].append(needle_idx)
+            dict_one_needle['CAS_Version'].append(self.cas_version)
+            dict_one_needle['TimeIntervention'].append(self.time_intervention)
+            dict_one_needle['PlannedEntryPoint'].append(self.planned.entrypoint)
+            dict_one_needle['PlannedTargetPoint'].append(self.planned.targetpoint)
+            dict_one_needle['PlannedNeedleLength'].append(self.planned.length_needle)
+            dict_one_needle['ValidationEntryPoint'].append(self.validation.entrypoint)
+            dict_one_needle['ValidationTargetPoint'].append(self.validation.targetpoint)
+            dict_one_needle['ReferenceNeedle'].append(self.isreference)
+            dict_one_needle['EntryLateral'].append(self.tpeerorrs.entry_lateral)
+            dict_one_needle['AngularError'].append(self.tpeerorrs.angular)
+            dict_one_needle['LateralError'].append(self.tpeerorrs.lateral)
+            dict_one_needle['LongitudinalError'].append(self.tpeerorrs.longitudinal)
+            dict_one_needle['EuclideanError'].append(self.tpeerorrs.euclidean)
+            dict_one_needle['NeedleType'].append(None)
+            dict_one_needle['TumorPath'].append(None)
+            dict_one_needle['PlanTumorPath'].append(None)
+            dict_one_needle['Tumor_CT_Series'].append(None)
+            dict_one_needle['Tumor_Series_UID'].append(None)
+            dict_one_needle['Tumor_Segmentation_Datetime'].append(None)
+            dict_one_needle['AblationPath'].append(None)
+            dict_one_needle['ValidationAblationPath'].append(None)
+            dict_one_needle['Ablation_CT_Series'].append(None)
+            dict_one_needle['Ablation_Series_UID'].append(None)
+            dict_one_needle['AblationSystem'].append(None)
+            dict_one_needle['AblatorID'].append(None)
+            dict_one_needle['AblationSystemVersion'].append(None)
+            dict_one_needle['AblationShapeIndex'].append(None)
+            dict_one_needle['AblatorType'].append(None)
             return dict_one_needle
 
 
@@ -343,13 +340,19 @@ class NeedleToDictWriter:
 
     def needlesToDict(needle_data, patientID, patient_name, lesionIdx, needles):
         if len(needles)>0:
+            dict_one_needle = defaultdict(list)
             for needle_idx, needle in enumerate(needles):
-                needle_dict = needle.to_dict(patientID, patient_name, lesionIdx, needle_idx)  # needle_dict is a list type
+                needle_dict = needle.to_dict(patientID, patient_name, lesionIdx, needle_idx, dict_one_needle)
+                needle_dict = None
+                needle_data.append(dict_one_needle)
+                # TODO: return dict_one_needle instead
                 # TODO: unpack before appending if multiple segmentations are available for a needle
-                # TODO: iterate through each value of the dictionary - but how??
-                needle_data.append(needle_dict)
+                # for keys, values in needle_dict.items():
+                #     needle_data.append(needle_dict)
         else:
-            print(patientID)
+            pass
+            # print(patienID)
+
 
 
 class TPEErrors:
