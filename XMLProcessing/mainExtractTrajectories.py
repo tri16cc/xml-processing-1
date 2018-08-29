@@ -5,17 +5,18 @@ Created on Tue Feb 27 16:49:22 2018
 @author: Raluca Sandu
 """
 import os
-from time import strftime
 import pandas as pd
+from time import strftime
 import NeedlesInfoClass
 import parseIREtrajectories
+from collections import defaultdict
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
 # %%
 # rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
 # rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
-rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed\Pat_Vonlanthen Gilbert_0008372870_2018-01-19_11-00-31"
-#rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
+
+rootdir =  r"C:\Patients_Cochlea\Datsets_Fabrice_processed\Pat_Vonlanthen Gilbert_0008372870_2018-01-19_11-00-31"
 
 patientsRepo = NeedlesInfoClass.PatientRepo()
 pat_ids = []
@@ -64,32 +65,30 @@ for subdir, dirs, files in os.walk(rootdir):
                                                                  trajectories_info.cas_version)
 
 # %% extract information from the object classes into pandas dataframe
-needle_data = []
 patients = patientsRepo.getPatients()
+# needle_data = []
 if not patients :
     print('No CAS Recordings found. Check if the files are there and in the correct folder structure.')
 else:
-    for p in patients:
-        lesions = p.getLesions()
-        patientID = p.patient_id_xml
-        patientName = p.patient_name
+    for patient in patients:
+        lesions = patient.getLesions()
+        patientID = patient.patient_id_xml
+        patientName = patient.patient_name
         for l_idx, lesion in enumerate(lesions):
             needles = lesion.getNeedles()
-            # for each needle get the segmentations associated with it
-            try:
-                NeedlesInfoClass.NeedleToDictWriter.needlesToDict(needle_data,  patientID,  patientName, l_idx, lesion.getNeedles())
-            except Exception:
-                print('Class Extraction Error', patientName)
-    # unwrap class object and write to dictionary.
-    # TODO: check patient Volantherm blabla
-    needle_list = []
-    df_needles = pd.DataFrame.from_dict(needle_data)
+            needles_unpacked_list = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,  patientName, l_idx, needles)
 
-    # TODO: might be redundant
-    for needles in needle_data:
-        for l in needles:
-            needle_list.append(l)
-    df_patients_trajectories = pd.DataFrame(needle_list)
+
+    # unwrap class object and write to dictionary.
+    #TODO: the problem appears with the needle unpacking. the classes storage is fine.
+    # needle_list = defaultdict(list)
+    # for needles in needle_data:
+    #     # take each key of the dictionary, each value
+    #     for keys, vals in needles.items():
+    #         for val in vals:
+    #             needle_list[keys].append(val)
+    # write to DataFrame
+    df_patients_trajectories = pd.DataFrame(needles_unpacked_list)
     # %% read MWA Needle Database Excel.
     df_mwa_database = pd.read_excel("CAS_IR_MWA_NeedleDatabase.xlsx")
 
