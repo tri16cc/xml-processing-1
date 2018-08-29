@@ -16,7 +16,7 @@ from customize_dataframe import customize_dataframe
 # rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
 # rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
 
-rootdir =  r"C:\Patients_Cochlea\Datsets_Fabrice_processed\Pat_Vonlanthen Gilbert_0008372870_2018-01-19_11-00-31"
+rootdir =  r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
 
 patientsRepo = NeedlesInfoClass.PatientRepo()
 pat_ids = []
@@ -66,74 +66,79 @@ for subdir, dirs, files in os.walk(rootdir):
 
 # %% extract information from the object classes into pandas dataframe
 patients = patientsRepo.getPatients()
-# needle_data = []
-if not patients :
-    print('No CAS Recordings found. Check if the files are there and in the correct folder structure.')
-else:
+needles_list = []
+if patients :
     for patient in patients:
         lesions = patient.getLesions()
         patientID = patient.patient_id_xml
         patientName = patient.patient_name
         for l_idx, lesion in enumerate(lesions):
             needles = lesion.getNeedles()
-            needles_unpacked_list = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,  patientName, l_idx, needles)
+            needles_defaultdict = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,  patientName, l_idx, needles)
+            needles_list.append(needles_defaultdict)
 
+    # unpack from defaultdict and list
+    needles_unpacked_list = defaultdict(list)
+    for needle_trajectories in needles_list:
+        for keys, vals in needle_trajectories.items():
+            for val in vals:
+                needles_unpacked_list[keys].append(val)
 
-    # unwrap class object and write to dictionary.
-    #TODO: the problem appears with the needle unpacking. the classes storage is fine.
-    # needle_list = defaultdict(list)
-    # for needles in needle_data:
-    #     # take each key of the dictionary, each value
-    #     for keys, vals in needles.items():
-    #         for val in vals:
-    #             needle_list[keys].append(val)
-    # write to DataFrame
+    # convert to DataFrame
+    for key, vals in needles_unpacked_list.items():
+        if len(needles_unpacked_list[key]) != 28:
+            print(key)
+
     df_patients_trajectories = pd.DataFrame(needles_unpacked_list)
-    # %% read MWA Needle Database Excel.
-    df_mwa_database = pd.read_excel("CAS_IR_MWA_NeedleDatabase.xlsx")
-
-    ellipse_data = []
-    for index, row in df_patients_trajectories.iterrows():
-        ablation_index = row["AblationShapeIndex"]
-        ablation_system = row["AblationSystem"]
-        if ablation_index:
-            rows_to_append = df_mwa_database[(df_mwa_database["AblationShapeIndex"] == int(ablation_index)) & (
-                        df_mwa_database["AblationSystem"] == ablation_system)]
-            dict_mwa = rows_to_append.iloc[:, 2:].to_dict('list')
-            ellipse_data.append(dict_mwa)
-        else:
-            dict_mwa = {'NeedleID': '',
-                        'NeedleName': '',
-                        'Power': '',
-                        'Radii': '',
-                        'Rotation': '',
-                        'Time_seconds': '',
-                        'Translation': '',
-                        'Type': ''
-                        }
-            ellipse_data.append(dict_mwa)
-    # concatenate to df_patients_trajectories
-    df_ellipse = pd.DataFrame(ellipse_data)
-    df_final = pd.concat([df_patients_trajectories, df_ellipse], axis=1, join_axes=[df_ellipse.index])
-
-    #%%  write to excel final list.
-    timestr = strftime("%Y%m%d-%H%M%S")
-    filename = 'Patients_MWA_Interventions-' + timestr + '.xlsx'
-    filepathExcel = os.path.join(rootdir, filename)
-    writer = pd.ExcelWriter(filepathExcel)
-    # df_final.sort_values(by=['PatientID'], inplace=True)
-    df_final.apply(pd.to_numeric, errors='ignore', downcast='float').info()
-    df_final[['LateralError']] = df_final[['LateralError']].apply(pd.to_numeric, downcast='float')
-    df_final[['AngularError']] = df_final[['AngularError']].apply(pd.to_numeric, downcast='float')
-    df_final[['EuclideanError']] = df_final[['EuclideanError']].apply(pd.to_numeric, downcast='float')
-    df_final[['LongitudinalError']] = df_final[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
-    df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
-    df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
-    df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
-    df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
-    df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
-    writer.save()
     print("success")
+elif not patients:
+    print('No CAS Recordings found. Check if the files are there and in the correct folder structure.')
+
+    # %% read MWA Needle Database Excel.
+    # df_mwa_database = pd.read_excel("CAS_IR_MWA_NeedleDatabase.xlsx")
+    # # TODO: add ellipse data
+    # ellipse_data = []
+    # for index, row in df_patients_trajectories.iterrows():
+    #     ablation_index = row["AblationShapeIndex"]
+    #     ablation_system = row["AblationSystem"]
+    #     if ablation_index:
+    #         rows_to_append = df_mwa_database[(df_mwa_database["AblationShapeIndex"] == int(ablation_index)) & (
+    #                     df_mwa_database["AblationSystem"] == ablation_system)]
+    #         dict_mwa = rows_to_append.iloc[:, 2:].to_dict('list')
+    #         ellipse_data.append(dict_mwa)
+    #     else:
+    #         dict_mwa = {'NeedleID': '',
+    #                     'NeedleName': '',
+    #                     'Power': '',
+    #                     'Radii': '',
+    #                     'Rotation': '',
+    #                     'Time_seconds': '',
+    #                     'Translation': '',
+    #                     'Type': ''
+    #                     }
+    #         ellipse_data.append(dict_mwa)
+    # # concatenate to df_patients_trajectories
+    # df_ellipse = pd.DataFrame(ellipse_data)
+    # df_final = pd.concat([df_patients_trajectories, df_ellipse], axis=1, join_axes=[df_ellipse.index])
+    #
+    # #%%  write to excel final list.
+    # timestr = strftime("%Y%m%d-%H%M%S")
+    # filename = 'Patients_MWA_Interventions-' + timestr + '.xlsx'
+    # filepathExcel = os.path.join(rootdir, filename)
+    # writer = pd.ExcelWriter(filepathExcel)
+    # # df_final.sort_values(by=['PatientID'], inplace=True)
+    # df_final.apply(pd.to_numeric, errors='ignore', downcast='float').info()
+    # df_final[['LateralError']] = df_final[['LateralError']].apply(pd.to_numeric, downcast='float')
+    # df_final[['AngularError']] = df_final[['AngularError']].apply(pd.to_numeric, downcast='float')
+    # df_final[['EuclideanError']] = df_final[['EuclideanError']].apply(pd.to_numeric, downcast='float')
+    # df_final[['LongitudinalError']] = df_final[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
+    # df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
+    # df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
+    # df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
+    # df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
+    # df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
+    # writer.save()
+    # print("success")
 # %% dataframes for Angles
 # Angles = []
 # patient_unique = dfPatientsTrajectories['PatientID'].unique()

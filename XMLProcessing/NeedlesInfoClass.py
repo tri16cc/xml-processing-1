@@ -274,30 +274,30 @@ class Needle:
                     dict_needles['ValidationAblationPath'].append(segmentations_ablation[idx_s].source_path)
                     dict_needles['Ablation_CT_Series'].append(segmentations_ablation[idx_s].ct_series)
                     dict_needles['Ablation_Series_UID'].append(segmentations_ablation[idx_s].series_UID)
+                    dict_needles["Ablation_Segmentation_Datetime"].append(
+                        segmentations_ablation[idx_s].segmentation_datetime)
                     dict_needles['AblationSystem'].append(None)
                     dict_needles['AblatorID'].append(None)
                     dict_needles['AblationSystemVersion'].append(None)
                     dict_needles['AblationShapeIndex'].append(None)
                     dict_needles['AblatorType'].append(None)
-                    dict_needles['Ablation_Segmentation_Datetime'].append(None)
-                    #TODO: instantiate the ablation system in the class definition
+                    #TODO: instantiation might be useless. the info is in REDCAP
                     # dict_needles['AblationSystem'].append(segmentations_tumor[idx_s].needle_specifications.ablationSystem)
                     # dict_needles['AblatorID'].append(segmentations_ablation[idx_s].needle_specifications.ablator_id)
                     # dict_needles['AblationSystemVersion'].append(segmentations_ablation[idx_s].needle_specifications.ablationSystemVersion)
                     # dict_needles['AblationShapeIndex'].append(segmentations_ablation[idx_s].needle_specifications.ablationShapeIndex)
                     # dict_needles['AblatorType'].append(segmentations_ablation[idx_s].needle_specifications.ablatorType)
-                    # dict_needles["Ablation_Segmentation_Datetime"].append(segmentations_ablation[idx_s].segmentation_datetime)
                 except Exception:
                     dict_needles['AblationPath'].append(None)
                     dict_needles['ValidationAblationPath'].append(None)
                     dict_needles['Ablation_CT_Series'].append(None)
                     dict_needles['Ablation_Series_UID'].append(None)
+                    dict_needles['Ablation_Segmentation_Datetime'].append(None)
                     dict_needles['AblationSystem'].append(None)
                     dict_needles['AblatorID'].append(None)
                     dict_needles['AblationSystemVersion'].append(None)
                     dict_needles['AblationShapeIndex'].append(None)
                     dict_needles['AblatorType'].append(None)
-                    dict_needles['Ablation_Segmentation_Datetime'].append(None)
             return dict_needles
         else:
             # no segmentations have been found for this needle

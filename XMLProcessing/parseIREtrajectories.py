@@ -61,6 +61,7 @@ def I_parseRecordingXML(filename):
     except Exception:
         try:
             # attempt to remove weird characters by rewriting the files
+            # try to to keep 'UTF-8' coding guidelines
             xmlobj = ET.parse(filename, parser=ET.XMLParser(encoding='ISO-8859-1'))
             root = xmlobj.getroot()
             root[0].attrib.pop('seriesPath', None)
@@ -108,8 +109,9 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
 
     # check if folder exists in the current path adress extracted from the XML. if false, the segmentations are stored into another folder.
     # check if folder is empty. if true don't add the segmentation to the needles.
-    if os.path.exists(segmentation_filepath) and os.listdir(segmentation_filepath):
+    if os.path.exists(segmentation_filepath) and len(os.listdir(segmentation_filepath)) > 0:
         #  check if the series UID has already been added.
+        #TODO: series UID is not unique, problem might arise there
         segmentation = needle.findSegmentation(series_UID, segmentation_type)
         if segmentation is None:
             # append to the list of segmentations based on time of the intervention
@@ -121,14 +123,14 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
                                                   ct_series,
                                                   series_UID,
                                                   sphere_radius)
-
-            if elementExists(singleTrajectory, 'Ablator'):
-                needle_params = segmentation.setNeedleSpecifications()
-                needle_params.setNeedleSpecifications(singleTrajectory.Ablator["id"],
-                                                      singleTrajectory.Ablator["ablationSystem"],
-                                                      singleTrajectory.Ablator["ablationSystemVersion"],
-                                                      singleTrajectory.Ablator["ablatorType"],
-                                                      singleTrajectory.Ablator.Ablation["ablationShapeIndex"])
+            # TODO: add ablator information - actual info in patients records and REDCAP
+            # if elementExists(singleTrajectory, 'Ablator'):
+            #     needle_params = segmentation.setNeedleSpecifications()
+            #     needle_params.setNeedleSpecifications(singleTrajectory.Ablator["id"],
+            #                                           singleTrajectory.Ablator["ablationSystem"],
+            #                                           singleTrajectory.Ablator["ablationSystemVersion"],
+            #                                           singleTrajectory.Ablator["ablatorType"],
+            #                                           singleTrajectory.Ablator.Ablation["ablationShapeIndex"])
         else:
             pass # do nothing
             # print("segmentation series already exists")
