@@ -392,5 +392,5 @@ class Trajectory:
         self.entrypoint = entrypoint
         self.targetpoint = targetpoint
 
-    def setLenghtNeedle(self):
+    def setLengthNeedle(self):
         self.length_needle = np.linalg.norm(self.targetpoint - self.entrypoint)

@@ -61,7 +61,7 @@ def I_parseRecordingXML(filename):
     except Exception:
         try:
             # attempt to remove weird characters by rewriting the files
-            # try to to keep 'UTF-8' coding guidelines
+            # TODO: try to to keep 'UTF-8' coding guidelines
             xmlobj = ET.parse(filename, parser=ET.XMLParser(encoding='ISO-8859-1'))
             root = xmlobj.getroot()
             root[0].attrib.pop('seriesPath', None)
@@ -107,8 +107,10 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
                                        all_paths[idx_pat[1] + 1],
                                        series_no_source)
 
-    # check if folder exists in the current path adress extracted from the XML. if false, the segmentations are stored into another folder.
+    # check if folder exists in the current path adress extracted from the XML.
+    # if false, the segmentations are stored into another folder.
     # check if folder is empty. if true don't add the segmentation to the needles.
+
     if os.path.exists(segmentation_filepath) and len(os.listdir(segmentation_filepath)) > 0:
         #  check if the series UID has already been added.
         #TODO: series UID is not unique, problem might arise there
@@ -166,11 +168,13 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
             needle = lesion.newNeedle(False, needle_type, ct_series)  # False - the needle is not a reference trajectory
             tps = needle.setTPEs()
             validation = needle.setValidationTrajectory()
-        # add the entry and target points to the needle object
+        # add the entry and target points to the needle object regardless needle is None or not
         planned = needle.setPlannedTrajectory()
         planned.setTrajectory(ep_planning, tp_planning)
-        planned.setLenghtNeedle()
-        # add the TPEs if they exist in the Measurements field
+        planned.setLengthNeedle()
+        needle.setTimeIntervention(time_intervention)
+        needle.setCASversion(cas_version)
+        # add the TPEs if they exist in the Measurements field - ie. the needle has been validated
         if elementExists(singleTrajectory, 'Measurements') is False:
             # print('No Measurement for this needle')
             pass
@@ -189,8 +193,7 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
                 = extractTPES(singleTrajectory.Measurements.Measurement)
 
             tps = needle.setTPEs()
-            needle.setTimeIntervention(time_intervention)
-            needle.setCASversion(cas_version)
+
             # set TPE errors
             tps.setTPEErrors(entry_lateral, target_lateral, target_angular, target_longitudinal, target_euclidean)
 
@@ -243,11 +246,12 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             IV_parseNeedles(children_trajectories, lesion, needle_type,
                             ct_series, xml_filepath, time_intervention, cas_version)
         else:
-            # MWA type of needle
+            # assuming 'EG_ATOMIC_TRAJECTORY' stands for MWA type of needle
             needle_type = "MWA"
             # drop the lesion identification for MWA. multiple needles might be 
-            # no clear consensus for minimal distance between lesions
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=100)
+            # no clear consensus for minimal distance between lesions and no info in the log version <=2.9
+            # DISTANCE_BETWEEN_LESIONS=1000 very large number
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=1000)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)
             children_trajectories = xmlTrajectory

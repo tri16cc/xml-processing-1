@@ -85,9 +85,9 @@ if patients :
                 needles_unpacked_list[keys].append(val)
 
     # convert to DataFrame
-    for key, vals in needles_unpacked_list.items():
-        if len(needles_unpacked_list[key]) != 28:
-            print(key)
+    # for key, vals in needles_unpacked_list.items():
+    #     if len(needles_unpacked_list[key]) != 28:
+    #         print(key)
 
     df_patients_trajectories = pd.DataFrame(needles_unpacked_list)
     print("success")
