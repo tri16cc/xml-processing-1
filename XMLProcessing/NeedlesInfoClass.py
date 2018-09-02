@@ -25,8 +25,14 @@ class Patient:
 
     def __init__(self, patient_id_xml, patient_name):
         self.lesions = []
+        self.registrations = []
         self.patient_id_xml = patient_id_xml
         self.patient_name = patient_name
+
+    def addNewRegistration(self):
+        registration = Registration()
+        self.registrations.append(registration)
+        return registration
 
     def addLesion(self, lesion):
         self.lesions.append(lesion)
@@ -48,6 +54,23 @@ class Patient:
             return foundLesions[0]
         else:
             raise Exception('Something went wrong')
+
+
+class Registration:
+
+    def __init__(self):
+        self.r_matrix = None
+        self.r_type = None
+        self.pp_planning = None
+        self.pp_validation = None
+        self.r_flag = False
+
+    def setRegistrationInfo(self,  r_matrix, r_type, pp_planning, pp_validation):
+        self.r_matrix = r_matrix
+        self.r_type = r_type
+        self.pp_planning = pp_planning
+        self.pp_validation = pp_validation
+        self.r_flag = True
 
 
 class Lesion:

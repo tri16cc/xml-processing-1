@@ -13,10 +13,8 @@ from collections import defaultdict
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
 # %%
-# rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
+rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
 # rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
-
-rootdir =  r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
 
 patientsRepo = NeedlesInfoClass.PatientRepo()
 pat_ids = []
@@ -49,9 +47,13 @@ for subdir, dirs, files in os.walk(rootdir):
                     patients = patientsRepo.getPatients()
                     patient = [x for x in patients if x.patient_id_xml == pat_id]
                     if not patient:
+                        # instantiate patient object
                         # create patient measurements if patient is not already in the PatientsRepository
                         patient = patientsRepo.addNewPatient(pat_id,
                                                              xmlobj.patient_name)
+                        # instantiate registration
+                        parseIREtrajectories.II_extractRegistration(xmlobj.trajectories, patient, xmlfilename)
+                        # add intervention data
                         parseIREtrajectories.III_parseTrajectory(trajectories_info.trajectories, patient,
                                                                  trajectories_info.series, xmlfilename,
                                                                  trajectories_info.time_intervention,
@@ -63,6 +65,8 @@ for subdir, dirs, files in os.walk(rootdir):
                                                                  trajectories_info.series, xmlfilename,
                                                                  trajectories_info.time_intervention,
                                                                  trajectories_info.cas_version)
+                        # add the registration, if several exist (hopefully not)
+                        parseIREtrajectories.II_extractRegistration(xmlobj.trajectories, patient[0], xmlfilename)
 
 # %% extract information from the object classes into pandas dataframe
 patients = patientsRepo.getPatients()
@@ -72,6 +76,10 @@ if patients :
         lesions = patient.getLesions()
         patientID = patient.patient_id_xml
         patientName = patient.patient_name
+        patient_registrations = patient.registrations
+        if len(patient_registrations) > 1:
+            print(patient)
+
         for l_idx, lesion in enumerate(lesions):
             needles = lesion.getNeedles()
             needles_defaultdict = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,  patientName, l_idx, needles)
@@ -94,7 +102,7 @@ if patients :
 elif not patients:
     print('No CAS Recordings found. Check if the files are there and in the correct folder structure.')
 
-    # %% read MWA Needle Database Excel.
+    #%% read MWA Needle Database Excel.
     # df_mwa_database = pd.read_excel("CAS_IR_MWA_NeedleDatabase.xlsx")
     # # TODO: add ellipse data
     # ellipse_data = []
@@ -120,25 +128,26 @@ elif not patients:
     # # concatenate to df_patients_trajectories
     # df_ellipse = pd.DataFrame(ellipse_data)
     # df_final = pd.concat([df_patients_trajectories, df_ellipse], axis=1, join_axes=[df_ellipse.index])
-    #
-    # #%%  write to excel final list.
-    # timestr = strftime("%Y%m%d-%H%M%S")
-    # filename = 'Patients_MWA_Interventions-' + timestr + '.xlsx'
-    # filepathExcel = os.path.join(rootdir, filename)
-    # writer = pd.ExcelWriter(filepathExcel)
-    # # df_final.sort_values(by=['PatientID'], inplace=True)
-    # df_final.apply(pd.to_numeric, errors='ignore', downcast='float').info()
-    # df_final[['LateralError']] = df_final[['LateralError']].apply(pd.to_numeric, downcast='float')
-    # df_final[['AngularError']] = df_final[['AngularError']].apply(pd.to_numeric, downcast='float')
-    # df_final[['EuclideanError']] = df_final[['EuclideanError']].apply(pd.to_numeric, downcast='float')
-    # df_final[['LongitudinalError']] = df_final[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
-    # df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
-    # df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
-    # df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
-    # df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
-    # df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
-    # writer.save()
-    # print("success")
+
+    #%%  write to excel final list.
+timestr = strftime("%Y%m%d-%H%M%S")
+filename = 'MAVERRIC_Stockholm_June_all_patients_no_registration' + timestr + '.xlsx'
+filepathExcel = os.path.join(rootdir, filename)
+writer = pd.ExcelWriter(filepathExcel)
+df_final = df_patients_trajectories
+# df_final.sort_values(by=['PatientID'], inplace=True)
+df_final.apply(pd.to_numeric, errors='ignore', downcast='float').info()
+df_final[['LateralError']] = df_final[['LateralError']].apply(pd.to_numeric, downcast='float')
+df_final[['AngularError']] = df_final[['AngularError']].apply(pd.to_numeric, downcast='float')
+df_final[['EuclideanError']] = df_final[['EuclideanError']].apply(pd.to_numeric, downcast='float')
+df_final[['LongitudinalError']] = df_final[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
+df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
+df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
+df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
+df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
+df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
+writer.save()
+print("success")
 # %% dataframes for Angles
 # Angles = []
 # patient_unique = dfPatientsTrajectories['PatientID'].unique()

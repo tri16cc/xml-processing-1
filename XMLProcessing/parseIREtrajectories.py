@@ -9,6 +9,7 @@ import re
 import collections
 import numpy as np
 import untangle as ut
+from collections import defaultdict
 
 import xml.etree.ElementTree as ET
 from extractTPEsXml import extractTPES
@@ -68,7 +69,7 @@ def I_parseRecordingXML(filename):
             xmlobj.write(filename)
             return 1
         except Exception:
-            print("This file could not be parse:", filename)
+            print("This file could not be parsed:", filename)
             return None
 
 
@@ -291,3 +292,39 @@ def II_parseTrajectories(xmlobj):
         # print('No trajectory was found in the XML file')
         result = tuple_results(None, None, None, None)
         return result
+
+
+def II_extractRegistration(xmlobj, patient, xmlfilename):
+    """
+    Check if there is any registration matrix and extracts it if True.
+    :param xmlobj: xmlobj tree structured parsed by library such as untangle, XMLTree etc.
+    :return: RegistrationType, error, Transform Matrix, PointPairsPlanning, Validation  + set flag.
+    """
+    # init registration
+    registration = patient.addNewRegistration()
+    # check if the element exists
+    if elementExists(xmlobj.Eagles, 'Registration'):
+        # only add if registration matrix is different from the Identity Matrix
+        registration_matrix = xmlobj.Eagles.Registration.ValidationToPlanning.Transform.cdata
+        registration_type = xmlobj.Eagles.Registration.ValidationToPlanning["RegistrationType"]
+        if xmlobj.Eagles.Registration.PointPairs:
+            try:
+                pp_val_dict = defaultdict(list)
+                pp_plan_dict = defaultdict(list)
+                for PointPair in xmlobj.Eagles.Registration.PointPairs.PointPair:
+                    pp_plan_dict['RegistationPlanPoints'].append(PointPair.Planning.cdata)
+                    pp_val_dict['RegistrationValidationPoints'].append(PointPair.Validation.cdata)
+                # instantiate registration
+                registration.setRegistrationInfo(registration_matrix,
+                                                 registration_type,
+                                                 pp_plan_dict,
+                                                 pp_val_dict)
+            except Exception:
+                print(xmlfilename)
+        else:
+            pass
+            # don't instatiante if is identity matrix.
+    else:
+        pass
+
+
