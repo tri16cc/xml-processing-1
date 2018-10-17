@@ -93,7 +93,7 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
         series_UID = singleTrajectory.Segmentation.SeriesUID.cdata
         sphere_radius = ''
         all_paths = splitall(xml_filepath)
-        idx_segmentations = [i for i, s in enumerate(all_paths) if "Study" in s]
+        idx_study = [i for i, s in enumerate(all_paths) if "Study" in s]
         idx_cas_recordings = [i for i, s in enumerate(all_paths) if "CAS-One Recordings" in s]
         segmentation_datetime = all_paths[idx_cas_recordings[0] + 1]
         segmentation_filepath = os.path.join(*all_paths[0:len(all_paths)-1], singleTrajectory.Segmentation.Path.cdata[1:])
@@ -104,10 +104,13 @@ def parse_segmentation(singleTrajectory, needle, needle_type, ct_series, xml_fil
         str_to_split = all_paths_segmentation[idx_series[0]]
         series_no = [int(s) for s in str_to_split.split("_") if s.isdigit()]
         series_no_source = "Series_" + str(series_no[0])
-        source_filepath = os.path.join(all_paths[idx_pat[1]],
-                                       all_paths[idx_pat[1] + 1],
+        # TODO: check source segmentation path
+        # source_filepath = os.path.join(all_paths[idx_pat[1]-1],
+        #                                 all_paths[idx_pat[1]],
+        #                                 all_paths[idx_pat[1] + 1],
+        #                                 series_no_source)
+        source_filepath = os.path.join(*all_paths[0:idx_study[0]+1],
                                        series_no_source)
-
     # check if folder exists in the current path adress extracted from the XML.
     # if false, the segmentations are stored into another folder.
     # check if folder is empty. if true don't add the segmentation to the needles.
@@ -300,14 +303,15 @@ def II_extractRegistration(xmlobj, patient, xmlfilename):
     :param xmlobj: xmlobj tree structured parsed by library such as untangle, XMLTree etc.
     :return: RegistrationType, error, Transform Matrix, PointPairsPlanning, Validation  + set flag.
     """
-    # init registration
-    registration = patient.addNewRegistration()
+
     # check if the element exists
     if elementExists(xmlobj.Eagles, 'Registration'):
         # only add if registration matrix is different from the Identity Matrix
         registration_matrix = xmlobj.Eagles.Registration.ValidationToPlanning.Transform.cdata
         registration_type = xmlobj.Eagles.Registration.ValidationToPlanning["RegistrationType"]
-        if xmlobj.Eagles.Registration.PointPairs:
+        if xmlobj.Eagles.Registration.PointPairs and "RegistrationType" is not None:
+            # init registration only if registration different than the identity matrix
+            registration = patient.addNewRegistration()
             try:
                 pp_val_dict = defaultdict(list)
                 pp_plan_dict = defaultdict(list)
@@ -318,13 +322,15 @@ def II_extractRegistration(xmlobj, patient, xmlfilename):
                 registration.setRegistrationInfo(registration_matrix,
                                                  registration_type,
                                                  pp_plan_dict,
-                                                 pp_val_dict)
+                                                 pp_val_dict,
+                                                )
             except Exception:
                 print(xmlfilename)
         else:
             pass
             # don't instatiante if is identity matrix.
     else:
+        # if it doesn't exist is the wrong file
         pass
 
 

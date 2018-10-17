@@ -13,7 +13,7 @@ from collections import defaultdict
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
 # %%
-rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maveric"
+rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maverric"
 # rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
 
 patientsRepo = NeedlesInfoClass.PatientRepo()
@@ -51,7 +51,8 @@ for subdir, dirs, files in os.walk(rootdir):
                         # create patient measurements if patient is not already in the PatientsRepository
                         patient = patientsRepo.addNewPatient(pat_id,
                                                              xmlobj.patient_name)
-                        # instantiate registration
+                        # instantiate extract registration
+                        # TODO: write registration matrix to Excel
                         parseIREtrajectories.II_extractRegistration(xmlobj.trajectories, patient, xmlfilename)
                         # add intervention data
                         parseIREtrajectories.III_parseTrajectory(trajectories_info.trajectories, patient,
@@ -66,6 +67,8 @@ for subdir, dirs, files in os.walk(rootdir):
                                                                  trajectories_info.time_intervention,
                                                                  trajectories_info.cas_version)
                         # add the registration, if several exist (hopefully not)
+                        # TODO: add condition if multiple registrations are available
+                        # TODO: add flag in excel if registration existing (write registration to excel)
                         parseIREtrajectories.II_extractRegistration(xmlobj.trajectories, patient[0], xmlfilename)
 
 # %% extract information from the object classes into pandas dataframe
@@ -77,13 +80,20 @@ if patients :
         patientID = patient.patient_id_xml
         patientName = patient.patient_name
         patient_registrations = patient.registrations
-        if len(patient_registrations) > 1:
-            print(patient)
-
-        for l_idx, lesion in enumerate(lesions):
-            needles = lesion.getNeedles()
-            needles_defaultdict = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,  patientName, l_idx, needles)
-            needles_list.append(needles_defaultdict)
+        flag_registration = False
+        for rg in patient_registrations:
+            if rg.r_type is not None:
+                print(patientID)
+                flag_registration = True
+        # if registration is None parse the patient, otherwise continue
+        # TODO: add registragtion to excel.
+        if flag_registration is False:
+            for l_idx, lesion in enumerate(lesions):
+                needles = lesion.getNeedles()
+                needles_defaultdict = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,  patientName, l_idx, needles)
+                needles_list.append(needles_defaultdict)
+        else:
+            continue
 
     # unpack from defaultdict and list
     needles_unpacked_list = defaultdict(list)
@@ -131,7 +141,7 @@ elif not patients:
 
     #%%  write to excel final list.
 timestr = strftime("%Y%m%d-%H%M%S")
-filename = 'MAVERRIC_Stockholm_June_all_patients_no_registration' + timestr + '.xlsx'
+filename = 'MAVERRIC_Stockholm_June_all_patients_' + timestr + '.xlsx'
 filepathExcel = os.path.join(rootdir, filename)
 writer = pd.ExcelWriter(filepathExcel)
 df_final = df_patients_trajectories

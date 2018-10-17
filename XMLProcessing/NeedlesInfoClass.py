@@ -357,6 +357,7 @@ class Needle:
             dict_needles['AblationShapeIndex'].append(None)
             dict_needles['AblatorType'].append(None)
             dict_needles['Ablation_Segmentation_Datetime'].append(None)
+            # dict_needles['Registration_Flag'].append(sel)
             return dict_needles
 
 
