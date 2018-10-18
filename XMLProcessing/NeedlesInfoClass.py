@@ -35,15 +35,13 @@ class Patient:
         return registration
 
     def findRegistration(self, REGISTRATION_MATRIX):
-
-        foundRegistrations = [rg.rg_matrix for rg in self.registrations if np.array_equal(np.array(rg.rg_matrix), np.array(REGISTRATION_MATRIX))]
+        foundRegistrations = [rg.r_matrix for rg in self.registrations if np.array_equal(np.array(rg.r_matrix), np.array(REGISTRATION_MATRIX))]
         if len(foundRegistrations) == 0:
             return None
         elif len(foundRegistrations) > 0:
             return foundRegistrations[0]
         else:
             raise Exception('Something went wrong')
-
 
     def addLesion(self, lesion):
         self.lesions.append(lesion)
