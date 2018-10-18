@@ -310,27 +310,33 @@ def II_extractRegistration(xmlobj, patient, xmlfilename):
         registration_matrix = xmlobj.Eagles.Registration.ValidationToPlanning.Transform.cdata
         registration_type = xmlobj.Eagles.Registration.ValidationToPlanning["RegistrationType"]
         if xmlobj.Eagles.Registration.PointPairs and "RegistrationType" is not None:
-            # init registration only if registration different than the identity matrix
-            registration = patient.addNewRegistration()
-            try:
-                pp_val_dict = defaultdict(list)
-                pp_plan_dict = defaultdict(list)
-                for PointPair in xmlobj.Eagles.Registration.PointPairs.PointPair:
-                    pp_plan_dict['RegistationPlanPoints'].append(PointPair.Planning.cdata)
-                    pp_val_dict['RegistrationValidationPoints'].append(PointPair.Validation.cdata)
-                # instantiate registration
-                registration.setRegistrationInfo(registration_matrix,
-                                                 registration_type,
-                                                 pp_plan_dict,
-                                                 pp_val_dict,
-                                                )
-            except Exception:
-                print(xmlfilename)
+            # first search if this registration matrix has been already added
+            registration = patient.findRegistration(registration_matrix)
+            if registration is None:
+                # init registration only if registration different than the identity matrix
+                registration = patient.addNewRegistration()
+                try:
+                    pp_val_dict = defaultdict(list)
+                    pp_plan_dict = defaultdict(list)
+                    for PointPair in xmlobj.Eagles.Registration.PointPairs.PointPair:
+                        pp_plan_dict['RegistationPlanPoints'].append(PointPair.Planning.cdata)
+                        pp_val_dict['RegistrationValidationPoints'].append(PointPair.Validation.cdata)
+                    # instantiate registration
+                    registration.setRegistrationInfo(registration_matrix,
+                                                     registration_type,
+                                                     pp_plan_dict,
+                                                     pp_val_dict,
+                                                    )
+                except Exception:
+                    print('Registration Matrix Extraction Issue in file:', xmlfilename)
+            else:
+                # if registration matrix has already been added then don't add it anymore
+                pass
         else:
             pass
             # don't instatiante if is identity matrix.
     else:
-        # if it doesn't exist is the wrong file
+        # if it doesn't exist is the wrong file that doesn't contain registration
         pass
 
 
