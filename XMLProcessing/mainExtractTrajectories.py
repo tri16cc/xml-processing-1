@@ -67,7 +67,6 @@ for subdir, dirs, files in os.walk(rootdir):
                                                                  trajectories_info.time_intervention,
                                                                  trajectories_info.cas_version)
                         # add the registration, if several exist (hopefully not)
-                        # TODO: add condition if multiple registrations are available
                         # TODO: add flag in excel if registration existing (write registration to excel)
                         parseIREtrajectories.II_extractRegistration(xmlobj.trajectories, patient[0], xmlfilename)
 
@@ -79,34 +78,25 @@ if patients :
         lesions = patient.getLesions()
         patientID = patient.patient_id_xml
         patientName = patient.patient_name
-        patient_registrations = patient.registrations
-        flag_registration = False
-        for rg in patient_registrations:
-            if rg.r_type is not None:
-                print(patientID)
-                flag_registration = True
-        # if registration is None parse the patient, otherwise continue
-        # TODO: add registragtion to excel.
-        if flag_registration is False:
-            for l_idx, lesion in enumerate(lesions):
-                needles = lesion.getNeedles()
-                needles_defaultdict = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,  patientName, l_idx, needles)
-                needles_list.append(needles_defaultdict)
-        else:
-            continue
-
+        img_registration = patient.registrations
+        # check-up if more than one distinct img_registration available
+        if len(img_registration) > 1:
+            print('more than one registration available for patient', patientName)
+        for l_idx, lesion in enumerate(lesions):
+            needles = lesion.getNeedles()
+            needles_defaultdict = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,
+                                                                                    patientName,
+                                                                                    l_idx,
+                                                                                    needles,
+                                                                                    img_registration)
+            needles_list.append(needles_defaultdict)
     # unpack from defaultdict and list
     needles_unpacked_list = defaultdict(list)
     for needle_trajectories in needles_list:
         for keys, vals in needle_trajectories.items():
             for val in vals:
                 needles_unpacked_list[keys].append(val)
-
-    # convert to DataFrame
-    # for key, vals in needles_unpacked_list.items():
-    #     if len(needles_unpacked_list[key]) != 28:
-    #         print(key)
-
+    # conver to DataFrame for easier writing to Excel
     df_patients_trajectories = pd.DataFrame(needles_unpacked_list)
     print("success")
 elif not patients:

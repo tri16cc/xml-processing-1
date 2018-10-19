@@ -286,12 +286,10 @@ def II_parseTrajectories(xmlobj):
             result = tuple_results(trajectories, series, time_intervention, cas_version)
             return result
         else:
-            # TODO: better error message
             # print('No trajectory was found in the XML file')
             result = tuple_results(None, None, None, None)
             return result
     except Exception:
-        # TODO: better error message
         # print('No trajectory was found in the XML file')
         result = tuple_results(None, None, None, None)
         return result
@@ -303,40 +301,61 @@ def II_extractRegistration(xmlobj, patient, xmlfilename):
     :param xmlobj: xmlobj tree structured parsed by library such as untangle, XMLTree etc.
     :return: RegistrationType, error, Transform Matrix, PointPairsPlanning, Validation  + set flag.
     """
-
     # check if the element exists
-    if elementExists(xmlobj.Eagles, 'Registration'):
-        # only add if registration matrix is different from the Identity Matrix
-        registration_matrix = xmlobj.Eagles.Registration.ValidationToPlanning.Transform.cdata
-        registration_type = xmlobj.Eagles.Registration.ValidationToPlanning["RegistrationType"]
-        if xmlobj.Eagles.Registration.PointPairs and "RegistrationType" is not None:
-            # first search if this registration matrix has been already added
-            registration = patient.findRegistration(registration_matrix)
-            if registration is None:
-                # init registration only if registration different than the identity matrix
-                registration = patient.addNewRegistration()
-                try:
-                    pp_val_dict = defaultdict(list)
-                    pp_plan_dict = defaultdict(list)
-                    for PointPair in xmlobj.Eagles.Registration.PointPairs.PointPair:
-                        pp_plan_dict['RegistationPlanPoints'].append(PointPair.Planning.cdata)
-                        pp_val_dict['RegistrationValidationPoints'].append(PointPair.Validation.cdata)
-                    # instantiate registration
-                    registration.setRegistrationInfo(registration_matrix,
-                                                     registration_type,
-                                                     pp_plan_dict,
-                                                     pp_val_dict,
-                                                    )
-                except Exception:
-                    print('Registration Matrix Extraction Issue in file:', xmlfilename)
-            else:
-                # if registration matrix has already been added then don't add it anymore
-                pass
-        else:
-            pass
-            # don't instatiante if is identity matrix.
-    else:
+    if not elementExists(xmlobj.Eagles, 'Registration'):
         # if it doesn't exist is the wrong file that doesn't contain registration
         pass
+    else:
+        registration_matrix = xmlobj.Eagles.Registration.ValidationToPlanning.Transform.cdata
+        registration_type = xmlobj.Eagles.Registration.ValidationToPlanning["RegistrationType"]
+        # just add the registration matrix once
+        if not patient.registrations:
+            # if list is emtpy add it once
+            registration = patient.addNewRegistration()
+        else: # if list is not empty and the registration hasn't been added already add it to the list
+            if (xmlobj.Eagles.Registration.PointPairs and 'none' != registration_type):
+                registration_exists = patient.findRegistration(registration_matrix)
+                if registration_exists is not None and len(patient.registrations)>1:
+                    return # exists
+                elif registration_exists is None and len(patient.registrations)==1:
+                    # that means the registration has been initialized with an empty matrix
+                    registration = patient.registrations[0]
+                    try:
+                        pp_val_dict = defaultdict(list)
+                        pp_plan_dict = defaultdict(list)
+
+                        for PointPair in xmlobj.Eagles.Registration.PointPairs.PointPair:
+                            pp_plan_dict['RegistrationPlanPoints'].append(PointPair.Planning.cdata)
+                            pp_val_dict['RegistrationValidationPoints'].append(PointPair.Validation.cdata)
+
+                        # instantiate registration
+                        registration.setRegistrationInfo(registration_matrix,
+                                                         registration_type,
+                                                         pp_plan_dict,
+                                                         pp_val_dict,
+                                                         )
+                    except Exception:
+                        print('Registration Matrix Extraction Issue in file:', xmlfilename)
+
+                elif registration_exists is None and len(patient.registrations)>1:
+                    registration = patient.addNewRegistration()
+                    try:
+                        pp_val_dict = defaultdict(list)
+                        pp_plan_dict = defaultdict(list)
+
+                        for PointPair in xmlobj.Eagles.Registration.PointPairs.PointPair:
+                            pp_plan_dict['RegistrationPlanPoints'].append(PointPair.Planning.cdata)
+                            pp_val_dict['RegistrationValidationPoints'].append(PointPair.Validation.cdata)
+
+                        # instantiate registration
+                        registration.setRegistrationInfo(registration_matrix,
+                                                         registration_type,
+                                                         pp_plan_dict,
+                                                         pp_val_dict,
+                                                         )
+                    except Exception:
+                        print('Registration Matrix Extraction Issue in file:', xmlfilename)
+
+
 
 
