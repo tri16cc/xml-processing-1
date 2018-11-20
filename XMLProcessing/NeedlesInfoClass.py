@@ -302,7 +302,7 @@ class Needle:
                     dict_needles['Tumor_Series_UID'].append(segmentations_tumor[idx_s].series_UID)
                     dict_needles["Tumor_Segmentation_Datetime"].append(segmentations_tumor[idx_s].segmentation_datetime)
                 except Exception:
-                    dict_needles['NeedleType'].append(None)
+                    dict_needles['NeedleType'].append(self.needle_type)
                     dict_needles['TumorPath'].append(None)
                     dict_needles['PlanTumorPath'].append(None)
                     dict_needles['Tumor_CT_Series'].append(None)
@@ -358,7 +358,7 @@ class Needle:
             dict_needles['LateralError'].append(self.tpeerorrs.lateral)
             dict_needles['LongitudinalError'].append(self.tpeerorrs.longitudinal)
             dict_needles['EuclideanError'].append(self.tpeerorrs.euclidean)
-            dict_needles['NeedleType'].append(None)
+            dict_needles['NeedleType'].append(self.needle_type)
             dict_needles['TumorPath'].append(None)
             dict_needles['PlanTumorPath'].append(None)
             dict_needles['Tumor_CT_Series'].append(None)
