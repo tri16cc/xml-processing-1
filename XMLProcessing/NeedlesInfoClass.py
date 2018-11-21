@@ -374,11 +374,11 @@ class Needle:
             dict_needles['AblationShapeIndex'].append(None)
             dict_needles['AblatorType'].append(None)
             dict_needles['Ablation_Segmentation_Datetime'].append(None)
-            dict_needles['RegistrationFlag'].append(img_registration[0].r_flag)
-            dict_needles['RegistrationMatrix'].append(img_registration[0].r_matrix)
-            dict_needles['PP_planing'].append(img_registration[0].pp_planning)
-            dict_needles['PP_validation'].append(img_registration[0].pp_validation)
-            dict_needles['RegistrationType'].append(img_registration[0].r_type)
+            # dict_needles['RegistrationFlag'].append(img_registration[0].r_flag)
+            # dict_needles['RegistrationMatrix'].append(img_registration[0].r_matrix)
+            # dict_needles['PP_planing'].append(img_registration[0].pp_planning)
+            # dict_needles['PP_validation'].append(img_registration[0].pp_validation)
+            # dict_needles['RegistrationType'].append(img_registration[0].r_type)
             return dict_needles
 
 

@@ -12,9 +12,9 @@ import untangle as ut
 from collections import defaultdict
 
 import xml.etree.ElementTree as ET
-from extractTPEsXml import extractTPES
-from elementExistsXml import elementExists
-from splitAllPaths import splitall
+from XMLProcessing.extractTPEsXml import extractTPES
+from XMLProcessing.elementExistsXml import elementExists
+from XMLProcessing.splitAllPaths import splitall
 # %%
 
 def extract_patient_id(filename, patient_id_xml, patient_name_flag=True):
@@ -237,7 +237,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             needle.setValidationTrajectory()  # empty because the reference needle has no validation trajectory
             needle.setTPEs()  # init empty TPEs because there are no TPEs for the reference needle
             children_trajectories = xmlTrajectory.Children.Trajectory
-            IV_parseNeedles(children_trajectories, lesion, needle_type)
+            IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention, cas_version)
 
         elif not (xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
             # the case when CAS XML Log is older version 2.5
@@ -247,8 +247,8 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)
             children_trajectories = xmlTrajectory
-            IV_parseNeedles(children_trajectories, lesion, needle_type,
-                            ct_series, xml_filepath, time_intervention, cas_version)
+            IV_parseNeedles(children_trajectories, lesion=lesion, needle_type=needle_type,
+                            ct_series=ct_series, xml_filepath=xml_filepath, time_intervention=time_intervention, cas_version=cas_version)
         else:
             # assuming 'EG_ATOMIC_TRAJECTORY' stands for MWA type of needle
             needle_type = "MWA"

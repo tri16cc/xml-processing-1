@@ -7,13 +7,13 @@ Created on Tue Feb 27 16:49:22 2018
 import os
 import pandas as pd
 from time import strftime
-import NeedlesInfoClass
-import parseIREtrajectories
+import XMLProcessing.NeedlesInfoClass as NeedlesInfoClass
+import XMLProcessing.parseIREtrajectories as parseIREtrajectories
 from collections import defaultdict
-import extractTrajectoriesAngles as eta
-from customize_dataframe import customize_dataframe
+import XMLProcessing.extractTrajectoriesAngles as eta
+#from customize_dataframe import customize_dataframe
 # %%
-rootdir = r"C:\PatientDatasets_GroundTruth_Database\Stockholm\3d_segmentation_maverric\maverric"
+rootdir = r"C:\PacientData\Davids IRE study"
 # rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
 
 patientsRepo = NeedlesInfoClass.PatientRepo()
