@@ -7,13 +7,19 @@ Created on Tue Feb 27 16:49:22 2018
 import os
 import pandas as pd
 from time import strftime
+from collections import defaultdict
+
+import readInputKeyboard
 import NeedlesInfoClasses
 import parseNeedleTrajectories as parseNeedleTrajectories
-from collections import defaultdict
+
 import extractTrajectoriesAngles as eta
-#from customize_dataframe import customize_dataframe
+from customize_dataframe import customize_dataframe
 # %%
-rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
+
+rootdir = readInputKeyboard.getNonEmptyString("Root Directory")
+outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
+flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
 
 patientsRepo = NeedlesInfoClasses.PatientRepo()
 pat_ids = []
@@ -103,8 +109,9 @@ elif not patients:
 
 
     #%%  write to excel final list.
+
 timestr = strftime("%Y%m%d-%H%M%S")
-filename = 'MAVERRIC_Stockholm_June_all_patients_' + timestr + '.xlsx'
+filename = outfilename + timestr + '.xlsx'
 filepathExcel = os.path.join(rootdir, filename)
 writer = pd.ExcelWriter(filepathExcel)
 df_final = df_patients_trajectories
@@ -122,12 +129,12 @@ df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
 writer.save()
 print("success")
 # %% dataframes for Angles
-# Angles = []
-# patient_unique = dfPatientsTrajectories['PatientID'].unique()
-# TODO: flag to cancel Angles if Dataset is MWA
-# for PatientIdx, patient in enumerate(patient_unique):
-#    patient_data = dfPatientsTrajectories[dfPatientsTrajectories['PatientID'] == patient]
-#    eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data, patient, Angles)
-# dfAngles = pd.DataFrame(Angles)
-# call the customize_dataframe to make columns numerical, write with 2 decimals
-# customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir)
+if flag_angles == 'y':
+    Angles = []
+    patient_unique = df_final['PatientID'].unique()
+    for PatientIdx, patient in enumerate(patient_unique):
+       patient_data = df_final[df_final['PatientID'] == patient]
+       eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data, patient, Angles)
+    dfAngles = pd.DataFrame(Angles)
+    # call the customize_dataframe to make columns numerical, write with 2 decimals
+    customize_dataframe(dfAngles, df_final, rootdir)
