@@ -101,32 +101,6 @@ if patients :
 elif not patients:
     print('No CAS Recordings found. Check if the files are there and in the correct folder structure.')
 
-    #%% read MWA Needle Database Excel.
-    # df_mwa_database = pd.read_excel("CAS_IR_MWA_NeedleDatabase.xlsx")
-    # # TODO: add ellipse data
-    # ellipse_data = []
-    # for index, row in df_patients_trajectories.iterrows():
-    #     ablation_index = row["AblationShapeIndex"]
-    #     ablation_system = row["AblationSystem"]
-    #     if ablation_index:
-    #         rows_to_append = df_mwa_database[(df_mwa_database["AblationShapeIndex"] == int(ablation_index)) & (
-    #                     df_mwa_database["AblationSystem"] == ablation_system)]
-    #         dict_mwa = rows_to_append.iloc[:, 2:].to_dict('list')
-    #         ellipse_data.append(dict_mwa)
-    #     else:
-    #         dict_mwa = {'NeedleID': '',
-    #                     'NeedleName': '',
-    #                     'Power': '',
-    #                     'Radii': '',
-    #                     'Rotation': '',
-    #                     'Time_seconds': '',
-    #                     'Translation': '',
-    #                     'Type': ''
-    #                     }
-    #         ellipse_data.append(dict_mwa)
-    # # concatenate to df_patients_trajectories
-    # df_ellipse = pd.DataFrame(ellipse_data)
-    # df_final = pd.concat([df_patients_trajectories, df_ellipse], axis=1, join_axes=[df_ellipse.index])
 
     #%%  write to excel final list.
 timestr = strftime("%Y%m%d-%H%M%S")
