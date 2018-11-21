@@ -7,16 +7,15 @@ Created on Tue Feb 27 16:49:22 2018
 import os
 import pandas as pd
 from time import strftime
-import XMLProcessing.NeedlesInfoClass as NeedlesInfoClass
-import XMLProcessing.parseIREtrajectories as parseIREtrajectories
+import NeedlesInfoClasses
+import parseNeedleTrajectories as parseNeedleTrajectories
 from collections import defaultdict
-import XMLProcessing.extractTrajectoriesAngles as eta
+import extractTrajectoriesAngles as eta
 #from customize_dataframe import customize_dataframe
 # %%
-rootdir = r"C:\PacientData\Davids IRE study"
-# rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
+rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
 
-patientsRepo = NeedlesInfoClass.PatientRepo()
+patientsRepo = NeedlesInfoClasses.PatientRepo()
 pat_ids = []
 pat_id = 0
 
@@ -30,16 +29,16 @@ for subdir, dirs, files in os.walk(rootdir):
             xmlFilePathName = os.path.join(subdir, file)
             xmlfilename = os.path.normpath(xmlFilePathName)
 
-            xmlobj = parseIREtrajectories.I_parseRecordingXML(xmlfilename)
+            xmlobj = parseNeedleTrajectories.I_parseRecordingXML(xmlfilename)
 
             if xmlobj is 1:
                 # file was re-written of weird characters so we need to re-open it.
-                xmlobj = parseIREtrajectories.I_parseRecordingXML(xmlfilename)
+                xmlobj = parseNeedleTrajectories.I_parseRecordingXML(xmlfilename)
             if xmlobj is not None and xmlobj!=1:
                 pat_id = xmlobj.patient_id_xml
                 pat_ids.append(pat_id)
                 # parse trajectories and other patient specific info
-                trajectories_info = parseIREtrajectories.II_parseTrajectories(xmlobj.trajectories)
+                trajectories_info = parseNeedleTrajectories.II_parseTrajectories(xmlobj.trajectories)
                 if trajectories_info.trajectories is None:
                     continue # no trajectories found in this xml, go on to the next file.
                 else:
@@ -53,22 +52,22 @@ for subdir, dirs, files in os.walk(rootdir):
                                                              xmlobj.patient_name)
                         # instantiate extract registration
                         # TODO: write registration matrix to Excel
-                        parseIREtrajectories.II_extractRegistration(xmlobj.trajectories, patient, xmlfilename)
+                        parseNeedleTrajectories.II_extractRegistration(xmlobj.trajectories, patient, xmlfilename)
                         # add intervention data
-                        parseIREtrajectories.III_parseTrajectory(trajectories_info.trajectories, patient,
-                                                                 trajectories_info.series, xmlfilename,
-                                                                 trajectories_info.time_intervention,
-                                                                 trajectories_info.cas_version)
+                        parseNeedleTrajectories.III_parseTrajectory(trajectories_info.trajectories, patient,
+                                                                    trajectories_info.series, xmlfilename,
+                                                                    trajectories_info.time_intervention,
+                                                                    trajectories_info.cas_version)
                     else:
                         # update patient measurements in the PatientsRepository if the patient (id) already exists
                         # patient[0] because the returned result is a list with one element.
-                        parseIREtrajectories.III_parseTrajectory(trajectories_info.trajectories, patient[0],
-                                                                 trajectories_info.series, xmlfilename,
-                                                                 trajectories_info.time_intervention,
-                                                                 trajectories_info.cas_version)
+                        parseNeedleTrajectories.III_parseTrajectory(trajectories_info.trajectories, patient[0],
+                                                                    trajectories_info.series, xmlfilename,
+                                                                    trajectories_info.time_intervention,
+                                                                    trajectories_info.cas_version)
                         # add the registration, if several exist (hopefully not)
                         # TODO: add flag in excel if registration existing (write registration to excel)
-                        parseIREtrajectories.II_extractRegistration(xmlobj.trajectories, patient[0], xmlfilename)
+                        parseNeedleTrajectories.II_extractRegistration(xmlobj.trajectories, patient[0], xmlfilename)
 
 # %% extract information from the object classes into pandas dataframe
 patients = patientsRepo.getPatients()
@@ -84,7 +83,7 @@ if patients :
             print('more than one registration available for patient', patientName)
         for l_idx, lesion in enumerate(lesions):
             needles = lesion.getNeedles()
-            needles_defaultdict = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,
+            needles_defaultdict = NeedlesInfoClasses.NeedleToDictWriter.needlesToDict(patientID,
                                                                                     patientName,
                                                                                     l_idx,
                                                                                     needles,
