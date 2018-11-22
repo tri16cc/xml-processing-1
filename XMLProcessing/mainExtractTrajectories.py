@@ -16,9 +16,13 @@ import parseNeedleTrajectories as parseNeedleTrajectories
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
 # %%
-rootdir = readInputKeyboard.getNonEmptyString("Root Directory given as r")
-outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
-flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
+# rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
+rootdir = r"C:\Stockholm_IRE_Study\data"
+outfilename = "IRE_Analysis"
+flag_angles = 'n'
+# rootdir = readInputKeyboard.getNonEmptyString("Root Directory given as r")
+# outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
+# flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
 
 patientsRepo = NeedlesInfoClasses.PatientRepo()
 pat_ids = []
@@ -49,6 +53,7 @@ for subdir, dirs, files in os.walk(rootdir):
                 else:
                     # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
                     patients = patientsRepo.getPatients()
+                    # perform search based on patient name if patient_id fails
                     patient = [x for x in patients if x.patient_id_xml == pat_id]
                     if not patient:
                         # instantiate patient object
@@ -76,6 +81,7 @@ for subdir, dirs, files in os.walk(rootdir):
 
 # %% extract information from the object classes into pandas dataframe
 patients = patientsRepo.getPatients()
+df_patients_trajectories = None
 needles_list = []
 if patients :
     for patient in patients:
@@ -106,27 +112,28 @@ if patients :
 elif not patients:
     print('No CAS Recordings found. Check if the files are there and in the correct folder structure.')
 
-
-    #%%  write to excel final list.
-
-timestr = strftime("%Y%m%d-%H%M%S")
-filename = outfilename + timestr + '.xlsx'
-filepathExcel = os.path.join(rootdir, filename)
-writer = pd.ExcelWriter(filepathExcel)
-df_final = df_patients_trajectories
-# df_final.sort_values(by=['PatientID'], inplace=True)
-df_final.apply(pd.to_numeric, errors='ignore', downcast='float').info()
-df_final[['LateralError']] = df_final[['LateralError']].apply(pd.to_numeric, downcast='float')
-df_final[['AngularError']] = df_final[['AngularError']].apply(pd.to_numeric, downcast='float')
-df_final[['EuclideanError']] = df_final[['EuclideanError']].apply(pd.to_numeric, downcast='float')
-df_final[['LongitudinalError']] = df_final[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
-df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
-df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
-df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
-df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
-df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
-writer.save()
-print("success")
+#%%  write to excel final list.
+if df_patients_trajectories is None:
+    print('No Needle Trajectories found in the input file directory:')
+else:
+    timestr = strftime("%Y%m%d-%H%M%S")
+    filename = outfilename + '_' +timestr + '.xlsx'
+    filepathExcel = os.path.join(rootdir, filename)
+    writer = pd.ExcelWriter(filepathExcel)
+    df_final = df_patients_trajectories
+    # df_final.sort_values(by=['PatientID'], inplace=True)
+    df_final.apply(pd.to_numeric, errors='ignore', downcast='float').info()
+    df_final[['LateralError']] = df_final[['LateralError']].apply(pd.to_numeric, downcast='float')
+    df_final[['AngularError']] = df_final[['AngularError']].apply(pd.to_numeric, downcast='float')
+    df_final[['EuclideanError']] = df_final[['EuclideanError']].apply(pd.to_numeric, downcast='float')
+    df_final[['LongitudinalError']] = df_final[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
+    df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
+    df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
+    df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
+    df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
+    df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
+    writer.save()
+    print("success")
 # %% dataframes for Angles
 if flag_angles == 'y':
     Angles = []
