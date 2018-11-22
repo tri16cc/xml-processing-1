@@ -9,12 +9,23 @@ import pandas as pd
 from time import strftime
 from collections import defaultdict
 
+"""
+#Raluca's Libraries
 import readInputKeyboard
 import NeedlesInfoClasses
 import parseNeedleTrajectories as parseNeedleTrajectories
 
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
+"""
+#Trini's Libraries
+import XMLProcessing.NeedlesInfoClasses as NeedlesInfoClasses
+import XMLProcessing.parseNeedleTrajectories as parseNeedleTrajectories
+
+import XMLProcessing.extractTrajectoriesAngles as eta
+from XMLProcessing.customize_dataframe import customize_dataframe
+
+
 # %%
 # rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
 rootdir = r"C:\Stockholm_IRE_Study\data"
