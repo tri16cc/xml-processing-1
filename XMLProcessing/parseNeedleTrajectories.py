@@ -10,11 +10,21 @@ import collections
 import numpy as np
 import untangle as ut
 from collections import defaultdict
-
+"""
+#Raluca's Libraries
 import xml.etree.ElementTree as ET
 from extractTPEsXml import extractTPES
 from elementExistsXml import elementExists
 from splitAllPaths import splitall
+"""
+
+#Trini's Libraries
+import xml.etree.ElementTree as ET
+from XMLProcessing.extractTPEsXml import extractTPES
+from XMLProcessing.elementExistsXml import elementExists
+from XMLProcessing.splitAllPaths import splitall
+
+
 
 # %%
 
@@ -54,6 +64,7 @@ def extract_patient_id(filename, patient_id_xml, patient_name_flag=True):
 def I_parseRecordingXML(filename):
 
     patient_id_xml = None
+    patient_name = None
     xml_tree = collections.namedtuple('xml_tree',
                                       ['trajectories', 'patient_id_xml', 'patient_name'])
     try:
@@ -74,8 +85,9 @@ def I_parseRecordingXML(filename):
 
     try:
         patient_id_xml = xmlobj.Eagles.PatientData["patientID"]
-    except Exception:
-        patient_id_xml, patient_name = extract_patient_id(filename, patient_id_xml, patient_name_flag=True)
+    except Exception as e:
+        print(repr(e))
+    patient_id_xml, patient_name = extract_patient_id(filename, patient_id_xml, patient_name_flag=True)
     result = xml_tree(xmlobj, patient_id_xml, patient_name)
     return result
 
