@@ -7,16 +7,24 @@ Created on Tue Feb 27 16:49:22 2018
 import os
 import pandas as pd
 from time import strftime
-import XMLProcessing.NeedlesInfoClass as NeedlesInfoClass
-import XMLProcessing.parseIREtrajectories as parseIREtrajectories
 from collections import defaultdict
-import XMLProcessing.extractTrajectoriesAngles as eta
-#from customize_dataframe import customize_dataframe
-# %%
-rootdir = r"C:\PacientData\Davids IRE study"
-# rootdir = r"C:\Patients_Cochlea\Datsets_Fabrice_processed"
 
-patientsRepo = NeedlesInfoClass.PatientRepo()
+import readInputKeyboard
+import NeedlesInfoClasses
+import parseNeedleTrajectories as parseNeedleTrajectories
+
+import extractTrajectoriesAngles as eta
+from customize_dataframe import customize_dataframe
+# %%
+# rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
+rootdir = r"C:\Stockholm_IRE_Study\data"
+outfilename = "IRE_Analysis"
+flag_angles = 'n'
+# rootdir = readInputKeyboard.getNonEmptyString("Root Directory given as r")
+# outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
+# flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
+
+patientsRepo = NeedlesInfoClasses.PatientRepo()
 pat_ids = []
 pat_id = 0
 
@@ -30,21 +38,22 @@ for subdir, dirs, files in os.walk(rootdir):
             xmlFilePathName = os.path.join(subdir, file)
             xmlfilename = os.path.normpath(xmlFilePathName)
 
-            xmlobj = parseIREtrajectories.I_parseRecordingXML(xmlfilename)
+            xmlobj = parseNeedleTrajectories.I_parseRecordingXML(xmlfilename)
 
             if xmlobj is 1:
                 # file was re-written of weird characters so we need to re-open it.
-                xmlobj = parseIREtrajectories.I_parseRecordingXML(xmlfilename)
+                xmlobj = parseNeedleTrajectories.I_parseRecordingXML(xmlfilename)
             if xmlobj is not None and xmlobj!=1:
                 pat_id = xmlobj.patient_id_xml
                 pat_ids.append(pat_id)
                 # parse trajectories and other patient specific info
-                trajectories_info = parseIREtrajectories.II_parseTrajectories(xmlobj.trajectories)
+                trajectories_info = parseNeedleTrajectories.II_parseTrajectories(xmlobj.trajectories)
                 if trajectories_info.trajectories is None:
                     continue # no trajectories found in this xml, go on to the next file.
                 else:
                     # check if patient exists first, if yes, instantiate new object, otherwise retrieve it from list
                     patients = patientsRepo.getPatients()
+                    # perform search based on patient name if patient_id fails
                     patient = [x for x in patients if x.patient_id_xml == pat_id]
                     if not patient:
                         # instantiate patient object
@@ -53,25 +62,26 @@ for subdir, dirs, files in os.walk(rootdir):
                                                              xmlobj.patient_name)
                         # instantiate extract registration
                         # TODO: write registration matrix to Excel
-                        parseIREtrajectories.II_extractRegistration(xmlobj.trajectories, patient, xmlfilename)
+                        parseNeedleTrajectories.II_extractRegistration(xmlobj.trajectories, patient, xmlfilename)
                         # add intervention data
-                        parseIREtrajectories.III_parseTrajectory(trajectories_info.trajectories, patient,
-                                                                 trajectories_info.series, xmlfilename,
-                                                                 trajectories_info.time_intervention,
-                                                                 trajectories_info.cas_version)
+                        parseNeedleTrajectories.III_parseTrajectory(trajectories_info.trajectories, patient,
+                                                                    trajectories_info.series, xmlfilename,
+                                                                    trajectories_info.time_intervention,
+                                                                    trajectories_info.cas_version)
                     else:
                         # update patient measurements in the PatientsRepository if the patient (id) already exists
                         # patient[0] because the returned result is a list with one element.
-                        parseIREtrajectories.III_parseTrajectory(trajectories_info.trajectories, patient[0],
-                                                                 trajectories_info.series, xmlfilename,
-                                                                 trajectories_info.time_intervention,
-                                                                 trajectories_info.cas_version)
+                        parseNeedleTrajectories.III_parseTrajectory(trajectories_info.trajectories, patient[0],
+                                                                    trajectories_info.series, xmlfilename,
+                                                                    trajectories_info.time_intervention,
+                                                                    trajectories_info.cas_version)
                         # add the registration, if several exist (hopefully not)
                         # TODO: add flag in excel if registration existing (write registration to excel)
-                        parseIREtrajectories.II_extractRegistration(xmlobj.trajectories, patient[0], xmlfilename)
+                        parseNeedleTrajectories.II_extractRegistration(xmlobj.trajectories, patient[0], xmlfilename)
 
 # %% extract information from the object classes into pandas dataframe
 patients = patientsRepo.getPatients()
+df_patients_trajectories = None
 needles_list = []
 if patients :
     for patient in patients:
@@ -84,7 +94,7 @@ if patients :
             print('more than one registration available for patient', patientName)
         for l_idx, lesion in enumerate(lesions):
             needles = lesion.getNeedles()
-            needles_defaultdict = NeedlesInfoClass.NeedleToDictWriter.needlesToDict(patientID,
+            needles_defaultdict = NeedlesInfoClasses.NeedleToDictWriter.needlesToDict(patientID,
                                                                                     patientName,
                                                                                     l_idx,
                                                                                     needles,
@@ -102,59 +112,35 @@ if patients :
 elif not patients:
     print('No CAS Recordings found. Check if the files are there and in the correct folder structure.')
 
-    #%% read MWA Needle Database Excel.
-    # df_mwa_database = pd.read_excel("CAS_IR_MWA_NeedleDatabase.xlsx")
-    # # TODO: add ellipse data
-    # ellipse_data = []
-    # for index, row in df_patients_trajectories.iterrows():
-    #     ablation_index = row["AblationShapeIndex"]
-    #     ablation_system = row["AblationSystem"]
-    #     if ablation_index:
-    #         rows_to_append = df_mwa_database[(df_mwa_database["AblationShapeIndex"] == int(ablation_index)) & (
-    #                     df_mwa_database["AblationSystem"] == ablation_system)]
-    #         dict_mwa = rows_to_append.iloc[:, 2:].to_dict('list')
-    #         ellipse_data.append(dict_mwa)
-    #     else:
-    #         dict_mwa = {'NeedleID': '',
-    #                     'NeedleName': '',
-    #                     'Power': '',
-    #                     'Radii': '',
-    #                     'Rotation': '',
-    #                     'Time_seconds': '',
-    #                     'Translation': '',
-    #                     'Type': ''
-    #                     }
-    #         ellipse_data.append(dict_mwa)
-    # # concatenate to df_patients_trajectories
-    # df_ellipse = pd.DataFrame(ellipse_data)
-    # df_final = pd.concat([df_patients_trajectories, df_ellipse], axis=1, join_axes=[df_ellipse.index])
-
-    #%%  write to excel final list.
-timestr = strftime("%Y%m%d-%H%M%S")
-filename = 'MAVERRIC_Stockholm_June_all_patients_' + timestr + '.xlsx'
-filepathExcel = os.path.join(rootdir, filename)
-writer = pd.ExcelWriter(filepathExcel)
-df_final = df_patients_trajectories
-# df_final.sort_values(by=['PatientID'], inplace=True)
-df_final.apply(pd.to_numeric, errors='ignore', downcast='float').info()
-df_final[['LateralError']] = df_final[['LateralError']].apply(pd.to_numeric, downcast='float')
-df_final[['AngularError']] = df_final[['AngularError']].apply(pd.to_numeric, downcast='float')
-df_final[['EuclideanError']] = df_final[['EuclideanError']].apply(pd.to_numeric, downcast='float')
-df_final[['LongitudinalError']] = df_final[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
-df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
-df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
-df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
-df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
-df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
-writer.save()
-print("success")
+#%%  write to excel final list.
+if df_patients_trajectories is None:
+    print('No Needle Trajectories found in the input file directory:')
+else:
+    timestr = strftime("%Y%m%d-%H%M%S")
+    filename = outfilename + '_' +timestr + '.xlsx'
+    filepathExcel = os.path.join(rootdir, filename)
+    writer = pd.ExcelWriter(filepathExcel)
+    df_final = df_patients_trajectories
+    # df_final.sort_values(by=['PatientID'], inplace=True)
+    df_final.apply(pd.to_numeric, errors='ignore', downcast='float').info()
+    df_final[['LateralError']] = df_final[['LateralError']].apply(pd.to_numeric, downcast='float')
+    df_final[['AngularError']] = df_final[['AngularError']].apply(pd.to_numeric, downcast='float')
+    df_final[['EuclideanError']] = df_final[['EuclideanError']].apply(pd.to_numeric, downcast='float')
+    df_final[['LongitudinalError']] = df_final[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
+    df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
+    df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
+    df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
+    df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
+    df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')
+    writer.save()
+    print("success")
 # %% dataframes for Angles
-# Angles = []
-# patient_unique = dfPatientsTrajectories['PatientID'].unique()
-# TODO: flag to cancel Angles if Dataset is MWA
-# for PatientIdx, patient in enumerate(patient_unique):
-#    patient_data = dfPatientsTrajectories[dfPatientsTrajectories['PatientID'] == patient]
-#    eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data, patient, Angles)
-# dfAngles = pd.DataFrame(Angles)
-# call the customize_dataframe to make columns numerical, write with 2 decimals
-# customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir)
+if flag_angles == 'y':
+    Angles = []
+    patient_unique = df_final['PatientID'].unique()
+    for PatientIdx, patient in enumerate(patient_unique):
+       patient_data = df_final[df_final['PatientID'] == patient]
+       eta.ComputeAnglesTrajectories.FromTrajectoriesToNeedles(patient_data, patient, Angles)
+    dfAngles = pd.DataFrame(Angles)
+    # call the customize_dataframe to make columns numerical, write with 2 decimals
+    customize_dataframe(dfAngles, df_final, rootdir)

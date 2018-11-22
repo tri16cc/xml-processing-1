@@ -121,3 +121,7 @@ db.sqlite3
 *.tif
 *.jpg
 *.png
+
+# Temporary files starting with temp_ or test_
+temp_*
+test_*

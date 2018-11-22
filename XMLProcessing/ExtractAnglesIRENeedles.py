@@ -24,7 +24,7 @@ from datetime import datetime
 # TO DO: import planned data,
 
 #%%
-rootdir = "C:/Users/Raluca Sandu/Documents/MATLAB/My CAS-One Data/"
+
 
 IRE_data = []
 # assign random number to LesionCount column, update it later after removing duplicates/errors

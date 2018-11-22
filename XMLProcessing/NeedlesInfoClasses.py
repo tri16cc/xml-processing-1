@@ -268,12 +268,13 @@ class Needle:
         # dict_needles = defaultdict(list)
         max_no_segmentations = max(len(segmentations_ablation), len(segmentations_tumor))
         if max_no_segmentations > 0:
-
+            # segmentations have been made for this patient and needle trajectory
             for idx_s in range(0, max_no_segmentations):
                 dict_needles['PatientID'].append(patientID)
                 dict_needles['PatientName'].append(patient_name)
                 dict_needles['LesionNr'].append(lesionIdx)
                 dict_needles['NeedleNr'].append(needle_idx)
+                dict_needles['NeedleType'].append(self.needle_type)
                 dict_needles['CAS_Version'].append(self.cas_version)
                 dict_needles['TimeIntervention'].append(self.time_intervention)
                 dict_needles['PlannedEntryPoint'].append(self.planned.entrypoint)
@@ -292,17 +293,16 @@ class Needle:
                 dict_needles['PP_planing'].append(img_registration[0].pp_planning)
                 dict_needles['PP_validation'].append(img_registration[0].pp_validation)
                 dict_needles['RegistrationType'].append(img_registration[0].r_type)
-
                 try:
                     # try catch block if there is no tumor segmentation at the respective index
-                    dict_needles['NeedleType'].append(segmentations_tumor[idx_s].needle_type)
+                    # dict_needles['NeedleType'].append(segmentations_tumor[idx_s].needle_type)
                     dict_needles['TumorPath'].append(segmentations_tumor[idx_s].mask_path)
                     dict_needles['PlanTumorPath'].append(segmentations_tumor[idx_s].source_path)
                     dict_needles['Tumor_CT_Series'].append(segmentations_tumor[idx_s].ct_series)
                     dict_needles['Tumor_Series_UID'].append(segmentations_tumor[idx_s].series_UID)
                     dict_needles["Tumor_Segmentation_Datetime"].append(segmentations_tumor[idx_s].segmentation_datetime)
                 except Exception:
-                    dict_needles['NeedleType'].append(self.needle_type)
+                    # dict_needles['NeedleType'].append(None)
                     dict_needles['TumorPath'].append(None)
                     dict_needles['PlanTumorPath'].append(None)
                     dict_needles['Tumor_CT_Series'].append(None)
@@ -345,6 +345,7 @@ class Needle:
             dict_needles['PatientName'].append(patient_name)
             dict_needles['LesionNr'].append(lesionIdx)
             dict_needles['NeedleNr'].append(needle_idx)
+            dict_needles['NeedleType'].append(self.needle_type)
             dict_needles['CAS_Version'].append(self.cas_version)
             dict_needles['TimeIntervention'].append(self.time_intervention)
             dict_needles['PlannedEntryPoint'].append(self.planned.entrypoint)
@@ -358,7 +359,6 @@ class Needle:
             dict_needles['LateralError'].append(self.tpeerorrs.lateral)
             dict_needles['LongitudinalError'].append(self.tpeerorrs.longitudinal)
             dict_needles['EuclideanError'].append(self.tpeerorrs.euclidean)
-            dict_needles['NeedleType'].append(self.needle_type)
             dict_needles['TumorPath'].append(None)
             dict_needles['PlanTumorPath'].append(None)
             dict_needles['Tumor_CT_Series'].append(None)
@@ -374,11 +374,11 @@ class Needle:
             dict_needles['AblationShapeIndex'].append(None)
             dict_needles['AblatorType'].append(None)
             dict_needles['Ablation_Segmentation_Datetime'].append(None)
-            # dict_needles['RegistrationFlag'].append(img_registration[0].r_flag)
-            # dict_needles['RegistrationMatrix'].append(img_registration[0].r_matrix)
-            # dict_needles['PP_planing'].append(img_registration[0].pp_planning)
-            # dict_needles['PP_validation'].append(img_registration[0].pp_validation)
-            # dict_needles['RegistrationType'].append(img_registration[0].r_type)
+            dict_needles['RegistrationFlag'].append(img_registration[0].r_flag)
+            dict_needles['RegistrationMatrix'].append(img_registration[0].r_matrix)
+            dict_needles['PP_planing'].append(img_registration[0].pp_planning)
+            dict_needles['PP_validation'].append(img_registration[0].pp_validation)
+            dict_needles['RegistrationType'].append(img_registration[0].r_type)
             return dict_needles
 
 
