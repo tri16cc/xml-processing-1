@@ -9,25 +9,25 @@ import pandas as pd
 from time import strftime
 from collections import defaultdict
 
-"""
-#Raluca's Libraries
+
+# Raluca's Libraries
 import readInputKeyboard
 import NeedlesInfoClasses
 import parseNeedleTrajectories as parseNeedleTrajectories
 
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
-"""
+
 #Trini's Libraries
-import XMLProcessing.NeedlesInfoClasses as NeedlesInfoClasses
-import XMLProcessing.parseNeedleTrajectories as parseNeedleTrajectories
-
-import XMLProcessing.extractTrajectoriesAngles as eta
-from XMLProcessing.customize_dataframe import customize_dataframe
-
-
+# import XMLProcessing.NeedlesInfoClasses as NeedlesInfoClasses
+# import XMLProcessing.parseNeedleTrajectories as parseNeedleTrajectories
+#
+# import XMLProcessing.extractTrajectoriesAngles as eta
+# from XMLProcessing.customize_dataframe import customize_dataframe
+#
+#
 # %%
-# rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
+# # rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
 rootdir = r"C:\Stockholm_IRE_Study\data"
 outfilename = "IRE_Analysis"
 flag_angles = 'n'
@@ -44,8 +44,10 @@ for subdir, dirs, files in os.walk(rootdir):
     for file in files:
         fileName, fileExtension = os.path.splitext(file)
 
+        # if fileExtension.lower().endswith('.xml') and (
+        #         'validation' in fileName.lower() or 'plan' in fileName.lower()):
         if fileExtension.lower().endswith('.xml') and (
-                'validation' in fileName.lower() or 'plan' in fileName.lower()):
+                'validation' in fileName.lower() ):
             xmlFilePathName = os.path.join(subdir, file)
             xmlfilename = os.path.normpath(xmlFilePathName)
 

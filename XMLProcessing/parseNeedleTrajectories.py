@@ -10,19 +10,19 @@ import collections
 import numpy as np
 import untangle as ut
 from collections import defaultdict
-"""
+
 #Raluca's Libraries
 import xml.etree.ElementTree as ET
 from extractTPEsXml import extractTPES
 from elementExistsXml import elementExists
 from splitAllPaths import splitall
-"""
+
 
 #Trini's Libraries
-import xml.etree.ElementTree as ET
-from XMLProcessing.extractTPEsXml import extractTPES
-from XMLProcessing.elementExistsXml import elementExists
-from XMLProcessing.splitAllPaths import splitall
+# import xml.etree.ElementTree as ET
+# from XMLProcessing.extractTPEsXml import extractTPES
+# from XMLProcessing.elementExistsXml import elementExists
+# from XMLProcessing.splitAllPaths import splitall
 
 
 
@@ -176,7 +176,9 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
     3. needle_type (string) MWA or IRE
     OUTPUT: doesn't return anything, just sets the TPEs
     """
+
     for singleTrajectory in children_trajectories:
+
         ep_planning = np.array([float(i) for i in singleTrajectory.EntryPoint.cdata.split()])
         tp_planning = np.array([float(i) for i in singleTrajectory.TargetPoint.cdata.split()])
         # find if the needle exists already in the patient repository
@@ -236,18 +238,21 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
     OUTPUT: list of Needle Trajectories passed to Needle Trajectories function
     """
     for xmlTrajectory in trajectories:
+        # Trajectories contains all the upper-level Parent trajectories
         # check whether it's IRE trajectory
         ep_planning = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
         tp_planning = np.array([float(i) for i in xmlTrajectory.TargetPoint.cdata.split()])
 
         if (xmlTrajectory['type']) and 'IRE' in xmlTrajectory['type']:
+            # singleTrajectories = trajectory.Children
+            #
+            # for singleTrajectory in singleTrajectories.Trajectory:
             needle_type = 'IRE'
             # function to check if the lesion exists based on location returning true or false
             lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=1000)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning)  # input parameter target point of reference trajectory
-
-            children_trajectories = xmlTrajectory
+            children_trajectories = xmlTrajectory.Children.Trajectory
             IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention,
                             cas_version)
 
