@@ -237,7 +237,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             needle.setValidationTrajectory()  # empty because the reference needle has no validation trajectory
             needle.setTPEs()  # init empty TPEs because there are no TPEs for the reference needle
             children_trajectories = xmlTrajectory.Children.Trajectory
-            IV_parseNeedles(children_trajectories, lesion, needle_type)
+            IV_parseNeedles(children_trajectories, lesion, needle_type,ct_series, xml_filepath, time_intervention, cas_version)
 
         elif not (xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
             # the case when CAS XML Log is older version 2.5

@@ -16,8 +16,7 @@ import parseNeedleTrajectories as parseNeedleTrajectories
 import extractTrajectoriesAngles as eta
 from customize_dataframe import customize_dataframe
 # %%
-
-rootdir = readInputKeyboard.getNonEmptyString("Root Directory")
+rootdir = readInputKeyboard.getNonEmptyString("Root Directory given as r")
 outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
 flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
 
