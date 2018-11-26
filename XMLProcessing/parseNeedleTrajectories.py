@@ -42,7 +42,10 @@ def extract_patient_id(filename, patient_id_xml, patient_name_flag=True):
     """
     all_paths = splitall(filename)
     ix_patient_folder_name = [i for i, s in enumerate(all_paths) if "Pat_" in s]
-    patient_folder_name = all_paths[ix_patient_folder_name[0]]
+    try:
+        patient_folder_name = all_paths[ix_patient_folder_name[0]]
+    except Exception as e:
+        print(repr(e))
     patient_id = re.search("\d", patient_folder_name)  # numerical id
     ix_patient_id = int(patient_id.start())
     underscore = re.search("_", patient_folder_name[ix_patient_id:])
@@ -238,21 +241,22 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
     OUTPUT: list of Needle Trajectories passed to Needle Trajectories function
     """
     for xmlTrajectory in trajectories:
+        lesion_count = 0
+        # xmltrajectory count contains the number of lesions
         # Trajectories contains all the upper-level Parent trajectories
         # check whether it's IRE trajectory
         ep_planning = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
         tp_planning = np.array([float(i) for i in xmlTrajectory.TargetPoint.cdata.split()])
 
         if (xmlTrajectory['type']) and 'IRE' in xmlTrajectory['type']:
-            # singleTrajectories = trajectory.Children
-            #
-            # for singleTrajectory in singleTrajectories.Trajectory:
             needle_type = 'IRE'
             # function to check if the lesion exists based on location returning true or false
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=1000)
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
             if lesion is None:
-                lesion = patient.addNewLesion(tp_planning)  # input parameter target point of reference trajectory
+                # TODO:  add lesion count, add lesion intervention date, add needle type
+                lesion = patient.addNewLesion(tp_planning, time_intervention)  # input parameter target point of reference trajectory
             children_trajectories = xmlTrajectory.Children.Trajectory
+            # needle level
             IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention,
                             cas_version)
 
@@ -265,19 +269,21 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             needle_type = 'IRE'
             lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=1000)
             if lesion is None:
-                lesion = patient.addNewLesion(tp_planning)
+                lesion = patient.addNewLesion(tp_planning, time_intervention)
             children_trajectories = xmlTrajectory
             IV_parseNeedles(children_trajectories, lesion, needle_type,
                             ct_series, xml_filepath, time_intervention, cas_version)
+
         else:
             # assuming 'EG_ATOMIC_TRAJECTORY' stands for MWA type of needle
             needle_type = "MWA"
             # drop the lesion identification for MWA. multiple needles might be 
             # no clear consensus for minimal distance between lesions and no info in the log version <=2.9
             # DISTANCE_BETWEEN_LESIONS=1000 very large number
+            # TODO: add lesion id based on intervention date
             lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=1000)
             if lesion is None:
-                lesion = patient.addNewLesion(tp_planning)
+                lesion = patient.addNewLesion(tp_planning, time_intervention)
             children_trajectories = xmlTrajectory
             IV_parseNeedles(children_trajectories, lesion, needle_type,
                             ct_series, xml_filepath, time_intervention, cas_version)

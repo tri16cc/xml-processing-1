@@ -46,8 +46,8 @@ class Patient:
     def addLesion(self, lesion):
         self.lesions.append(lesion)
 
-    def addNewLesion(self, location):
-        lesion = Lesion(location)
+    def addNewLesion(self, location, time_intervention):
+        lesion = Lesion(location, time_intervention)
         self.addLesion(lesion)
         return lesion
 
@@ -84,8 +84,9 @@ class Registration:
 
 class Lesion:
     # location is a numpy array
-    def __init__(self, location):
+    def __init__(self, location, intervention_date):
         self.needles = []
+        self.intervention_date = intervention_date
         if location is not None and len(location) is 3:
             self.location = location
         else:
@@ -374,11 +375,22 @@ class Needle:
             dict_needles['AblationShapeIndex'].append(None)
             dict_needles['AblatorType'].append(None)
             dict_needles['Ablation_Segmentation_Datetime'].append(None)
-            dict_needles['RegistrationFlag'].append(img_registration[0].r_flag)
-            dict_needles['RegistrationMatrix'].append(img_registration[0].r_matrix)
-            dict_needles['PP_planing'].append(img_registration[0].pp_planning)
-            dict_needles['PP_validation'].append(img_registration[0].pp_validation)
-            dict_needles['RegistrationType'].append(img_registration[0].r_type)
+            try:
+                dict_needles['RegistrationFlag'].append(img_registration[0].r_flag)
+                dict_needles['RegistratqionMatrix'].append(img_registration[0].r_matrix)
+                dict_needles['PP_planing'].append(img_registration[0].pp_planning)
+                dict_needles['PP_validation'].append(img_registration[0].pp_validation)
+                dict_needles['RegistrationType'].append(img_registration[0].r_type)
+            except Exception as e:
+                print(repr(e))
+                print('patient id: ', patientID)
+                dict_needles['RegistrationFlag'].append(None)
+                dict_needles['RegistratqionMatrix'].append(None)
+                dict_needles['PP_planing'].append(None)
+                dict_needles['PP_validation'].append(None)
+                dict_needles['RegistrationType'].append(None)
+
+
             return dict_needles
 
 
@@ -395,8 +407,13 @@ class NeedleToDictWriter:
         if len(needles)>0:
             # for each patient the dict_needles defaultdict is reset
             dict_needles = defaultdict(list)
+            lesion_count = lesionIdx
             for needle_idx, needle in enumerate(needles):
-                needle.to_dict(patientID, patient_name, lesionIdx, needle_idx, dict_needles, img_registration)
+                # todo: update the lesion_index here
+                # if needle_idx > 0 :
+                #     if needle.time_intervention != needles[needle_idx-1].time_intervention:
+                #         lesion_count = 0
+                needle.to_dict(patientID, patient_name, lesion_count, needle_idx, dict_needles, img_registration)
             return dict_needles
         else:
             print('No needles for this lesion')

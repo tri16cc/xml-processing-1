@@ -27,8 +27,8 @@ from customize_dataframe import customize_dataframe
 #
 #
 # %%
-# # rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
-rootdir = r"C:\Stockholm_IRE_Study\data"
+rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
+# rootdir = r"C:\Stockholm_IRE_Study\data_test"
 outfilename = "IRE_Analysis"
 flag_angles = 'n'
 # rootdir = readInputKeyboard.getNonEmptyString("Root Directory given as r")
@@ -44,13 +44,12 @@ for subdir, dirs, files in os.walk(rootdir):
     for file in files:
         fileName, fileExtension = os.path.splitext(file)
 
-        # if fileExtension.lower().endswith('.xml') and (
-        #         'validation' in fileName.lower() or 'plan' in fileName.lower()):
         if fileExtension.lower().endswith('.xml') and (
-                'validation' in fileName.lower() ):
+                'validation' in fileName.lower() or 'plan' in fileName.lower()):
+        # if fileExtension.lower().endswith('.xml') and (
+        #         'validation' in fileName.lower() ):
             xmlFilePathName = os.path.join(subdir, file)
             xmlfilename = os.path.normpath(xmlFilePathName)
-
             xmlobj = parseNeedleTrajectories.I_parseRecordingXML(xmlfilename)
 
             if xmlobj is 1:
@@ -105,13 +104,16 @@ if patients :
         # check-up if more than one distinct img_registration available
         if len(img_registration) > 1:
             print('more than one registration available for patient', patientName)
+            # TODO: extract lesions from classes. add new field.
+
         for l_idx, lesion in enumerate(lesions):
+
             needles = lesion.getNeedles()
             needles_defaultdict = NeedlesInfoClasses.NeedleToDictWriter.needlesToDict(patientID,
-                                                                                    patientName,
-                                                                                    l_idx,
-                                                                                    needles,
-                                                                                    img_registration)
+                                                                                      patientName,
+                                                                                      l_idx,
+                                                                                      needles,
+                                                                                      img_registration)
             needles_list.append(needles_defaultdict)
     # unpack from defaultdict and list
     needles_unpacked_list = defaultdict(list)
