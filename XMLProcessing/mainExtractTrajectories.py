@@ -27,8 +27,8 @@ from customize_dataframe import customize_dataframe
 #
 #
 # %%
-rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
-# rootdir = r"C:\Stockholm_IRE_Study\data_test"
+# rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
+rootdir = r"C:\Stockholm_IRE_Study\data_test"
 outfilename = "IRE_Analysis"
 flag_angles = 'n'
 # rootdir = readInputKeyboard.getNonEmptyString("Root Directory given as r")
@@ -44,10 +44,10 @@ for subdir, dirs, files in os.walk(rootdir):
     for file in files:
         fileName, fileExtension = os.path.splitext(file)
 
-        if fileExtension.lower().endswith('.xml') and (
-                'validation' in fileName.lower() or 'plan' in fileName.lower()):
         # if fileExtension.lower().endswith('.xml') and (
-        #         'validation' in fileName.lower() ):
+        #         'validation' in fileName.lower() or 'plan' in fileName.lower()):
+        if fileExtension.lower().endswith('.xml') and (
+                'validation' in fileName.lower() ):
             xmlFilePathName = os.path.join(subdir, file)
             xmlfilename = os.path.normpath(xmlFilePathName)
             xmlobj = parseNeedleTrajectories.I_parseRecordingXML(xmlfilename)

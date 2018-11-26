@@ -241,7 +241,6 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
     OUTPUT: list of Needle Trajectories passed to Needle Trajectories function
     """
     for xmlTrajectory in trajectories:
-        lesion_count = 0
         # xmltrajectory count contains the number of lesions
         # Trajectories contains all the upper-level Parent trajectories
         # check whether it's IRE trajectory
@@ -255,6 +254,18 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             if lesion is None:
                 # TODO:  add lesion count, add lesion intervention date, add needle type
                 lesion = patient.addNewLesion(tp_planning, time_intervention)  # input parameter target point of reference trajectory
+            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
+            if needle is None:
+                needle = lesion.newNeedle(True, needle_type, ct_series)
+            # the reference needle has only planning data
+            tps = needle.setTPEs()
+            validation = needle.setValidationTrajectory()
+            planned = needle.setPlannedTrajectory()
+            planned.setTrajectory(ep_planning, tp_planning)
+            planned.setLengthNeedle()
+            needle.setTimeIntervention(time_intervention)
+            needle.setCASversion(cas_version)
+
             children_trajectories = xmlTrajectory.Children.Trajectory
             # needle level
             IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention,
