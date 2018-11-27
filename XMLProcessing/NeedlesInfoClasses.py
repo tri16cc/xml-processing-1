@@ -277,6 +277,7 @@ class Needle:
                 dict_needles['NeedleNr'].append(needle_idx)
                 dict_needles['NeedleType'].append(self.needle_type)
                 dict_needles['CAS_Version'].append(self.cas_version)
+                dict_needles['CT_series_Plan'].append(self.ct_series)
                 dict_needles['TimeIntervention'].append(self.time_intervention)
                 dict_needles['PlannedEntryPoint'].append(self.planned.entrypoint)
                 dict_needles['PlannedTargetPoint'].append(self.planned.targetpoint)
@@ -348,6 +349,7 @@ class Needle:
             dict_needles['NeedleNr'].append(needle_idx)
             dict_needles['NeedleType'].append(self.needle_type)
             dict_needles['CAS_Version'].append(self.cas_version)
+            dict_needles['CT_series_Plan'].append(self.ct_series)
             dict_needles['TimeIntervention'].append(self.time_intervention)
             dict_needles['PlannedEntryPoint'].append(self.planned.entrypoint)
             dict_needles['PlannedTargetPoint'].append(self.planned.targetpoint)
@@ -403,16 +405,11 @@ class NeedleToDictWriter:
         needles: needles class object
     """
 
-    def needlesToDict(patientID, patient_name, lesionIdx, needles, img_registration):
+    def needlesToDict(patientID, patient_name, lesion_count, needles, img_registration):
         if len(needles)>0:
             # for each patient the dict_needles defaultdict is reset
             dict_needles = defaultdict(list)
-            lesion_count = lesionIdx
             for needle_idx, needle in enumerate(needles):
-                # todo: update the lesion_index here
-                # if needle_idx > 0 :
-                #     if needle.time_intervention != needles[needle_idx-1].time_intervention:
-                #         lesion_count = 0
                 needle.to_dict(patientID, patient_name, lesion_count, needle_idx, dict_needles, img_registration)
             return dict_needles
         else:

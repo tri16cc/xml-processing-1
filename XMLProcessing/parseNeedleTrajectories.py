@@ -252,8 +252,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             # function to check if the lesion exists based on location returning true or false
             lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
             if lesion is None:
-                # TODO:  add lesion count, add lesion intervention date, add needle type
-                lesion = patient.addNewLesion(tp_planning, time_intervention)  # input parameter target point of reference trajectory
+                lesion = patient.addNewLesion(tp_planning, time_intervention)
             needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
             if needle is None:
                 needle = lesion.newNeedle(True, needle_type, ct_series)
@@ -278,7 +277,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             # remove the lesion identification based on the distance between needles, too much variation for accurate identification
             #  put an absurd value for DISTANCE_BETWEEN_LESIONS
             needle_type = 'IRE'
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=1000)
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=100)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning, time_intervention)
             children_trajectories = xmlTrajectory
@@ -290,9 +289,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             needle_type = "MWA"
             # drop the lesion identification for MWA. multiple needles might be 
             # no clear consensus for minimal distance between lesions and no info in the log version <=2.9
-            # DISTANCE_BETWEEN_LESIONS=1000 very large number
-            # TODO: add lesion id based on intervention date
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=1000)
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning, time_intervention)
             children_trajectories = xmlTrajectory
