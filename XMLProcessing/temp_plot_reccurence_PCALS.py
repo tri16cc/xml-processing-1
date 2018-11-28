@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime, date
 from datetime import timedelta
 
-filepath = r"C:\Users\Raluca Sandu\Dropbox\Pascale\Mappe1_local_recurrence_PCALS_Pascale.xlsx"
+filepath = r""
 data_pcals = pd.read_excel(filepath)
 
 data_pcals['time_seconds'] = data_pcals['Time_Duration'].apply(lambda x: datetime.combine(date.min,  x) - datetime.min)
