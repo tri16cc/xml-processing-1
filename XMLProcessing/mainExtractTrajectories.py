@@ -31,10 +31,14 @@ from customize_dataframe import customize_dataframe
 rootdir = r"C:\Stockholm_IRE_Study\data_test"
 outfilename = "IRE_Analysis"
 flag_angles = 'n'
-# rootdir = readInputKeyboard.getNonEmptyString("Root Directory given as r")
+flag_segmentation_info = 'n'
+# rootdir = os.path.normpath(readInputKeyboard.getNonEmptyString("Root Directory given as r"))
 # outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
 # flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
+# flag_segmentation_info = readInputKeyboard.getChoice('Do you want to have the segmentation information ?', ['Y', 'N'])
 
+
+# instanstiate the patient repository class
 patientsRepo = NeedlesInfoClasses.PatientRepo()
 pat_ids = []
 pat_id = 0
@@ -132,15 +136,18 @@ else:
     filename = outfilename + '_' +timestr + '.xlsx'
     filepathExcel = os.path.join(rootdir, filename)
     writer = pd.ExcelWriter(filepathExcel)
-    df_final = df_patients_trajectories
-    # df_final.sort_values(by=['PatientID'], inplace=True)
+    if flag_segmentation_info == 'y':
+        df_final = df_patients_trajectories
+        df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
+        df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
+    else:
+        df_final = df_patients_trajectories.iloc[:,0:19].copy() # use copy to avoid the case where changing df1 also changes df
+    # df_final.sort_values(by=['PatientName'], inplace=True)
     df_final.apply(pd.to_numeric, errors='ignore', downcast='float').info()
     df_final[['LateralError']] = df_final[['LateralError']].apply(pd.to_numeric, downcast='float')
     df_final[['AngularError']] = df_final[['AngularError']].apply(pd.to_numeric, downcast='float')
     df_final[['EuclideanError']] = df_final[['EuclideanError']].apply(pd.to_numeric, downcast='float')
     df_final[['LongitudinalError']] = df_final[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
-    df_final[["Ablation_Series_UID"]] = df_final[["Ablation_Series_UID"]].astype(str)
-    df_final[["Tumor_Series_UID"]] = df_final[["Tumor_Series_UID"]].astype(str)
     df_final[["PatientID"]] = df_final[["PatientID"]].astype(str)
     df_final[["TimeIntervention"]] = df_final[["TimeIntervention"]].astype(str)
     df_final.to_excel(writer, sheet_name='Paths', index=False, na_rep='NaN')

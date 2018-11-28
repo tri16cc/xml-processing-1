@@ -277,7 +277,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             # remove the lesion identification based on the distance between needles, too much variation for accurate identification
             #  put an absurd value for DISTANCE_BETWEEN_LESIONS
             needle_type = 'IRE'
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=100)
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning, time_intervention)
             children_trajectories = xmlTrajectory

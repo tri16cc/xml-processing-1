@@ -22,19 +22,22 @@ class ComputeAnglesTrajectories():
             PlannedTargetPoint = lesion_data['PlannedTargetPoint'].tolist()
             ValidationEntryPoint = lesion_data['ValidationEntryPoint'].tolist()
             ValidationTargetPoint = lesion_data['ValidationTargetPoint'].tolist()
+            NeedleType = lesion_data['NeedleType'].tolist()
             ReferenceNeedle = lesion_data['ReferenceNeedle'].tolist()
 
+            # take needles in combination of 2
             for combination_angles in combinations(needles_lesion, 2):
-
+                # TODO: condition for MWA
+                # the first combination is always (0,1) - the angle between the reference needle and the 1st needle
                 angle_planned = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[0]],
                                                            PlannedTargetPoint[combination_angles[0]],
                                                            PlannedEntryPoint[combination_angles[1]],
                                                            PlannedTargetPoint[combination_angles[1]])
-
                 try:
                     euclidean_distance_planned = np.linalg.norm(
                         PlannedTargetPoint[combination_angles[0]] - PlannedTargetPoint[combination_angles[1]])
-                except:
+                except Exception as e:
+                    print(repr(e))
                     euclidean_distance_validation = np.nan
 
                 if combination_angles[0] != 0 and combination_angles[1] != 0:
@@ -47,23 +50,53 @@ class ComputeAnglesTrajectories():
                     try:
                         euclidean_distance_validation = np.linalg.norm(
                             ValidationTargetPoint[combination_angles[0]] - ValidationTargetPoint[combination_angles[1]])
-                    except:
+                    except Exception as e:
+                        print(repr(e))
                         euclidean_distance_validation = np.nan
 
-                if ReferenceNeedle[combination_angles[0]] == True:
+                if ReferenceNeedle[combination_angles[0]] is False:
+                    if ReferenceNeedle[
+                        combination_angles[1]] is False:
 
-                    needleA = 'Reference'
-                    needleB = combination_angles[1]
-                    angle_validation = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[0]],
-                                                                  PlannedTargetPoint[combination_angles[0]],
-                                                                  ValidationEntryPoint[combination_angles[1]],
-                                                                  ValidationTargetPoint[combination_angles[1]])
-                    try:
-                        euclidean_distance_validation = np.linalg.norm(
-                            PlannedTargetPoint[combination_angles[0]] - ValidationTargetPoint[combination_angles[1]])
-                    except:
-                        euclidean_distance_validation = np.nan
+                        needleA = 'Reference'
+                        needleB = combination_angles[1]
+                        angle_validation = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[0]],
+                                                                      PlannedTargetPoint[combination_angles[0]],
+                                                                      ValidationEntryPoint[combination_angles[1]],
+                                                                      ValidationTargetPoint[combination_angles[1]])
+                        try:
+                            euclidean_distance_validation = np.linalg.norm(
+                                PlannedTargetPoint[combination_angles[0]] - ValidationTargetPoint[combination_angles[1]])
+                        except:
+                            euclidean_distance_validation = np.nan
 
+                    elif ReferenceNeedle[combination_angles[0]] is False and ReferenceNeedle[
+                        combination_angles[1]] is False:
+                        needleA = combination_angles[0]
+                        needleB = combination_angles[1]
+                        angle_validation = AngleNeedles.angle_between(ValidationEntryPoint[combination_angles[0]],
+                                                                      ValidationTargetPoint[combination_angles[0]],
+                                                                      ValidationEntryPoint[combination_angles[1]],
+                                                                      ValidationTargetPoint[combination_angles[1]])
+                        try:
+                            euclidean_distance_validation = np.linalg.norm(
+                                ValidationTargetPoint[combination_angles[0]] - ValidationTargetPoint[combination_angles[1]])
+                        except:
+                            euclidean_distance_validation = np.nan
+
+
+                    else:
+                        needleB = 'Reference'
+                        needleA = combination_angles[0]
+                        angle_validation = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[1]],
+                                                                      PlannedTargetPoint[combination_angles[1]],
+                                                                      ValidationEntryPoint[combination_angles[0]],
+                                                                      ValidationTargetPoint[combination_angles[0]])
+                        try:
+                            euclidean_distance_validation = np.linalg.norm(
+                                PlannedTargetPoint[combination_angles[1]] - ValidationTargetPoint[combination_angles[0]])
+                        except:
+                            euclidean_distance_validation = np.nan
                 elif ReferenceNeedle[combination_angles[0]] is False and ReferenceNeedle[
                     combination_angles[1]] is False:
                     needleA = combination_angles[0]
@@ -77,8 +110,6 @@ class ComputeAnglesTrajectories():
                             ValidationTargetPoint[combination_angles[0]] - ValidationTargetPoint[combination_angles[1]])
                     except:
                         euclidean_distance_validation = np.nan
-
-
                 else:
                     needleB = 'Reference'
                     needleA = combination_angles[0]
