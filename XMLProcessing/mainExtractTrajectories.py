@@ -15,7 +15,7 @@ import readInputKeyboard
 import NeedlesInfoClasses
 import parseNeedleTrajectories as parseNeedleTrajectories
 
-import extractTrajectoriesAngles as eta
+import extractIREAngles as eta
 from customize_dataframe import customize_dataframe
 
 #Trini's Libraries
@@ -27,15 +27,10 @@ from customize_dataframe import customize_dataframe
 #
 #
 # %%
-# rootdir = r"C:\Stockholm_IRE_Study\IRE_Stockholm_allCases"
-rootdir = r"C:\Stockholm_IRE_Study\data_test"
-outfilename = "IRE_Analysis"
-flag_angles = 'n'
-flag_segmentation_info = 'n'
-# rootdir = os.path.normpath(readInputKeyboard.getNonEmptyString("Root Directory given as r"))
-# outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
-# flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
-# flag_segmentation_info = readInputKeyboard.getChoice('Do you want to have the segmentation information ?', ['Y', 'N'])
+rootdir = os.path.normpath(readInputKeyboard.getNonEmptyString("Root Directory given as r"))
+outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
+flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
+flag_segmentation_info = readInputKeyboard.getChoice('Do you want to have the segmentation information ?', ['Y', 'N'])
 
 
 # instanstiate the patient repository class
@@ -163,3 +158,4 @@ if flag_angles == 'y':
     dfAngles = pd.DataFrame(Angles)
     # call the customize_dataframe to make columns numerical, write with 2 decimals
     customize_dataframe(dfAngles, df_final, rootdir)
+    print("Angles have been computed!")
