@@ -270,24 +270,10 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention,
                             cas_version)
 
-        elif not (xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
-            # the case when CAS XML Log is old version 2.5
-            # the distance between needles shouldn't be more than 22 mm according to a paper
-            # DISTANCE_BETWEEN_LESIONS [mm]
-            # remove the lesion identification based on the distance between needles, too much variation for accurate identification
-            #  put an absurd value for DISTANCE_BETWEEN_LESIONS
-            needle_type = 'IRE'
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
-            if lesion is None:
-                lesion = patient.addNewLesion(tp_planning, time_intervention)
-            children_trajectories = xmlTrajectory
-            IV_parseNeedles(children_trajectories, lesion, needle_type,
-                            ct_series, xml_filepath, time_intervention, cas_version)
-
-        else:
+        elif (xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']) :
             # assuming 'EG_ATOMIC_TRAJECTORY' stands for MWA type of needle
             needle_type = "MWA"
-            # drop the lesion identification for MWA. multiple needles might be 
+            # drop the lesion identification for MWA. multiple needles might be
             # no clear consensus for minimal distance between lesions and no info in the log version <=2.9
             lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
             if lesion is None:
@@ -295,6 +281,21 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             children_trajectories = xmlTrajectory
             IV_parseNeedles(children_trajectories, lesion, needle_type,
                             ct_series, xml_filepath, time_intervention, cas_version)
+
+        elif not (xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
+            # the case when CAS XML Log is old version 2.5
+            # the distance between needles shouldn't be more than 22 mm according to a paper
+            # DISTANCE_BETWEEN_LESIONS [mm]
+            # remove the lesion identification based on the distance between needles, too much variation for accurate identification
+            #  put an absurd value for DISTANCE_BETWEEN_LESIONS
+            needle_type = 'IRE'
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=10000)
+            if lesion is None:
+                lesion = patient.addNewLesion(tp_planning, time_intervention)
+            children_trajectories = xmlTrajectory
+            IV_parseNeedles(children_trajectories, lesion, needle_type,
+                            ct_series, xml_filepath, time_intervention, cas_version)
+
 
 
 def II_parseTrajectories(xmlobj):
