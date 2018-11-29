@@ -10,6 +10,7 @@ import time
 import pandas as pd
 import matplotlib.pyplot as plt
 
+pd.options.display.float_format = '{:.2f}'.format
 
 def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     
@@ -30,8 +31,10 @@ def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     dfAngles.apply(pd.to_numeric, errors='ignore', downcast='float').info()
     
     dfPatientsTrajectories.apply(pd.to_numeric, errors='ignore', downcast='float').info()
-    
+    # float("{0:.2f}".format
+
     dfPatientsTrajectories[['LateralError']] = dfPatientsTrajectories[['LateralError']].apply(pd.to_numeric, downcast='float')
+    dfPatientsTrajectories[['LateralError']].round(2)
     
     dfPatientsTrajectories[['AngularError']] = dfPatientsTrajectories[['AngularError']].apply(pd.to_numeric, downcast='float')
     
@@ -44,8 +47,6 @@ def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     dfTPEs = dfPatientsTrajectories[['PatientID','PatientName','LesionNr','NeedleNr','NeedleType',
                                      'TimeIntervention','ReferenceNeedle', 'PlannedNeedleLength','LongitudinalError',\
                                      'LateralError','EuclideanError','AngularError']]
-
-
 
     # select rows where the needle is not a reference, but part of child trajectories
     dfTPEsNoReference = dfTPEs[~(dfTPEs.ReferenceNeedle)]
