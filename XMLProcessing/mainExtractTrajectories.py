@@ -27,7 +27,7 @@ from customize_dataframe import customize_dataframe
 #
 #
 # %%
-rootdir = r"C:\Stockholm_IRE_Study\data_test"
+rootdir = r"\\zonula\Public\Raluca\Davids_IRE_Stockholm_study_validated"
 outfilename = 'IRE_Analysis'
 flag_angles = 'y'
 flag_segmentation_info = 'n'
