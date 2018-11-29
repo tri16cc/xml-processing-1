@@ -27,8 +27,11 @@ class ComputeAnglesTrajectories():
 
             for combination_angles in combinations(needles_lesion, 2):
 
-                if NeedleType[combination_angles[0]]=='MWA' or NeedleType[combination_angles[1]] == 'MWA':
-                    continue # go back to the begining of the loop, else option not needed
+                try:
+                    if NeedleType[combination_angles[0]]=='MWA' or NeedleType[combination_angles[1]] == 'MWA':
+                        continue # go back to the begining of the loop, else option not needed
+                except Exception as e:
+                    print(repr(e))
 
                 if ReferenceNeedle[combination_angles[0]] is False and ReferenceNeedle[combination_angles[1]] is False:
                     # no reference needle available, older version of XML CAS Logs
@@ -59,11 +62,14 @@ class ComputeAnglesTrajectories():
                     # ReferenceNeedle is never validated, only plan trajectories are available
                     needleA = 'Reference'
                     needleB =  needles_lesion[combination_angles[1]]
-                    if (PlannedTargetPoint[combination_angles[0]]).all() and PlannedTargetPoint[combination_angles[0]].all():
+
+                    if (PlannedTargetPoint[combination_angles[0]]) is not None\
+                            and (PlannedTargetPoint[combination_angles[0]]) is not None:
                         angle_planned = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[0]],
                                                                PlannedTargetPoint[combination_angles[0]],
                                                                PlannedEntryPoint[combination_angles[1]],
                                                                PlannedTargetPoint[combination_angles[1]])
+
                     else:
                         angle_planned = np.nan
 

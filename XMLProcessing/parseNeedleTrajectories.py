@@ -292,7 +292,9 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=10000)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning, time_intervention)
+
             children_trajectories = xmlTrajectory
+
             IV_parseNeedles(children_trajectories, lesion, needle_type,
                             ct_series, xml_filepath, time_intervention, cas_version)
 

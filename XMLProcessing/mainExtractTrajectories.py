@@ -27,11 +27,14 @@ from customize_dataframe import customize_dataframe
 #
 #
 # %%
-
-rootdir = os.path.normpath(readInputKeyboard.getNonEmptyString("Root Directory given as r"))
-outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
-flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
-flag_segmentation_info = readInputKeyboard.getChoice('Do you want to have the segmentation information ?', ['Y', 'N'])
+rootdir = r"C:\Stockholm_IRE_Study\data_test"
+outfilename = 'IRE_Analysis'
+flag_angles = 'y'
+flag_segmentation_info = 'n'
+# rootdir = os.path.normpath(readInputKeyboard.getNonEmptyString("Root Directory given as r"))
+# outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
+# flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
+# flag_segmentation_info = readInputKeyboard.getChoice('Do you want to have the segmentation information ?', ['Y', 'N'])
 
 
 # instanstiate the patient repository class
