@@ -63,11 +63,11 @@ def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     
     # question: what is the frequency of the needle configuration (3 paired, 4 paired) ?
     dfLesionsNeedlePairs = dfNeedlesIndex.groupby(['TotalNeedles_Count']).LesionNr.count()
-    dfLesionsIndex = dfLesionsNeedlePairs.add_suffix(' Count').reset_index()
+    dfLesionsIndex = dfLesionsNeedlePairs.add_suffix('-Paired').reset_index()
     
     # how many patients & how many lesions ?
     dfLesionsTotal = df_IRE_only.groupby(['PatientID']).LesionNr.max().to_frame('Total Lesions')
-    dfLesionsTotalIndex = dfLesionsTotal.add_suffix(' - Paired').reset_index()
+    dfLesionsTotalIndex = dfLesionsTotal.add_suffix(' Count').reset_index()
     #%%  write to Excel File
     timestr = time.strftime("%Y%m%d-%H%M%S")
     filename = 'IRE_Analysis_Statistics-' + timestr + '.xlsx'
