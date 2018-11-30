@@ -268,7 +268,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             except Exception as e:
                 print(repr(e))
                 print('Log 2.5 validated in 2018, fake MWA')
-                lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=10000)
+                lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
                 if lesion is None:
                     lesion = patient.addNewLesion(tp_planning, time_intervention)
                 children_trajectories = xmlTrajectory
