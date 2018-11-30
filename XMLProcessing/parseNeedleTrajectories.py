@@ -24,8 +24,6 @@ from splitAllPaths import splitall
 # from XMLProcessing.elementExistsXml import elementExists
 # from XMLProcessing.splitAllPaths import splitall
 
-
-
 # %%
 
 def extract_patient_id(filename, patient_id_xml, patient_name_flag=True):
@@ -187,7 +185,7 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
         # find if the needle exists already in the patient repository
         # for IRE needles the distance shouldn't be larger than 3 (in theory)
         if needle_type is "IRE":
-            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
+            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=1)
         elif needle_type is "MWA":
             needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
         # case for new needle not currently saved in database
@@ -249,23 +247,31 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
 
         if (xmlTrajectory['type']) and 'IRE' in xmlTrajectory['type']:
             needle_type = 'IRE'
-            # function to check if the lesion exists based on location returning true or false
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
-            if lesion is None:
-                lesion = patient.addNewLesion(tp_planning, time_intervention)
-            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
-            if needle is None:
-                needle = lesion.newNeedle(True, needle_type, ct_series)
-            # the reference needle has only planning data
-            tps = needle.setTPEs()
-            validation = needle.setValidationTrajectory()
-            planned = needle.setPlannedTrajectory()
-            planned.setTrajectory(ep_planning, tp_planning)
-            planned.setLengthNeedle()
-            needle.setTimeIntervention(time_intervention)
-            needle.setCASversion(cas_version)
 
-            children_trajectories = xmlTrajectory.Children.Trajectory
+            try:
+                children_trajectories = xmlTrajectory.Children.Trajectory
+                # function to check if the lesion exists based on location returning true or false
+                lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
+                if lesion is None:
+                    lesion = patient.addNewLesion(tp_planning, time_intervention)
+                needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
+                if needle is None:
+                    needle = lesion.newNeedle(True, needle_type, ct_series)
+                # the reference needle has only planning data
+                tps = needle.setTPEs()
+                validation = needle.setValidationTrajectory()
+                planned = needle.setPlannedTrajectory()
+                planned.setTrajectory(ep_planning, tp_planning)
+                planned.setLengthNeedle()
+                needle.setTimeIntervention(time_intervention)
+                needle.setCASversion(cas_version)
+            except Exception as e:
+                print(repr(e))
+                print('Log 2.5 validated in 2018, fake MWA')
+                lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=10000)
+                if lesion is None:
+                    lesion = patient.addNewLesion(tp_planning, time_intervention)
+                children_trajectories = xmlTrajectory
             # needle level
             IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention,
                             cas_version)
