@@ -27,10 +27,7 @@ from customize_dataframe import customize_dataframe
 #
 #
 # %%
-# rootdir = "r"
-# outfilename = 'IRE_Analysis'
-# flag_angles = 'y'
-# flag_segmentation_info = 'n'
+
 rootdir = os.path.normpath(readInputKeyboard.getNonEmptyString("Root Directory given as r"))
 outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
 flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
