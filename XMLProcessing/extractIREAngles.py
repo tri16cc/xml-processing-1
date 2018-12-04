@@ -44,6 +44,7 @@ class ComputeAnglesTrajectories():
                     needleA = needles_lesion[combination_angles[0]] + k
                     needleB = needles_lesion[combination_angles[1]] + k
 
+
                     if PlannedTargetPoint[combination_angles[0]].all() and PlannedTargetPoint[
                         combination_angles[0]].all():
                         angle_planned = AngleNeedles.angle_between(PlannedEntryPoint[combination_angles[0]],

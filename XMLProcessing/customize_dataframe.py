@@ -6,7 +6,8 @@ for IRE Angles
 @author: Raluca Sandu
 """
 import os
-import time 
+import time
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -31,22 +32,34 @@ def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     dfAngles.apply(pd.to_numeric, errors='ignore', downcast='float').info()
     
     dfPatientsTrajectories.apply(pd.to_numeric, errors='ignore', downcast='float').info()
-    # float("{0:.2f}".format
+    # df.value1 = df.value1.round()
 
     dfPatientsTrajectories[['LateralError']] = dfPatientsTrajectories[['LateralError']].apply(pd.to_numeric, downcast='float')
-    dfPatientsTrajectories[['LateralError']].round(2)
+    dfPatientsTrajectories.LateralError = dfPatientsTrajectories.LateralError.round(decimals=2)
+
+    dfPatientsTrajectories[['EntryLateral']] = dfPatientsTrajectories[['EntryLateral']].apply(pd.to_numeric, downcast='float')
+    dfPatientsTrajectories.EntryLateral = dfPatientsTrajectories.EntryLateral.round(decimals=2)
     
     dfPatientsTrajectories[['AngularError']] = dfPatientsTrajectories[['AngularError']].apply(pd.to_numeric, downcast='float')
+    dfPatientsTrajectories.AngularError = dfPatientsTrajectories.AngularError.round(decimals=2)
     
     dfPatientsTrajectories[['EuclideanError']] = dfPatientsTrajectories[['EuclideanError']].apply(pd.to_numeric, downcast='float')
+    dfPatientsTrajectories.EuclideanError = dfPatientsTrajectories.EuclideanError.round(decimals=2)
     
     dfPatientsTrajectories[['LongitudinalError']] = dfPatientsTrajectories[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
-    
+    dfPatientsTrajectories.LongitudinalError = dfPatientsTrajectories.LongitudinalError.round(decimals=2)
+
+    dfPatientsTrajectories[['PlannedNeedleLength']] = dfPatientsTrajectories[['PlannedNeedleLength']].apply(pd.to_numeric, downcast='float')
+    dfPatientsTrajectories.PlannedNeedleLength = dfPatientsTrajectories.round(decimals=2)
+
     dfPatientsTrajectories.sort_values(by=['PatientID','LesionNr','NeedleNr'],inplace=True)
 
     dfTPEs = dfPatientsTrajectories[['PatientID','PatientName','LesionNr','NeedleNr','NeedleType',
-                                     'TimeIntervention','ReferenceNeedle', 'PlannedNeedleLength','LongitudinalError',\
+                                     'TimeIntervention','ReferenceNeedle', 'PlannedNeedleLength','EntryLateral',
+                                     'LongitudinalError',
                                      'LateralError','EuclideanError','AngularError']]
+
+    dfTPEs.dropna(subset=['EuclideanError'], inplace=True) # Keep the DataFrame with valid entries in the same variable.
 
     # select rows where the needle is not a reference, but part of child trajectories
     dfTPEsNoReference = dfTPEs[~(dfTPEs.ReferenceNeedle)]

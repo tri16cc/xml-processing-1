@@ -185,9 +185,9 @@ def IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_f
         # find if the needle exists already in the patient repository
         # for IRE needles the distance shouldn't be larger than 3 (in theory)
         if needle_type is "IRE":
-            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=1)
+            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=1) # distance is in mm
         elif needle_type is "MWA":
-            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
+            needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=1) # distance is in mm
         # case for new needle not currently saved in database
         if needle is None:
             # add the needle to lesion class and init its parameters
@@ -251,10 +251,10 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             try:
                 children_trajectories = xmlTrajectory.Children.Trajectory
                 # function to check if the lesion exists based on location returning true or false
-                lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
+                lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=1)
                 if lesion is None:
                     lesion = patient.addNewLesion(tp_planning, time_intervention)
-                needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=3)
+                needle = lesion.findNeedle(needlelocation=tp_planning, DISTANCE_BETWEEN_NEEDLES=1)
                 if needle is None:
                     needle = lesion.newNeedle(True, needle_type, ct_series)
                 # the reference needle has only planning data
@@ -265,28 +265,35 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
                 planned.setLengthNeedle()
                 needle.setTimeIntervention(time_intervention)
                 needle.setCASversion(cas_version)
+                # individual needle level
+                IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention,
+                                cas_version)
+
             except Exception as e:
-                print(repr(e))
-                print('Log 2.5 validated in 2018, fake MWA')
-                lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
+                print('Error when parsing IRE validated in 2018:', repr(e))
+                children_trajectories = xmlTrajectory
+                lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=10000)
+                # look for another needle withing distance of 100cm. in this case a tp needle will always be found
+                # so no new lesion will be added. we assume only one lesion was treated for older cases
                 if lesion is None:
                     lesion = patient.addNewLesion(tp_planning, time_intervention)
-                children_trajectories = xmlTrajectory
-            # needle level
-            IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention,
-                            cas_version)
+                # individual needle level
+                IV_parseNeedles(children_trajectories, lesion, needle_type, ct_series, xml_filepath, time_intervention,
+                                cas_version)
+
 
         elif (xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']) :
             # assuming 'EG_ATOMIC_TRAJECTORY' stands for MWA type of needle
             needle_type = "MWA"
             # drop the lesion identification for MWA. multiple needles might be
             # no clear consensus for minimal distance between lesions and no info in the log version <=2.9
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=3)
+            lesion = patient.findLesion(lesionlocation=tp_planning,  DISTANCE_BETWEEN_LESIONS=1)
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning, time_intervention)
             children_trajectories = xmlTrajectory
             IV_parseNeedles(children_trajectories, lesion, needle_type,
                             ct_series, xml_filepath, time_intervention, cas_version)
+
 
         elif not (xmlTrajectory['type'] and 'EG_ATOMIC' in xmlTrajectory['type']):
             # the case when CAS XML Log is old version 2.5
@@ -295,7 +302,9 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
             # remove the lesion identification based on the distance between needles, too much variation for accurate identification
             #  put an absurd value for DISTANCE_BETWEEN_LESIONS
             needle_type = 'IRE'
-            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=10000)
+            lesion = patient.findLesion(lesionlocation=tp_planning, DISTANCE_BETWEEN_LESIONS=100000)
+            # look for another needle withing distance of 100cm. in this case a tp needle will always be found
+            # so no new lesion will be added. we assume only one lesion was treated for older cases
             if lesion is None:
                 lesion = patient.addNewLesion(tp_planning, time_intervention)
             children_trajectories = xmlTrajectory
