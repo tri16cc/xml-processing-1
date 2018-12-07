@@ -19,7 +19,7 @@ def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     fig, axes = plt.subplots(figsize=(18, 20))
     dfAngles.boxplot(column=['Planned Angle', 'Validation Angle'], patch_artist=False, fontsize=20)
     plt.ylabel('Angle [$^\circ$]', fontsize=20)
-
+    # plt.show()
     savepath_png = os.path.join(rootdir, 'IRE_Angles.png')
     savepath_svg = os.path.join(rootdir, 'IRE_Angles.svg')
     plt.savefig(savepath_png, pad_inches=0)
@@ -49,17 +49,18 @@ def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     dfPatientsTrajectories[['LongitudinalError']] = dfPatientsTrajectories[['LongitudinalError']].apply(pd.to_numeric, downcast='float')
     dfPatientsTrajectories.LongitudinalError = dfPatientsTrajectories.LongitudinalError.round(decimals=2)
 
-    dfPatientsTrajectories[['PlannedNeedleLength']] = dfPatientsTrajectories[['PlannedNeedleLength']].apply(pd.to_numeric, downcast='float')
-    dfPatientsTrajectories.PlannedNeedleLength = dfPatientsTrajectories.round(decimals=2)
+    # dfPatientsTrajectories[['PlannedNeedleLength']] = dfPatientsTrajectories[['PlannedNeedleLength']].apply(pd.to_numeric, downcast='float')
+    # dfPatientsTrajectories.PlannedNeedleLength = dfPatientsTrajectories.round(decimals=2)
 
     dfPatientsTrajectories.sort_values(by=['PatientID','LesionNr','NeedleNr'],inplace=True)
 
-    dfTPEs = dfPatientsTrajectories[['PatientID','PatientName','LesionNr','NeedleNr','NeedleType',
-                                     'TimeIntervention','ReferenceNeedle', 'PlannedNeedleLength','EntryLateral',
-                                     'LongitudinalError',
-                                     'LateralError','EuclideanError','AngularError']]
+    dfTPEs = dfPatientsTrajectories[['PatientID','PatientName', 'LesionNr','NeedleNr', 'NeedleType',
+                                     'TimeIntervention', 'ReferenceNeedle','EntryLateral',
+                                     'LongitudinalError', 'LateralError','EuclideanError','AngularError']]
 
     dfTPEs.dropna(subset=['EuclideanError'], inplace=True) # Keep the DataFrame with valid entries in the same variable.
+
+    dfTPEs = dfTPEs[dfTPEs.NeedleType == 'IRE']
 
     # select rows where the needle is not a reference, but part of child trajectories
     dfTPEsNoReference = dfTPEs[~(dfTPEs.ReferenceNeedle)]

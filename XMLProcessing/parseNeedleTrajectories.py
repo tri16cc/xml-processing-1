@@ -245,6 +245,7 @@ def III_parseTrajectory(trajectories, patient, ct_series, xml_filepath, time_int
         ep_planning = np.array([float(i) for i in xmlTrajectory.EntryPoint.cdata.split()])
         tp_planning = np.array([float(i) for i in xmlTrajectory.TargetPoint.cdata.split()])
 
+
         if (xmlTrajectory['type']) and 'IRE' in xmlTrajectory['type']:
             needle_type = 'IRE'
 

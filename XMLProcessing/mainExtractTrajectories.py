@@ -27,11 +27,14 @@ from customize_dataframe import customize_dataframe
 #
 #
 # %%
-
-rootdir = os.path.normpath(readInputKeyboard.getNonEmptyString("Root Directory given as r"))
-outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
-flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
-flag_segmentation_info = readInputKeyboard.getChoice('Do you want to have the segmentation information ?', ['Y', 'N'])
+rootdir = r""
+outfilename = 'ire_analysis'
+flag_angles = 'y'
+flag_segmentation_info = 'n'
+# rootdir = os.path.normpath(readInputKeyboard.getNonEmptyString("Root Directory given as r"))
+# outfilename = readInputKeyboard.getNonEmptyString("Name of the ouput xlsx file ")
+# flag_angles = readInputKeyboard.getChoice('Do you want to compute the angles between the needles?', ['Y', 'N'])
+# flag_segmentation_info = readInputKeyboard.getChoice('Do you want to have the segmentation information ?', ['Y', 'N'])
 
 
 # instanstiate the patient repository class
@@ -41,13 +44,13 @@ pat_id = 0
 
 for subdir, dirs, files in os.walk(rootdir):
 
-    for file in files:
+    for file in sorted(files):
         fileName, fileExtension = os.path.splitext(file)
 
-        if fileExtension.lower().endswith('.xml') and (
-                'validation' in fileName.lower() or 'plan' in fileName.lower()):
         # if fileExtension.lower().endswith('.xml') and (
-        #         'validation' in fileName.lower() ):
+        #         'validation' in fileName.lower() or 'plan' in fileName.lower()):
+        if fileExtension.lower().endswith('.xml') and (
+                'validation' in fileName.lower() ):
             xmlFilePathName = os.path.join(subdir, file)
             xmlfilename = os.path.normpath(xmlFilePathName)
             xmlobj = parseNeedleTrajectories.I_parseRecordingXML(xmlfilename)
@@ -91,7 +94,7 @@ for subdir, dirs, files in os.walk(rootdir):
                         # TODO: add flag in excel if registration existing (write registration to excel)
                         parseNeedleTrajectories.II_extractRegistration(xmlobj.trajectories, patient[0], xmlfilename)
 
-# %% extract information from the object classes into pandas dataframe
+# %% extract information from the object classes into pandas datafr ame
 patients = patientsRepo.getPatients()
 df_patients_trajectories = None
 needles_list = []
