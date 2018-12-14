@@ -11,12 +11,35 @@ from itertools import combinations
 
 class ComputeAnglesTrajectories():
 
-    def FromTrajectoriesToNeedles(patient_data, patientID, Angles):
+    def FromTrajectoriesToNeedles(df_patient_data, patientID, Angles):
 
-        lesion_unique = patient_data['LesionNr'].unique()
+        # keep just the IRE Needles
+        df_IREs = df_patient_data[df_patient_data.NeedleType == 'IRE']
+        # recompute the 'LesionNr' just for Validated IRE Angles
+        list_lesion_count = []
+        needles = df_IREs['NeedleNr'].tolist()
+
+        k_lesion = 1
+        for needle_idx, needle in enumerate(needles):
+            if needle_idx == 0:
+                list_lesion_count.append(k_lesion)
+            else:
+                if needles[needle_idx] <= needles[needle_idx - 1]:
+                    k_lesion += 1
+                    list_lesion_count.append(k_lesion)
+                else:
+                    list_lesion_count.append(k_lesion)
+
+        # get unique values from the lesion index count
+        lesion_unique = list(set(list_lesion_count))
+        try:
+            df_IREs['LesionNr'] = list_lesion_count
+        except Exception as e:
+            print(repr(e))
 
         for i, lesion in enumerate(lesion_unique):
-            lesion_data = patient_data[patient_data['LesionNr'] == lesion]
+
+            lesion_data = df_IREs[df_IREs['LesionNr'] == lesion]
             needles_lesion = lesion_data['NeedleNr'].tolist()
             PlannedEntryPoint = lesion_data['PlannedEntryPoint'].tolist()
             PlannedTargetPoint = lesion_data['PlannedTargetPoint'].tolist()

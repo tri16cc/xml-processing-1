@@ -30,9 +30,9 @@ def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     dfAngles = dfAngles[['PatientID', 'LesionNr','Electrode Pair', 'Planned Angle', 'Validation Angle']]
     dfAngles.sort_values(by=['PatientID','LesionNr'], inplace=True)
     dfAngles.apply(pd.to_numeric, errors='ignore', downcast='float').info()
+    # dfAngles_no_nans = dfAngles.dropna(subset=['Validation Angle'], inplace=True)
     
     dfPatientsTrajectories.apply(pd.to_numeric, errors='ignore', downcast='float').info()
-    # df.value1 = df.value1.round()
 
     dfPatientsTrajectories[['LateralError']] = dfPatientsTrajectories[['LateralError']].apply(pd.to_numeric, downcast='float')
     dfPatientsTrajectories.LateralError = dfPatientsTrajectories.LateralError.round(decimals=2)
@@ -60,13 +60,31 @@ def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
 
     dfTPEs.dropna(subset=['EuclideanError'], inplace=True) # Keep the DataFrame with valid entries in the same variable.
 
-    dfTPEs = dfTPEs[dfTPEs.NeedleType == 'IRE']
+    dfIREs = dfTPEs[dfTPEs.NeedleType == 'IRE']
+
+    # dfTPEs = dfTPEs[dfTPEs.NeedleType == 'IRE']
 
     # select rows where the needle is not a reference, but part of child trajectories
-    dfTPEsNoReference = dfTPEs[~(dfTPEs.ReferenceNeedle)]
+    dfTPEsNoReference = dfIREs[~(dfIREs.ReferenceNeedle)]
     # select IRE rows, drop the MWAs
     df_IRE_only = dfTPEsNoReference[dfTPEsNoReference.NeedleType == 'IRE']
 
+    #%%  Re-calculate lesion count index
+
+    list_lesion_count = []
+    NeedleCount = df_IRE_only['NeedleNr'].tolist()
+    k = 1
+    for needle_idx, needle in enumerate(NeedleCount):
+        if needle_idx == 0:
+            list_lesion_count.append(k)
+        else:
+            if NeedleCount[needle_idx] <= NeedleCount[needle_idx-1]:
+                k +=1
+                list_lesion_count.append(k)
+            else:
+                list_lesion_count.append(k)
+
+    df_IRE_only['LesionNr'] = list_lesion_count
     #%% Group statistics
 
     # grpd_needles = dfTPEs.groupby(['PatientID','NeedleNr']).size().to_frame('Needle Count')
@@ -91,7 +109,10 @@ def customize_dataframe(dfAngles, dfPatientsTrajectories, rootdir):
     dfLesionsTotalIndex.to_excel(writer, sheet_name='LesionsTotal', index=False, na_rep='Nan')
     dfNeedlesIndex.to_excel(writer, sheet_name='NeedlesLesion', index=False, na_rep='Nan')
     dfLesionsIndex.to_excel(writer, sheet_name='NeedleFreq', index=False, na_rep='Nan')
+    # if dfAngles_no_nans is not None:
+    #     dfAngles_no_nans.to_excel(writer, sheet_name='Angles', index=False, na_rep='Nan')
     dfAngles.to_excel(writer, sheet_name='Angles', index=False, na_rep='NaN')
+    df_IRE_only.to_excel(writer, sheet_name='TPE_IREs', index=False, na_rep='NaN')
     dfTPEs.to_excel(writer, sheet_name='TPEs', index=False, na_rep='NaN')
     dfPatientsTrajectories.to_excel(writer,sheet_name='Trajectories', index=False, na_rep='NaN')
     writer.save()
