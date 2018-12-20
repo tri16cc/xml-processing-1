@@ -62,6 +62,7 @@ class ComputeAnglesTrajectories():
                 except Exception as e:
                     print(repr(e))
 
+
                 if ReferenceNeedle[combination_angles[0]] is False and ReferenceNeedle[combination_angles[1]] is False:
                     # no reference needle available, older version of XML CAS Logs
                     needleA = needles_lesion[combination_angles[0]] + k
@@ -87,7 +88,6 @@ class ComputeAnglesTrajectories():
                     else:
                         # this angle pair hasn't been validated so assign NaN to the angle validation
                         angle_validation = np.nan
-
                 elif ReferenceNeedle[combination_angles[0]] is True:
                     # ReferenceNeedle is never validated, only plan trajectories are available
                     needleA = 'Reference'
